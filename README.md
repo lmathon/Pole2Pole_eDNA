@@ -2,7 +2,7 @@
 
 Code to assemble all datasets of eDNA using MOTUs (Teleo) and explore diversity patterns
 
-### Overview: starting
+### Overview
 
 This repo presents a set of functions to automatize the treatment of raw eDNA data from MiSeq sequencing and cleaned HiSeq sequencing (RapidRun).   
 It is only available for outputs of ecotag and swarm.   
