@@ -32,7 +32,7 @@ assemble_data <- function(table_otu, taxo_otu){
   # Extract all sample names to prepare formatting
   samples2 <- sw %>%
     dplyr::select(starts_with("CPCR"), starts_with("Cext"), starts_with("SPY"), starts_with("CMET"), starts_with("CNEG"), starts_with("Other"), 
-                  starts_with("Blank"), starts_with("Blanc"), starts_with("Other")) %>%
+                  starts_with("Blank"), starts_with("Blanc"), starts_with("Other"), starts_with("CENG")) %>%
     colnames()
   
   # Format 
