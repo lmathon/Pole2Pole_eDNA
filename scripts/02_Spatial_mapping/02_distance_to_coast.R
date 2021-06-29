@@ -7,7 +7,7 @@ library(gissr)
 
 
 ## open metadata uptodate
-metadata_sampling <- read.csv("metadata/Metadata_eDNA_global_V4.csv", header = T, sep = ";", stringsAsFactors = F, na.strings=c("","NA"))
+metadata_sampling <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv", header = T, sep = ";", stringsAsFactors = F, na.strings=c("","NA"))
 metadata_sampling$longitude_start_clean <- gsub('\\?', '', metadata_sampling$longitude_start)
 metadata_sampling$latitude_start_clean <- gsub('\\?', '', metadata_sampling$latitude_start)
 
@@ -48,7 +48,7 @@ metadata_dist$dist_to_coast <- dist_min
 metadata_na$dist_to_coast <- NA
 metadata <- rbind(metadata_dist, metadata_na)
 
-write.csv(metadata, "metadata/Metadata_eDNA_global_V4bis.csv", row.names = F)
+write.csv(metadata, "metadata/Metadata_eDNA_Pole2Pole_v2.csv", row.names = F)
 
 
 
