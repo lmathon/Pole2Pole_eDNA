@@ -27,7 +27,7 @@ load("Rdata/01_read_data.Rdata")
 list_read_step3 <- lapply(list_read_step2, function(x){
   clean_motus(x, min_PCR = 1)[[1]]
 })
-  
+
 # Extract the data present in only one PCR and which is discarded 
 list_read_step3_0PCR <- lapply(list_read_step2, function(x){
   clean_motus(x, min_PCR = 0)[[1]] %>%
@@ -108,9 +108,9 @@ list_read_step4 <- lapply(list_read_step4, function(x){
 list_read_step4 <- lapply(list_read_step4, function(x){
   scaridae <- c("Scarus", "Bolbometopon", "Cetoscarus", "Chlorurus", "Hipposcarus", "Calotomus", "Cryptotomus", "Leptoscarus", "Nicholsina", "Sparisoma")
   x_scaridae <- x%>%
-  filter(genus_name_corrected%in%scaridae)
+    filter(genus_name_corrected%in%scaridae)
   x <- x%>%
-  filter(genus_name_corrected%ni%scaridae)
+    filter(genus_name_corrected%ni%scaridae)
   x_scaridae$family_name_corrected <- "Scaridae"
   x <- rbind(x, x_scaridae)
   x_taeniura <- x%>%
@@ -132,10 +132,10 @@ list_read_step4 <- lapply(list_read_step4, function(x){
       genus_name_corrected %in% c("Taeniura") ~ "Dasyatidae", 
       TRUE ~ family_name_corrected
     )) 
-    
+  
   return(x)
 })
- 
+
 df_all_filters <- bind_rows(list_read_step4)
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 

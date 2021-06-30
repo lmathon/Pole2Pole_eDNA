@@ -1,13 +1,13 @@
 # This script reads eDNA metabarcoding data from the SWARM clustering pipeline 
 # It cleans and formats data correctly 
 
-
 # Lib 
 library(tidyverse)
 library(data.table)
 
 # Source functions
 source("scripts/01_read_cleaning/00_functions.R")
+load("Rdata/archive_class_ncbi.Rdata")
 
 # List the directories 
 list_projects_dir <- list.dirs(path = "data/swarm", full.names = TRUE, recursive = F)
@@ -20,11 +20,13 @@ directories_multiples_projects <- c("malpelo", "fakarava", "santamarta", "provid
 
 # For metadata field 
 columns_delete_field_metadata <- c("turbidity", "gps_start", "gps_b", "lat_gps_b", "long_gps_b", "gps_c", "long_gps_c", "lat_gps_d", "gps_half_turn", "longitude_turn", "latitude_end", "longitude_end", 
-                    "gps_end", "long_gps_d", "gps_d", "lat_gps_c", "latitude_turn", "data_manager", "gps_owner", "chimera")
+                                   "gps_end", "long_gps_d", "gps_d", "lat_gps_c", "latitude_turn", "data_manager", "gps_owner", "chimera")
 
 
 # metadata_field <- read.csv("metadata/Metadata_eDNA_global_V6.csv")
 metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv")
+
+# MEd: 4 et 11
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
 # Step 1 - Assemble & clean
@@ -145,49 +147,49 @@ for(i in 1:length(list_projects_dir)){
   }
   
   
-         ###       if(project_i %in% directories_multiples_projects){
-         ###         ##### IF THERE ARE MULTIPLE PROJECTS WITHIN THE DIRECTORY
-         ###         message(paste0("There is multiple projects within the ", project_i, " directory, so other projects will be condensed together"))
-         ###         
-         ###         # Other - normal
-         ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###         other_data_part1 <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
-         ###           left_join(., metadata_i)
-         ###         
-         ###         # Other -- the other(s) project(s) also analyzed 
-         ###         other_projects <- unique(word(grep(paste0(project_i, "|Other|Blank"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
-         ###         
-         ###         list_other <- lapply(other_projects, function(x){
-         ###           
-         ###           # x = "Fakarava"
-         ###           # Same thing
-         ###           other_bis_table <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)table"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###           other_bis_taxo <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)ecotag"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###           other_bis_data <- assemble_data(table_otu = other_bis_table, taxo_otu = other_bis_taxo) %>%
-         ###             left_join(., metadata_i) %>%
-         ###             mutate(project = "Other")
-         ###         })
-         ###         
-         ###         # Bind 
-         ###         other_data_part2 <- bind_rows(list_other)
-         ###         
-         ###         # Bind all other projects together
-         ###         other_data <- rbind(other_data_part1, other_data_part2)
-         ###         
-         ###       } else {
-         ###         ##### IF THERE IS A SINGLE PROJECT WITHIN THE DIRECTORY (CLASSIC CASE)
-         ###         
-         ###         # Other 
-         ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-         ###         
-         ###         # Assemble
-         ###         other_data <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
-         ###           left_join(., metadata_i)
-         ###         
-         ###       }
-         ###       
+  ###       if(project_i %in% directories_multiples_projects){
+  ###         ##### IF THERE ARE MULTIPLE PROJECTS WITHIN THE DIRECTORY
+  ###         message(paste0("There is multiple projects within the ", project_i, " directory, so other projects will be condensed together"))
+  ###         
+  ###         # Other - normal
+  ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###         other_data_part1 <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
+  ###           left_join(., metadata_i)
+  ###         
+  ###         # Other -- the other(s) project(s) also analyzed 
+  ###         other_projects <- unique(word(grep(paste0(project_i, "|Other|Blank"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
+  ###         
+  ###         list_other <- lapply(other_projects, function(x){
+  ###           
+  ###           # x = "Fakarava"
+  ###           # Same thing
+  ###           other_bis_table <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)table"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###           other_bis_taxo <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)ecotag"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###           other_bis_data <- assemble_data(table_otu = other_bis_table, taxo_otu = other_bis_taxo) %>%
+  ###             left_join(., metadata_i) %>%
+  ###             mutate(project = "Other")
+  ###         })
+  ###         
+  ###         # Bind 
+  ###         other_data_part2 <- bind_rows(list_other)
+  ###         
+  ###         # Bind all other projects together
+  ###         other_data <- rbind(other_data_part1, other_data_part2)
+  ###         
+  ###       } else {
+  ###         ##### IF THERE IS A SINGLE PROJECT WITHIN THE DIRECTORY (CLASSIC CASE)
+  ###         
+  ###         # Other 
+  ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+  ###         
+  ###         # Assemble
+  ###         other_data <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
+  ###           left_join(., metadata_i)
+  ###         
+  ###       }
+  ###       
   # ----- # Assemble project data 
   project_data <- assemble_data(table_otu = project_table, taxo_otu = project_taxo) %>%
     left_join(., metadata_i)
@@ -197,7 +199,7 @@ for(i in 1:length(list_projects_dir)){
   # Apply the code using the blanks only if those are present 
   
   if(length(grep("Blank(.*)", files_i, value=T)) == 0){message(paste0("There is no blank files for the ", project_i, " data"))}
-
+  
   if(length(grep("Blank(.*)", files_i, value=T)) != 0){
     
     # Read 
@@ -221,13 +223,13 @@ for(i in 1:length(list_projects_dir)){
                                 file_blank = blank_data)[[3]]
     
     message(paste0("The Blank threhsold for the ", project_i, " project is ", seuil$seuil_blank))
-
+    
   } else { project_data_blanks_discarded <- data.frame()}
   
   # Verifs - no NA values on the run
   verif_metadata <- !is.na(project_data$run)
   if( length(verif_metadata[verif_metadata==FALSE]) > 0 ) stop(paste(" error: some samples do not have metadata fields"))
-
+  
   # Verify NAs
   les_na <- project_data %>% filter(is.na(run))
   
@@ -257,6 +259,22 @@ load("Rdata/archive_class_ncbi.Rdata")
 # Remove null elements from list
 list_read_step1 <- list_read_step1[!sapply(list_read_step1,is.null)]
 
+# Create and/or update archive file 
+archive_list <- for(i in 1:length(list_read_step1)){
+  
+  file <- list_read_step1[[i]]
+  
+  # Filter out null object
+  if(is.null(file)){next}
+  
+  # Clean taxonomy 
+  file_taxo <- clean_taxonomy(file)
+  
+  # Add class name column 
+  list_output <- add_class_name_archive(file_taxo, archive_class_ncbi)
+  archive_class_ncbi <- list_output[[2]]
+}
+
 # Apply workflow
 list_read_step2 <- lapply(list_read_step1, function(file){
   
@@ -270,7 +288,7 @@ list_read_step2 <- lapply(list_read_step1, function(file){
   
   file_short <- file %>%
     select(-one_of(columns_to_remove))
-    
+  
   # Clean taxonomy 
   file_taxo <- clean_taxonomy(file_short)
   
