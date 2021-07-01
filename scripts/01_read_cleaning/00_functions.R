@@ -49,7 +49,6 @@ assemble_data <- function(table_otu, taxo_otu){
   return(sw2)
 }
 
-  
 # ---------------------------------------------------------------------------------------------------------------- # 
 # Function to clean tag-jump
 
@@ -120,7 +119,7 @@ clean_index_hoping <- function(file_edna, file_blank){
   #    ungroup() %>%
   #    filter(count_reads > seuil)
   #  
-  # For defining the seuil, take only the occurences with more than 10? more than one? 
+  # For defining the seuil, take only the occurences with more than 5? Otherwise, we get unexpected outputs like more reads in blanks, or thresholds at like 0.05 which is not likely
   table_counts <- all %>%
     # TAG JUMP
     group_by(run, sequence) %>%
@@ -134,7 +133,15 @@ clean_index_hoping <- function(file_edna, file_blank){
               n_reads_other_project = sum(count_reads[clean == "other_or_project"]), 
               n_reads_blanks = sum(count_reads[clean == "blank"])) %>%
     mutate(seuil_blank = n_reads_blanks/n_reads_tots) %>%
-    filter(n_reads_blanks>5) %>% ungroup()
+    filter(n_reads_blanks>5) %>% 
+    ungroup()
+  
+  # Control if it is empty
+  if(dim(table_counts)[1] ==0){
+    table_counts <- data.frame(lot = "A", 
+                               seuil_blank = 0, 
+                               stringsAsFactors = F)
+  }
   
   # Now, define a seuil at which the cleaning should happen -- It must be by lot!! TO CORRECT
   # Take only the occurences > 5 >10?? and remove the seuil set at 1? 
@@ -142,7 +149,7 @@ clean_index_hoping <- function(file_edna, file_blank){
   
   seuil_blank_df <- table_counts %>%
     # A trial??
-    filter(seuil_blank != 1) %>%
+    filter(seuil_blank != 1) %>% filter(seuil_blank < 0.5) %>%
     group_by(lot) %>%
     summarise(seuil_blank = max(seuil_blank))
   

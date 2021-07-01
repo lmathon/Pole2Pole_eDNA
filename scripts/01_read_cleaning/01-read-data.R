@@ -24,7 +24,7 @@ columns_delete_field_metadata <- c("turbidity", "gps_start", "gps_b", "lat_gps_b
 
 
 # metadata_field <- read.csv("metadata/Metadata_eDNA_global_V6.csv")
-metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv")
+metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv", sep=';')
 
 # MEd: 4 et 11
 
@@ -35,7 +35,10 @@ metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv")
 # Clean the index-hoping (ie. same plate number, different library)
 # Clean the tag-jump (1/1000 threshold for each MOTU within each library)
 
-for(i in 1:length(list_projects_dir)){
+to_do <- c(1,2,3,4,5,6,7,8,10,11,12,13,14)
+
+for(i in to_do){
+#for(i in 1:length(list_projects_dir)){
   
   # i = 2
   dir_i <- list_projects_dir[[i]]
@@ -48,7 +51,12 @@ for(i in 1:length(list_projects_dir)){
   
   # Metadata file 
   metadata_i <- fread(paste0(dir_i, "/metadata/all_samples.csv"), sep=";", h=F, stringsAsFactors = F) # %>% # There is sometimes a bug where '-' in original metadata ends up being "." after processing - correct it here -- it only happends with read.csv!! (weird) not fread mutate(V3 = gsub("\\-","\\.",V3))
-  colnames(metadata_i) <- c("plaque", "run", "sample_name", "project", "marker")
+  colnames(metadata_i)[1:5] <- c("plaque", "run", "sample_name", "project", "marker")
+  
+  # Check if the lot column is present or not 
+  if(dim(metadata_i)[2] == 6){
+    colnames(metadata_i)[6] <- c("lot")
+    }
   
   # ----- # Open files 
   
@@ -102,7 +110,7 @@ for(i in 1:length(list_projects_dir)){
       left_join(., metadata_i)
     
     # Other -- the other(s) project(s) also analyzed 
-    other_projects <- unique(word(grep(paste0(project_i, "|Other"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
+    other_projects <- unique(word(grep(paste0(project_i, "|Other|Blank"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
     
     list_other <- lapply(other_projects, function(x){
       
@@ -129,14 +137,14 @@ for(i in 1:length(list_projects_dir)){
     ##### IF THERE IS A MULTIPLE PROJECTS WITHIN THE DIRECTORY (CLASSIC CASE) & THERE IS NO OTHERS FILES 
     
     # Other -- the other(s) project(s) also analyzed 
-    other_projects <- unique(word(grep(paste0(project_i, "|Other"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
+    other_projects <- unique(word(grep(paste0(project_i, "|Other|Blank"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
     
     list_other <- lapply(other_projects, function(x){
       
       # x = "Fakarava"
       # Same thing
       other_bis_table <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)table"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-      other_bis_taxo <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)ecotag"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
+      other_bis_taxo <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)ecotag_customref"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
       other_bis_data <- assemble_data(table_otu = other_bis_table, taxo_otu = other_bis_taxo) %>%
         left_join(., metadata_i) %>%
         mutate(project = "Other")
@@ -146,61 +154,33 @@ for(i in 1:length(list_projects_dir)){
     other_data <- bind_rows(list_other)
   }
   
-  
-  ###       if(project_i %in% directories_multiples_projects){
-  ###         ##### IF THERE ARE MULTIPLE PROJECTS WITHIN THE DIRECTORY
-  ###         message(paste0("There is multiple projects within the ", project_i, " directory, so other projects will be condensed together"))
-  ###         
-  ###         # Other - normal
-  ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###         other_data_part1 <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
-  ###           left_join(., metadata_i)
-  ###         
-  ###         # Other -- the other(s) project(s) also analyzed 
-  ###         other_projects <- unique(word(grep(paste0(project_i, "|Other|Blank"), files_i, ignore.case = T, value=T, invert=T), 1, sep="_"))
-  ###         
-  ###         list_other <- lapply(other_projects, function(x){
-  ###           
-  ###           # x = "Fakarava"
-  ###           # Same thing
-  ###           other_bis_table <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)table"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###           other_bis_taxo <- fread(paste0(dir_i, "/", grep(paste0(x, "(.*)ecotag"), files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###           other_bis_data <- assemble_data(table_otu = other_bis_table, taxo_otu = other_bis_taxo) %>%
-  ###             left_join(., metadata_i) %>%
-  ###             mutate(project = "Other")
-  ###         })
-  ###         
-  ###         # Bind 
-  ###         other_data_part2 <- bind_rows(list_other)
-  ###         
-  ###         # Bind all other projects together
-  ###         other_data <- rbind(other_data_part1, other_data_part2)
-  ###         
-  ###       } else {
-  ###         ##### IF THERE IS A SINGLE PROJECT WITHIN THE DIRECTORY (CLASSIC CASE)
-  ###         
-  ###         # Other 
-  ###         other_table <- fread(paste0(dir_i, "/", grep("Other(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###         other_taxo <- fread(paste0(dir_i, "/", grep("Other(.*)ecotag", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T)
-  ###         
-  ###         # Assemble
-  ###         other_data <- assemble_data(table_otu = other_table, taxo_otu = other_taxo) %>%
-  ###           left_join(., metadata_i)
-  ###         
-  ###       }
-  ###       
   # ----- # Assemble project data 
   project_data <- assemble_data(table_otu = project_table, taxo_otu = project_taxo) %>%
     left_join(., metadata_i)
+  
+  # Add a control message for samples with SPY which do not match metadata (other than other project)
   
   # ----- # Blanks 
   # Blanks - not always present 
   # Apply the code using the blanks only if those are present 
   
-  if(length(grep("Blank(.*)", files_i, value=T)) == 0){message(paste0("There is no blank files for the ", project_i, " data"))}
+  # Blank and not empty files! 
+  #  ls|grep "Blank_teleo"|grep "table"
+  blanks_size_file <- system(paste0("ls ", dir_i, ' |grep "Blank_teleo"|grep "table" | wc -l'))
+  system(paste0("cd ", dir_i, " ; ls -lh"))
   
-  if(length(grep("Blank(.*)", files_i, value=T)) != 0){
+  if(length(grep("Blank(.*)", files_i, value=T)) == 0){
+    project_data_clean <- project_data_clean
+    message(paste0("There is no blank files for the ", project_i, " data"))
+  }
+  
+  if(length(grep("Blank(.*)", files_i, value=T)) != 0  & blanks_size_file == 0){
+    project_data_clean <- project_data_clean
+    message(paste0("Blank files are empty for the ", project_i, " data"))
+  }
+  
+  
+  if(length(grep("Blank(.*)", files_i, value=T)) != 0 & blanks_size_file > 0){
     
     # Read 
     blank_table <- try(fread(paste0(dir_i, "/", grep("Blank(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T))
@@ -214,7 +194,7 @@ for(i in 1:length(list_projects_dir)){
     lesna <- blank_data %>% filter(is.na(plaque))
     
     # Clean index-hoping (inter-library tag-jump)
-    project_data <- clean_index_hoping(file_edna = rbind(project_data, other_data), 
+    project_data_clean <- clean_index_hoping(file_edna = rbind(project_data, other_data), 
                                        file_blank = blank_data)[[1]]
     project_data_blanks_discarded <- clean_index_hoping(file_edna = rbind(project_data, other_data), 
                                                         file_blank = blank_data)[[2]]
@@ -224,17 +204,20 @@ for(i in 1:length(list_projects_dir)){
     
     message(paste0("The Blank threhsold for the ", project_i, " project is ", seuil$seuil_blank))
     
-  } else { project_data_blanks_discarded <- data.frame()}
+  } else { 
+    project_data_blanks_discarded <- data.frame()
+    project_data_clean <- project_data
+    }
   
   # Verifs - no NA values on the run
-  verif_metadata <- !is.na(project_data$run)
+  verif_metadata <- !is.na(project_data_clean$run)
   if( length(verif_metadata[verif_metadata==FALSE]) > 0 ) stop(paste(" error: some samples do not have metadata fields"))
   
   # Verify NAs
-  les_na <- project_data %>% filter(is.na(run))
+  les_na <- project_data_clean %>% filter(is.na(run))
   
   # Clean tag-jump (output is a list, using [[2]] will output the discarded reads)
-  project_data_tag <- clean_tag_jump(file_edna = project_data, file_other = other_data)[[1]]
+  project_data_tag <- clean_tag_jump(file_edna = project_data_clean, file_other = other_data)[[1]]
   
   # Add project column - normally not necessary as present in metadata but just in case 
   project_data_tag$project_i <- project_i
