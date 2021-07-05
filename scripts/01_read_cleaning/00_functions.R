@@ -154,7 +154,7 @@ clean_index_hoping <- function(file_edna, file_blank){
     summarise(seuil_blank = max(seuil_blank))
   
   # Warning if seuil is too important 
-  if(max(seuil_blank_df$seuil_blank) > 0.01) stop(paste(" error: the cleaning threshold using blanks seems too high"))
+  if(max(seuil_blank_df$seuil_blank) > 0.01) message(paste(" error: the cleaning threshold using blanks seems too high"))
   
   # Clean the project_data
   project_counts <- all %>%
@@ -399,7 +399,7 @@ apply_lulu <- function(edna_file, path_lulu, match_lulu = 84, co_occurence_lulu 
   otutab <- edna_file %>%
     select(definition, count_reads, sample_name) %>% # Here, sample name or sample name no pcr to try 
     spread(sample_name, count_reads) %>%
-    replace(., is.na(.), "0") %>%
+    mutate_if(is.integer, ~replace_na(., 0)) %>%
     as.data.frame()
   
   # Put the otu name in row name

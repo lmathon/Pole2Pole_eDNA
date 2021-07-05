@@ -35,10 +35,7 @@ metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv", sep=';')
 # Clean the index-hoping (ie. same plate number, different library)
 # Clean the tag-jump (1/1000 threshold for each MOTU within each library)
 
-to_do <- c(1,2,3,4,5,6,7,8,10,11,12,13,14)
-
-for(i in to_do){
-#for(i in 1:length(list_projects_dir)){
+for(i in 1:length(list_projects_dir)){
   
   # i = 2
   dir_i <- list_projects_dir[[i]]
@@ -161,26 +158,26 @@ for(i in to_do){
   # Add a control message for samples with SPY which do not match metadata (other than other project)
   
   # ----- # Blanks 
-  # Blanks - not always present 
-  # Apply the code using the blanks only if those are present 
+  # Blanks - not always present, and sometimes present but represent empty files
+  # Apply the code using the blanks only if those are present and not empty
+
+  # Find empty files
+  files_blank0 <- system(paste0("find ", dir_i, " -type f -size 0 -print"), intern = TRUE)
   
-  # Blank and not empty files! 
-  #  ls|grep "Blank_teleo"|grep "table"
-  blanks_size_file <- system(paste0("ls ", dir_i, ' |grep "Blank_teleo"|grep "table" | wc -l'))
-  system(paste0("cd ", dir_i, " ; ls -lh"))
-  
+  # No files = no blanks
   if(length(grep("Blank(.*)", files_i, value=T)) == 0){
-    project_data_clean <- project_data_clean
+    project_data_clean <- project_data
     message(paste0("There is no blank files for the ", project_i, " data"))
   }
   
-  if(length(grep("Blank(.*)", files_i, value=T)) != 0  & blanks_size_file == 0){
-    project_data_clean <- project_data_clean
+  # Files present but the Blank_teleo has an empty file, then print it is empty 
+  if(length(grep("Blank(.*)", files_i, value=T)) != 0  & sum(grepl("Blank_teleo", files_blank0), na.rm = TRUE) > 0){
+    project_data_clean <- project_data
     message(paste0("Blank files are empty for the ", project_i, " data"))
   }
   
-  
-  if(length(grep("Blank(.*)", files_i, value=T)) != 0 & blanks_size_file > 0){
+  # Apply this only if blank files exist and if those are not empty
+  if(length(grep("Blank(.*)", files_i, value=T)) != 0 & sum(grepl("Blank_teleo", files_blank0), na.rm = TRUE) == 0){
     
     # Read 
     blank_table <- try(fread(paste0(dir_i, "/", grep("Blank(.*)table", files_i, value=T)), sep="\t", stringsAsFactors = F, h=T))
@@ -228,6 +225,7 @@ for(i in to_do){
   
   # Print
   print(paste0(i, "_",  project_i))
+  
 }
 
 save(list_read_step1, list_clean_lot_discarded, file = "Rdata/all_df_step1.Rdata")
@@ -243,7 +241,7 @@ load("Rdata/archive_class_ncbi.Rdata")
 list_read_step1 <- list_read_step1[!sapply(list_read_step1,is.null)]
 
 # Create and/or update archive file 
-archive_list <- for(i in 1:length(list_read_step1)){
+for(i in 1:length(list_read_step1)){
   
   file <- list_read_step1[[i]]
   
@@ -266,8 +264,7 @@ list_read_step2 <- lapply(list_read_step1, function(file){
   
   # Clean column names 
   columns_to_remove <- c("amplicon", "family", "genus", "order", "species", "taxid", "OTU", "total", 
-                         "cloud", "length", "abundance", "spread", "identity", "taxonomy", "references", 
-                         "quality")
+                         "cloud", "length", "abundance", "spread", "identity", "taxonomy", "references")
   
   file_short <- file %>%
     select(-one_of(columns_to_remove))
