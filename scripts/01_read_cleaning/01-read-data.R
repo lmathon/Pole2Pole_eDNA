@@ -228,7 +228,7 @@ for(i in 1:length(list_projects_dir)){
   
 }
 
-save(list_read_step1, list_clean_lot_discarded, file = "Rdata/all_df_step1.Rdata")
+# save(list_read_step1, list_clean_lot_discarded, file = "Rdata/all_df_step1.Rdata")
 # load("Rdata/all_df_step1.Rdata")
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
