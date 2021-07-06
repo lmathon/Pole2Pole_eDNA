@@ -138,6 +138,16 @@ list_read_step4 <- lapply(list_read_step4, function(x){
 
 df_all_filters <- bind_rows(list_read_step4)
 
+# join China dataframe
+
+load("Rdata/df_china_formated.rdata")
+
+df_china_fin$latitude_start <- as.character(df_china_fin$latitude_start)
+df_china_fin$longitude_start <- as.character(df_china_fin$longitude_start)
+df_all_filters <- bind_rows(df_all_filters, df_china_fin)
+
+
+
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
 # save files
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
