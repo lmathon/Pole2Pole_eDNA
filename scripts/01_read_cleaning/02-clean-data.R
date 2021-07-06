@@ -98,7 +98,7 @@ metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole.csv", sep=";", stri
 metadata_field <- select(metadata_field, -c(columns_delete_field_metadata))
 
 list_read_step4 <- lapply(list_read_step4, function(x){
-  x$sample_name_all_pcr <- substr(x$sample_name,1, nchar(x$sample_name) -3)
+  x$sample_name_all_pcr <- word(x$sample_name, sep="_")
   x <- left_join(x, metadata_field, by=c("sample_name_all_pcr" = "code_spygen"))
 })
 
@@ -142,11 +142,9 @@ df_all_filters <- bind_rows(list_read_step4)
 
 load("Rdata/df_china_formated.rdata")
 
-df_china_fin$latitude_start <- as.character(df_china_fin$latitude_start)
-df_china_fin$longitude_start <- as.character(df_china_fin$longitude_start)
 df_all_filters <- bind_rows(df_all_filters, df_china_fin)
 
-
+list_read_step4[[15]] <- df_china_fin
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
 # save files
