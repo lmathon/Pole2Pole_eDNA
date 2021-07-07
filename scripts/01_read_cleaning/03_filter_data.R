@@ -8,8 +8,10 @@ df_filtered <- df_all_filters %>%
   filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%
   filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
   filter(habitat=="marine")%>%
+  filter(sample_method !="control") %>%
   filter(depth<40) #%>%
   #filter(family_name_corrected %ni% "Salmonidae") %>%
+  #filter(site_name!="kirkenes") %>%
   #filter(site_name %ni% c("mallorca", "menorca"))
   
 list_read_step4 <- lapply(list_read_step4, function(x){
@@ -17,8 +19,10 @@ list_read_step4 <- lapply(list_read_step4, function(x){
       filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%
       filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
       filter(habitat=="marine")%>%
+      filter(sample_method !="control") %>%
       filter(depth<40) #%>%
       #filter(family_name_corrected %ni% "Salmonidae") %>%
+      #filter(site_name!="kirkenes") %>%
       #filter(site_name %ni% c("mallorca", "menorca"))
 })
 
