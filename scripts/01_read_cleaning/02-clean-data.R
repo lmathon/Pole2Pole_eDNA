@@ -136,15 +136,16 @@ list_read_step4 <- lapply(list_read_step4, function(x){
   return(x)
 })
 
-df_all_filters <- bind_rows(list_read_step4)
+
 
 # join China dataframe
 
 load("Rdata/df_china_formated.rdata")
 
-df_all_filters <- bind_rows(df_all_filters, df_china_fin)
-
 list_read_step4[[15]] <- df_china_fin
+
+df_all_filters <- bind_rows(list_read_step4)
+
 
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- # 
 # save files
