@@ -20,7 +20,7 @@ save(env_var, file="Rdata/environmental_variables.rdata")
 # Geographic variables
 #---------------------------------------------------------------------------------------------------------------------
 
-geo_var <- meta[,c("station", "dist_to_coast", "dist_to_CT", "province", "depth_seafloor", "depth_sampling", "latitude_start")] # complete depth !
+geo_var <- meta[,c("station", "dist_to_coast", "dist_to_CT", "province", "depth_fin", "depth_sampling", "latitude_start")] # complete depth !
 
 geo_var <- geo_var %>%
   distinct(station, .keep_all=T)
