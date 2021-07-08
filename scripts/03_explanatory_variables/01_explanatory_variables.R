@@ -6,7 +6,7 @@ library(tidyverse)
 #---------------------------------------------------------------------------------------------------------------------
 
 env_var <- read.csv("metadata/eDNA-all-env-join.csv", sep=";")
-meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv")
+meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
 
 env_var <- left_join(env_var, meta[,c("code_spygen", "station")], by="code_spygen")
 
@@ -32,10 +32,18 @@ save(geo_var, file="Rdata/geographic_variables.rdata")
 # Sampling variables
 #---------------------------------------------------------------------------------------------------------------------
 
-samp_var <- meta[,c("station", "sample_type", "sample_method", "volume", "filter", "sequencer", "sequencing_depth")] 
+samp_var <- meta[,c("station", "sample_type", "sample_method", "filter", "sequencer", "sequencing_depth")] 
+
+meta$volume <- as.numeric(meta$volume)
+vol <- meta %>%
+  select(station, volume) %>%
+  group_by(station) %>% 
+  summarise_all(funs(sum))
 
 samp_var <- samp_var %>%
   distinct(station, .keep_all=T)
+
+samp_var <- left_join(samp_var, vol)
 
 save(samp_var, file="Rdata/sampling_variables.rdata")
 

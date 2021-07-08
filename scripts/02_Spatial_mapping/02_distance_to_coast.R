@@ -35,7 +35,7 @@ pts_sp <- SpatialPoints(pts,proj4string = crswgs84)
 pts_sp2 <- spTransform(pts_sp, crsmerc)
 
   # calculate and formate distance
-dist <- gDistance(pts_sp, coastline, byid = T)
+dist <- gDistance(pts_sp2, coastline, byid = T)
 dist_min <- apply(dist,2,min)
 dist_min <- replace(dist_min, dist_min< 10, 10)
 dist_min <- round(dist_min, 0) 
