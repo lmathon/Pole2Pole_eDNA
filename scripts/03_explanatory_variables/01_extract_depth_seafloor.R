@@ -3,7 +3,9 @@ library(sp)
 library(rgeos)
 library(rgdal)
 library(maptools)
+library(sf)
 library(raster)
+library(exactextractr)
 
 
 metadata_sampling <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v3.csv", header = T, sep = ";", stringsAsFactors = F, na.strings=c("","NA"))

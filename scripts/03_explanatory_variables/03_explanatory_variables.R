@@ -1,17 +1,28 @@
 library(tidyverse)
+'%ni%' <- Negate("%in%")
 
+meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=",")
+
+meta <- meta %>%
+  filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%
+  filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
+  filter(habitat=="marine")%>%
+  filter(sample_method !="control") %>%
+  filter(depth_sampling > -40)
 
 #---------------------------------------------------------------------------------------------------------------------
 # Environmental variables
 #---------------------------------------------------------------------------------------------------------------------
 
 env_var <- read.csv("metadata/eDNA-all-env-join.csv", sep=";")
-meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=",")
 
-env_var <- left_join(env_var, meta[,c("code_spygen", "station")], by="code_spygen")
+
+env_var <- left_join(meta[,c("code_spygen", "station")], env_var, by="code_spygen")
 
 env_var <- env_var %>%
   distinct(station, .keep_all=T)
+
+env_var <- env_var[, -c(1,3)]
 
 save(env_var, file="Rdata/environmental_variables.rdata")
 
@@ -36,7 +47,7 @@ samp_var <- meta[,c("station", "sample_type", "sample_method", "filter", "sequen
 
 meta$volume <- as.numeric(meta$volume)
 vol <- meta %>%
-  select(station, volume) %>%
+  dplyr::select(station, volume) %>%
   group_by(station) %>% 
   summarise_all(funs(sum))
 
