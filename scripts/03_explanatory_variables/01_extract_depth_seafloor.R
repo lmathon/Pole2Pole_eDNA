@@ -123,5 +123,30 @@ for (i in 1:nrow(prof_all)) {
 # assemble with metadata
 
 metadata <- left_join(metadata_sampling, prof_all[,c("station", "depth_fin")])
+metadata <- metadata %>% distinct(code_spygen, .keep_all=T)
+
+# if a real measured depth exist, choose it instead of the one from bathy
+for (i in 1:nrow(metadata)) {
+  if(!is.na(metadata[i, "depth_seafloor"])){
+    metadata[i, "depth_fin"] <- metadata[i, "depth_seafloor"]
+  }
+}
+
+metadata$depth_sampling <- paste("-", metadata$depth_sampling, sep="")
+metadata$depth_sampling <- as.numeric(metadata$depth_sampling)
+metadata$depth_sampling[is.na(metadata$depth_sampling)] <- 0
+metadata$depth_fin[is.na(metadata$depth_fin)] <- 0
+
+# if depth sampling is lower than depth_fin, change depth_fin for depth_sampling-5
+for (i in 1:nrow(metadata)) {
+  if(metadata[i, "depth_sampling"] < metadata[i, "depth_fin"]){
+    metadata[i, "depth_fin"] <- metadata[i, "depth_sampling"] - 5
+  }
+}
+
+metadata$depth_sampling[metadata$depth_sampling == 0] <- NA
+metadata$depth_fin[metadata$depth_fin == 0] <- NA
+
 
 write.csv(metadata, "metadata/Metadata_eDNA_Pole2Pole_v4.csv", row.names = F)
+

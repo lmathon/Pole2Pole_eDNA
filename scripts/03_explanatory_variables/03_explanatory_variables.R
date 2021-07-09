@@ -6,7 +6,7 @@ library(tidyverse)
 #---------------------------------------------------------------------------------------------------------------------
 
 env_var <- read.csv("metadata/eDNA-all-env-join.csv", sep=";")
-meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
+meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=",")
 
 env_var <- left_join(env_var, meta[,c("code_spygen", "station")], by="code_spygen")
 
@@ -52,3 +52,14 @@ save(samp_var, file="Rdata/sampling_variables.rdata")
 # Human variables
 #---------------------------------------------------------------------------------------------------------------------
 
+
+
+
+#---------------------------------------------------------------------------------------------------
+# Assemble all
+#-----------------------------------------------------------------------------------------------------
+
+exp_var <- merge(env_var, geo_var, by="station")
+exp_var <- merge(exp_var, samp_var, by="station")
+
+save(exp_var, file="Rdata/all_explanatory_variables.rdata")

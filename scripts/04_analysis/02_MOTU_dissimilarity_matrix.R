@@ -31,6 +31,11 @@ com <- com[,-1]
 com <- as.data.frame(t(com))
 com[is.na(com)] <- 0
 
+# calculate dissimilarity matrix with jaccard (PA) or Bray-curtis (abund)
 dist_jac <- as.matrix(vegdist(com, method = "jaccard"))
 
 dist_bc <- as.matrix(vegdist(com, method = "bray"))
+
+
+save(dist_bc, file="Rdata/Bray_dissimilarity_station.rdata")
+save(dist_jac, file="Rdata/Jaccard_dissimilarity_station.rdata")

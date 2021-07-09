@@ -43,3 +43,9 @@ com[is.na(com)] <- 0
 # calculate MNTD between pairs of stations
 
 mntd <- comdistnt(com, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+mntd <- as.matrix(mntd)
+
+
+# save Rdata
+
+save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
