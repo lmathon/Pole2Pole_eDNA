@@ -3,12 +3,7 @@ library(tidyverse)
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=",")
 
-meta <- meta %>%
-  filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%
-  filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
-  filter(habitat=="marine")%>%
-  filter(sample_method !="control") %>%
-  filter(depth_sampling > -40)
+
 
 #---------------------------------------------------------------------------------------------------------------------
 # Environmental variables

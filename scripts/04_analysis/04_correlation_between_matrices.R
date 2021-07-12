@@ -8,8 +8,7 @@ load("Rdata/MNTD_pairwise_station.rdata")
 load("Rdata/geographic_distance_stations.rdata")
 
 # select same stations in big geographic distance matrix
-dist_km <- dist_km[, colnames(dist_bc)]
-dist_km <- dist_km[rownames(dist_bc),]
+dist_km <- dist_km[rownames(dist_bc), colnames(dist_bc)]
 
 
 dist_jac <- as.dist(dist_jac)
