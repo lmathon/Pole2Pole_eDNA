@@ -15,26 +15,26 @@ library(ggrepel)
 library(grid)
 source("scripts/04_analysis/00_functions.R")
 
-load("Rdata/Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/MNTD_pairwise_station.rdata")
+load("Rdata/all_explanatory_variables_numeric.rdata")
+load("Rdata/Jaccard_dissimilarity_station.rdata")
 load("Rdata/geographic_distance_stations.rdata")
 
 # transform data
 
-df <- exp_var_num %>% filter(station %in% rownames(mntd))
+df <- exp_var_num %>% filter(station %in% rownames(dist_jac))
 rownames(df) <- df$station
-df <- df[rownames(mntd), ]
+df <- df[rownames(dist_jac), ]
 df <- df[,-62] # remove temporarily incomplete variables (sequencer)
 df <- df[, colSums(df != 0) > 0]
 
-mntd <- as.matrix(mntd)
-dist_km <- dist_km[rownames(mntd), colnames(mntd)]
+dist_jac <- as.matrix(dist_jac)
+dist_km <- dist_km[rownames(dist_jac), colnames(dist_jac)]
 
 #-----------------------------------------------------------------------------------------------------------------------------
 # total dbrda
 #-----------------------------------------------------------------------------------------------------------------------------
 
-dbrda_tot <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start+sample_type+sample_method+filter+sequencing_depth+volume, df)
+dbrda_tot <- capscale(dist_jac ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start+sample_type+sample_method+filter+sequencing_depth+volume, df)
 RsquareAdj(dbrda_tot)
 anova(dbrda_tot)
 anova(dbrda_tot, by = "axis",  permutations = 99)
@@ -80,9 +80,9 @@ grda_station
 env_var <- as.data.frame(df[,2:47])
 geo_var <- df[, 48:53]
 samp_var <- df[, c(54,55,58)]
-mntd <- as.dist(mntd)
+dist_jac <- as.dist(dist_jac)
 
-varpart_tot <- varpart(mntd, env_var, geo_var, samp_var)
+varpart_tot <- varpart(dist_jac, env_var, geo_var, samp_var)
 varpart_tot
 
 plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow'))
@@ -92,7 +92,7 @@ plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'samp_var'), bg =
 # partial dbrda : correcting for sampling variables
 #--------------------------------------------------------------------------------------------------------------------------------------
 
-dbrda_part <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start + Condition(sample_type,sample_method,filter,sequencing_depth,volume), df)
+dbrda_part <- capscale(dist_jac ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start + Condition(sample_type,sample_method,filter,sequencing_depth,volume), df)
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "axis",  permutations = 99)
@@ -119,7 +119,7 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
                arrow=arrow(length=unit(0.01,"npc")))+
   geom_label_repel(data= var_scores, 
                    aes(x= CAP1, y=CAP2), 
-                       fontface=3, size = 3,
+                   fontface=3, size = 3,
                    label = rownames(var_scores),
                    show.legend = F, max.overlaps = 18) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
@@ -139,9 +139,9 @@ grda_station
 env_var <- as.data.frame(df[,2:47])
 geo_var <- df[, 48:53]
 
-mntd <- as.dist(mntd)
+dist_jac <- as.dist(dist_jac)
 
-varpart_tot2 <- varpart(mntd, env_var, geo_var)
+varpart_tot2 <- varpart(dist_jac, env_var, geo_var)
 varpart_tot2
 
 plot(varpart_tot2, digits = 2, Xnames = c('env_var', 'geo_var'), bg = c('navy', 'tomato'))
