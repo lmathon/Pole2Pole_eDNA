@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ape)
 library(picante)
+library(seriation)
 
 load("Rdata/03-filter-data.Rdata")
 
@@ -49,3 +50,12 @@ mntd <- as.matrix(mntd)
 # save Rdata
 
 save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
+
+# plot distance matrix
+
+dissplot(mntd, method=NA, 
+         upper_tri = TRUE, 
+         lower_tri = FALSE, 
+         reverse_columns=TRUE,
+         main="Mean Nearest Taxon Distance between stations",
+         col=bluered(100))

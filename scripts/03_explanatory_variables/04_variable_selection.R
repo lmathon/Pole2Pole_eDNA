@@ -27,5 +27,5 @@ plot <- ggplot(cor_sign, aes(x,y,fill=assoc))+
   xlab("")+
   ylab("")+
   theme(axis.text.x = element_text(face="plain", size=10, angle=90, vjust = 0, hjust = 1))+
-  scale_fill_gradient(low="red", high="yellow")
+  scale_fill_gradient(low="blue", high="red")
 

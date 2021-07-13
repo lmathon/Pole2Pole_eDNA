@@ -3,8 +3,7 @@ library(sp)
 library(rgeos)
 library(rgdal)
 library(maptools)
-library(gissr)
-library(move)
+
 
 
 ## open metadata uptodate
@@ -25,7 +24,12 @@ crsmerc=CRS("+proj=merc +a=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0
 
   # import coastlines and change projection
 coastline <- readOGR("C:/Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L1.shp", verbose=TRUE)
-coastline <- spTransform(coastline, crsmerc)
+coastline2 <- readOGR("C:/Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L6.shp", verbose=TRUE)
+coastline2 <- crop(coastline2,extent(-180,180,-84,80))
+
+coast <- bind(coastline, coastline2)
+coast <- spTransform(coast, crsmerc)
+
   
   # Formate GPS points and project
 pts = metadata_dist[,c("longitude_start", "latitude_start")]
@@ -35,7 +39,7 @@ pts_sp <- SpatialPoints(pts,proj4string = crswgs84)
 pts_sp2 <- spTransform(pts_sp, crsmerc)
 
   # calculate and formate distance
-dist <- gDistance(pts_sp2, coastline, byid = T)
+dist <- gDistance(pts_sp2, coast, byid = T)
 dist_min <- apply(dist,2,min)
 dist_min <- replace(dist_min, dist_min< 10, 10)
 dist_min <- round(dist_min, 0) 

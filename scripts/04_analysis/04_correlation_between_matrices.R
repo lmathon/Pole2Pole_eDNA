@@ -1,20 +1,62 @@
 library(ade4)
 library(tidyverse)
+library(vegan)
+library(seriation)
+library(ape)
 
-load("Rdata/Bray_dissimilarity_station.rdata")
-load("Rdata/Jaccard_dissimilarity_station.rdata")
+
+load("Rdata/Jaccard_MOTU_dissimilarity.rdata")
+load("Rdata/Jaccard_species_dissimilarity.rdata")
 load("Rdata/MNTD_pairwise_station.rdata")
 
 load("Rdata/geographic_distance_stations.rdata")
+load("Rdata/environmental_variables.rdata")
+#load("Rdata/socioeconomic_variables.rdata")
 
 # select same stations in big geographic distance matrix
-dist_km <- dist_km[rownames(dist_bc), colnames(dist_bc)]
+dist_km <- dist_km[rownames(mntd), colnames(mntd)]
+rownames(env_var) <- env_var$station
+env_var <- env_var[rownames(mntd),]
+#rownames(socio_var) <- socio_var$station
+#socio_var <- socio_var[rownames(mntd),]
 
-
-dist_jac <- as.dist(dist_jac)
+dist_jac_mo <- as.dist(dist_jac_mo)
+dist_jac_sp <- as.dist(dist_jac_sp)
 dist_km <- as.dist(dist_km)
 mntd <- as.dist(mntd)
 
-mantel.rtest(dist_jac, mntd) # Motu composition dissimilarity & mntd correlated
+
+# environmental distance matrix
+dist_env <- vegdist(env_var[,-1], "bray", na.rm = TRUE)
+dist_socio <- vegdist(socio_var[,-1], "bray", na.rm = TRUE)
+
+save(dist_env, file="Rdata/environmental_distance_matrix.rdata")
+save(dist_socio, file="Rdata/socioeconomic_distance_matrix.rdata")
+
+# plot environmental distance matrix
+dissplot(dist_env, method=NA, 
+         upper_tri = TRUE, 
+         lower_tri = FALSE, 
+         reverse_columns=TRUE,
+         main="Environmental distance between stations",
+         col=bluered(100))
+
+# plot socioeconomic distance matrix
+dissplot(dist_socio, method=NA, 
+         upper_tri = TRUE, 
+         lower_tri = FALSE, 
+         reverse_columns=TRUE,
+         main="Socioeconomic distance between stations",
+         col=bluered(100))
+
+
+# calculate correlations
+mantel.rtest(dist_jac_mo, mntd) # Motu composition dissimilarity & mntd correlated
+mantel.rtest(dist_jac_mo, dist_km) # geographic distance & Motu composition dissimilarity correlated
 mantel.rtest(dist_km, mntd) # geographic distance & mntd correlated
-mantel.rtest(dist_km, dist_jac) # geographic distance & Motu composition dissimilarity correlated
+mantel.rtest(dist_env, mntd)
+mantel.rtest(dist_socio, mntd)
+mantel.rtest(dist_env, dist_jac_mo)
+mantel.rtest(dist_socio, dist_jac_mo)
+
+
