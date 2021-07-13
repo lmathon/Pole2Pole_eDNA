@@ -58,53 +58,9 @@ save(samp_var, file="Rdata/sampling_variables.rdata")
 
 
 #---------------------------------------------------------------------------------------------------------------------
-# Human variables
+# Socioeconomic variables variables
 #---------------------------------------------------------------------------------------------------------------------
 
 
 
 
-#---------------------------------------------------------------------------------------------------
-# Assemble all
-#-----------------------------------------------------------------------------------------------------
-
-exp_var <- left_join(env_var, geo_var, by="station")
-exp_var <- left_join(exp_var, samp_var, by="station")
-
-
-# transform factor to numeric
-exp_var_num <- exp_var %>%
-  mutate(sample_type = case_when(
-    sample_type == "control" ~ 0,
-    sample_type == "transect" ~ 1,
-    sample_type == "point" ~ 2)) %>%
-  mutate(sample_method = case_when(
-    sample_method == "control" ~ 0,
-    sample_method == "bag_underwater" ~ 1,
-    sample_method == "boat" ~ 2,
-    sample_method == "niskin" ~ 3,
-    sample_method == "transect_aller" ~ 4,
-    sample_method == "transect_aller_retour" ~ 5,
-    sample_method == "transect_benthique" ~ 6,
-    sample_method == "transect_deep" ~ 7,
-    sample_method == "transect_rectangle" ~ 8,
-    sample_method == "transect_rond" ~ 9)) %>%
-  mutate(province = case_when(
-    province == "Arctic" ~ 1,
-    province == "Cold_Temperate_Northwest_Pacific" ~ 2,
-    province == "Lusitanian" ~ 3,
-    province == "Mediterranean_Sea" ~ 4,
-    province == "Northern_European_Seas" ~ 5,
-    province == "Scotia_Sea" ~ 6,
-    province == "Southeast_Polynesia" ~ 7,
-    province == "Tropical_East_Pacific" ~ 8,
-    province == "Tropical_Northwestern_Atlantic" ~ 9,
-    province == "Tropical_Southwestern_Pacific" ~ 10,
-    province == "Western_Coral_Triangle" ~ 11,
-    province == "Western_Indian_Ocean" ~ 12
-  ))
-
-
-
-save(exp_var, file="Rdata/all_explanatory_variables.rdata")
-save(exp_var_num, file="Rdata/all_explanatory_variables_numeric.rdata")

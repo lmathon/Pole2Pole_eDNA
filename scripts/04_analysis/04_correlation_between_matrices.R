@@ -10,15 +10,11 @@ load("Rdata/Jaccard_species_dissimilarity.rdata")
 load("Rdata/MNTD_pairwise_station.rdata")
 
 load("Rdata/geographic_distance_stations.rdata")
-load("Rdata/environmental_variables.rdata")
+load("Rdata/selected_environmental_variables.rdata")
 #load("Rdata/socioeconomic_variables.rdata")
 
 # select same stations in big geographic distance matrix
 dist_km <- dist_km[rownames(mntd), colnames(mntd)]
-rownames(env_var) <- env_var$station
-env_var <- env_var[rownames(mntd),]
-#rownames(socio_var) <- socio_var$station
-#socio_var <- socio_var[rownames(mntd),]
 
 dist_jac_mo <- as.dist(dist_jac_mo)
 dist_jac_sp <- as.dist(dist_jac_sp)
@@ -27,8 +23,8 @@ mntd <- as.dist(mntd)
 
 
 # environmental distance matrix
-dist_env <- vegdist(env_var[,-1], "bray", na.rm = TRUE)
-dist_socio <- vegdist(socio_var[,-1], "bray", na.rm = TRUE)
+dist_env <- vegdist(env_var2[,-1], "mahalanobis", na.rm = TRUE)
+dist_socio <- vegdist(socio_var[,-1], "mahalanobis", na.rm = TRUE)
 
 save(dist_env, file="Rdata/environmental_distance_matrix.rdata")
 save(dist_socio, file="Rdata/socioeconomic_distance_matrix.rdata")
