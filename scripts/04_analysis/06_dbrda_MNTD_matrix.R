@@ -13,19 +13,17 @@ library(patchwork)
 library(ggalt)
 library(ggrepel)
 library(grid)
+library(spdep)
 source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/Rdata/all_explanatory_variables_numeric.rdata")
 load("Rdata/MNTD_pairwise_station.rdata")
 load("Rdata/geographic_distance_stations.rdata")
-
 # transform data
 
-df <- exp_var_num %>% filter(station %in% rownames(mntd))
-rownames(df) <- df$station
-df <- df[rownames(mntd), ]
-df <- df[,-62] # remove temporarily incomplete variables (sequencer)
-df <- df[, colSums(df != 0) > 0]
+df <- exp_var_num
+df <- df[,-16] # remove temporarily incomplete variables (sequencer)
+
 
 mntd <- as.matrix(mntd)
 dist_km <- dist_km[rownames(mntd), colnames(mntd)]
@@ -34,11 +32,12 @@ dist_km <- dist_km[rownames(mntd), colnames(mntd)]
 # total dbrda
 #-----------------------------------------------------------------------------------------------------------------------------
 
-dbrda_tot <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start+sample_type+sample_method+filter+sequencing_depth+volume, df)
+dbrda_tot <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start+sample_method+filter+sequencing_depth+volume, df)
 RsquareAdj(dbrda_tot)
-anova(dbrda_tot)
+mod <-anova(dbrda_tot)
 anova(dbrda_tot, by = "axis",  permutations = 99)
 anova(dbrda_tot, by = "term", permutations = 99)
+
 
 station_scores <- scores(dbrda_tot)$sites
 var_scores <- dbrda_tot[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
@@ -77,9 +76,9 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
 grda_station
 
 # var part (need to remove almost constant variables i.e. filter, sequencing_depth)
-env_var <- as.data.frame(df[,2:47])
-geo_var <- df[, 48:53]
-samp_var <- df[, c(54,55,58)]
+env_var <- df[,2:7]
+geo_var <- df[, 8:13]
+samp_var <- df[, c(14,17)]
 mntd <- as.dist(mntd)
 
 varpart_tot <- varpart(mntd, env_var, geo_var, samp_var)
