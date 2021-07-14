@@ -14,6 +14,7 @@ library(ggalt)
 library(ggrepel)
 library(grid)
 library(spdep)
+library(mctest)
 source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/all_explanatory_variables_numeric.rdata")
@@ -34,6 +35,7 @@ dbrda_0 <- capscale(mntd ~ 1, df_mem)
 dbrda_tot <- capscale(mntd ~ .,df_mem)
 
 vif(dbrda_tot)
+mctest::imcdiag(dbrda_tot, method="VIF")
 
 # run selection of best model
 dbrda_sel <- ordiR2step(dbrda_0, scope = formula(dbrda_tot), direction="both") 
