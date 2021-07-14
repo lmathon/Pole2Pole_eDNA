@@ -8,6 +8,10 @@ library(data.table)
 library(ggplot2)
 library(sf)
 library(tidyr)
+library(stringr)
+library(maps)
+library(mapdata)
+
 load("Rdata/MNTD_pairwise_station.rdata")
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -15,14 +19,14 @@ meta <- meta %>%
   distinct(station, .keep_all=T)
 rownames(meta) <- meta$station
 meta <- meta[rownames(mntd),]
-coor <- meta[,c("longitude_start", "latitude_start")]
+coor <- meta[,c("latitude_start", "longitude_start")]
 
 plot(coor, asp=1)
 
 DistSpatial=gcd.hf(coor)
 
 dbmem = dbmem(DistSpatial)
-rownames(dbmem) <- labels(DistSpatial)
+
 
 summary(dbmem)
 
@@ -30,23 +34,37 @@ adegraphics::s.label(coor, nb = attr(dbmem, "listw"))
 
 ade4::s.value(coor, dbmem[,1])
 
+
+
+
+# check with dbrda wich MEM explain the most spatial autocorrelation
+dbrda_mem <- capscale(mntd ~ ., dbmem)
+RsquareAdj(dbrda_mem)
+anova(dbrda_mem)
+anova(dbrda_mem, by = "axis",  permutations = 99)
+anova(dbrda_mem, by = "term", permutations = 99)
+
+vif(dbrda_mem)
+# --> MEM1:5 most explicative
+
+dbmem <- dbmem[,1:5]
 dbmem_coor <- cbind(coor, dbmem)
 
-save(dbmem_coor, file="Rdata/db_mem.rdata")
+save(dbmem, file="Rdata/db_mem.rdata")
+
 
 # change from wide to long format
 dbmem_gps_long <- gather(dbmem_coor, MEM, Value, MEM1:ncol(dbmem_coor))
 # Calculate an MEM average value for each GPS point.
-library(stringr)
-dbmem_gps <- dbmem_gps_long %>% group_by(latitude_start, longitude_start, MEM)%>%
+
+dbmem_gps <- dbmem_gps_long %>% group_by(longitude_start, latitude_start, MEM)%>%
   summarise(mem_mean <- mean(Value))
 setnames(dbmem_gps, "mem_mean <- mean(Value)", "Average_MEM")
 dbmem_wide <- spread(dbmem_gps, MEM, Average_MEM)
 
 
 #  Download a high resolution map with the sf package
-library(maps)
-library(mapdata)
+
 
 wH <- map_data("worldHires",  xlim=c(-179,179), ylim=c(-90,90)) # subset polygons surrounding med sea
 

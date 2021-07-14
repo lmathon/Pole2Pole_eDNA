@@ -13,38 +13,70 @@ library(patchwork)
 library(ggalt)
 library(ggrepel)
 library(grid)
+library(spdep)
 source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/Jaccard_dissimilarity_station.rdata")
-load("Rdata/geographic_distance_stations.rdata")
+load("Rdata/MNTD_pairwise_station.rdata")
+load("Rdata/db_mem.rdata")
 
 # transform data
 
-df <- exp_var_num %>% filter(station %in% rownames(dist_jac))
-rownames(df) <- df$station
-df <- df[rownames(dist_jac), ]
-df <- df[,-62] # remove temporarily incomplete variables (sequencer)
-df <- df[, colSums(df != 0) > 0]
+df <- exp_var_num
+df <- df[,-16] # remove temporarily incomplete variables (sequencer)
+df_mem <- cbind(df[,-1], dbmem)
 
-dist_jac <- as.matrix(dist_jac)
-dist_km <- dist_km[rownames(dist_jac), colnames(dist_jac)]
+#---------------------------------------------------------------------------------------------------------------------------
+#### Model selection ####
 
-#-----------------------------------------------------------------------------------------------------------------------------
-# total dbrda
-#-----------------------------------------------------------------------------------------------------------------------------
+# dbrda on null model, and full model
+dbrda_0 <- capscale(mntd ~ 1, df_mem)
+dbrda_tot <- capscale(mntd ~ .,df_mem)
 
-dbrda_tot <- capscale(dist_jac ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start+sample_type+sample_method+filter+sequencing_depth+volume, df)
-RsquareAdj(dbrda_tot)
-anova(dbrda_tot)
-anova(dbrda_tot, by = "axis",  permutations = 99)
-anova(dbrda_tot, by = "term", permutations = 99)
+vif(dbrda_tot)
 
-station_scores <- scores(dbrda_tot)$sites
-var_scores <- dbrda_tot[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
+# run selection of best model
+dbrda_sel <- ordiR2step(dbrda_0, scope = formula(dbrda_tot), direction="both") 
+
+# check out selected variables 
+dbrda_sel$anova
+
+vif(dbrda_sel) # -> select variables : filter, sequencing_depth & latitude cause problems
+
+RsquareAdj(dbrda_sel)
+anova(dbrda_sel)
+anova(dbrda_sel, by = "term", permutations = 99)
+
+
+#---------------------------------------------------------------------------------------------------------------------------
+#### dbrda final with all selected variables, correcting for spatial ####
+
+sel_vars <- rownames(dbrda_sel$anova)[-nrow(dbrda_sel$anova)] %>% sub("..", "",.)
+df_sel <- df_mem %>% select(all_of(sel_vars))
+
+dbrda_fin <- capscale(mntd ~ dist_to_coast+mean_sss_1year+depth_fin+sample_method+mean_npp_1year+mean_SST_1year+dist_to_CT+province+volume+depth_sampling+pH_mean+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5), df_sel)
+RsquareAdj(dbrda_fin)
+anova(dbrda_fin)
+anova(dbrda_fin, by = "term", permutations = 99)
+
+
+# var part (need to remove almost constant variables i.e. filter, sequencing_depth)
+env_var <- df_sel[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "pH_mean", "mean_DHW_1year")]
+geo_var <- df_sel[, c("dist_to_coast", "latitude_start", "depth_fin", "dist_to_CT", "province", "depth_sampling")]
+samp_var <- df[, c("sample_method", "volume")]
+mntd <- as.dist(mntd)
+
+varpart_tot <- varpart(mntd, env_var, geo_var, samp_var)
+varpart_tot
+
+plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow'))
+
+# get scores
+station_scores <- scores(dbrda_fin)$sites
+var_scores <- dbrda_fin[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
 
 # extract the percentage variability explained by axes
-sumdbrda <- summary(dbrda_tot)
+sumdbrda <- summary(dbrda_fin)
 CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
 CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
@@ -76,29 +108,23 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
 
-# var part (need to remove almost constant variables i.e. filter, sequencing_depth)
-env_var <- as.data.frame(df[,2:47])
-geo_var <- df[, 48:53]
-samp_var <- df[, c(54,55,58)]
-dist_jac <- as.dist(dist_jac)
+#---------------------------------------------------------------------------------------------------------------------------------
+#### partial dbrda correcting for sampling and spatial ####
 
-varpart_tot <- varpart(dist_jac, env_var, geo_var, samp_var)
-varpart_tot
-
-plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow'))
-
-
-#--------------------------------------------------------------------------------------------------------------------------------------
-# partial dbrda : correcting for sampling variables
-#--------------------------------------------------------------------------------------------------------------------------------------
-
-dbrda_part <- capscale(dist_jac ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_SST_5year+mean_sss_1year+mean_sss_5year+mean_npp_1year+mean_npp_5year+pH_mean+dist_to_coast+dist_to_CT+province+depth_fin+depth_sampling+latitude_start + Condition(sample_type,sample_method,filter,sequencing_depth,volume), df)
+dbrda_part <- capscale(mntd ~ dist_to_coast+mean_sss_1year+latitude_start+depth_fin+mean_npp_1year+mean_SST_1year+dist_to_CT+province+depth_sampling+pH_mean+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5+filter+sequencing_depth+volume+sample_method), df_sel)
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
-anova(dbrda_part, by = "axis",  permutations = 99)
 anova(dbrda_part, by = "term", permutations = 99)
 
+vif(dbrda_part)
+# variation partitioning
+varpart_part <- varpart(mntd, env_var, geo_var)
+varpart_part
 
+plot(varpart_part, digits = 2, Xnames = c('env_var', 'geo_var'), bg = c('navy', 'tomato'))
+
+
+# get scores
 station_scores <- scores(dbrda_part)$sites
 var_scores <- dbrda_part[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
 
@@ -134,14 +160,3 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
-
-# var part (need to remove almost constant variables i.e. filter, sequencing_depth)
-env_var <- as.data.frame(df[,2:47])
-geo_var <- df[, 48:53]
-
-dist_jac <- as.dist(dist_jac)
-
-varpart_tot2 <- varpart(dist_jac, env_var, geo_var)
-varpart_tot2
-
-plot(varpart_tot2, digits = 2, Xnames = c('env_var', 'geo_var'), bg = c('navy', 'tomato'))
