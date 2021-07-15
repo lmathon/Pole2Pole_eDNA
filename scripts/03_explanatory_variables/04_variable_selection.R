@@ -7,7 +7,7 @@ source("scripts/04_analysis/00_functions.R")
 load("Rdata/environmental_variables.rdata")
 load("Rdata/sampling_variables.rdata")
 load("Rdata/geographic_variables.rdata")
-#load("Rdata/socioeconomic_variables.rdata")
+load("Rdata/socioeconomic_variables.rdata")
 load("Rdata/MNTD_pairwise_station.rdata")
 
 # Formate data
@@ -21,8 +21,8 @@ geo_var <- geo_var[rownames(mntd),]
 rownames(samp_var) <- samp_var$station
 samp_var <- samp_var[rownames(mntd),]
 
-#rownames(socio_var) <- socio_var$station
-#socio_var <- socio_var[rownames(mntd),]
+rownames(socio_var) <- socio_var$station
+socio_var <- socio_var[rownames(mntd),]
 
 # calculate correlation between variables and select variables
 
@@ -55,7 +55,7 @@ ggplot(cor_env_var2, aes(x,y,fill=assoc))+
 
 
 # geographic
-cor_geo_var <- mixed_assoc(geo_var[,-1]) ## everything ok, maybe remove province
+cor_geo_var <- mixed_assoc(geo_var[,-1]) 
 
 cor_geo_sign <- cor_geo_var %>%
   filter(assoc >= 0.7 | assoc <= -0.7)
@@ -67,14 +67,17 @@ ggplot(cor_geo_var, aes(x,y,fill=assoc))+
   theme(axis.text.x = element_text(face="plain", size=10, angle=90, vjust = 0, hjust = 1))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
+geo_var2 <- geo_var %>%
+  select(station, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
+colnames(geo_var2) <- c("station", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
 
 # sampling
-cor_samp_var <- mixed_assoc(samp_var[,-c(1,5)]) ## everythin ok, maybe remove province
+cor_samp_var <- mixed_assoc(samp_var[,-1]) 
 
 cor_samp_sign <- cor_samp_var %>%
   filter(assoc >= 0.7 | assoc <= -0.7)
 
-ggplot(cor_samp_var, aes(x,y,fill=assoc))+
+ggplot(cor_samp_sign, aes(x,y,fill=assoc))+
   geom_tile()+
   xlab("")+
   ylab("")+
@@ -82,25 +85,49 @@ ggplot(cor_samp_var, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 samp_var2 <- samp_var %>%
-  select(station, sample_method, filter, sequencer, sequencing_depth, volume)
+  select(station, sample_method, sequencer, volume)
 
 # socioeco
 
+cor_socio_var <- mixed_assoc(socio_var[,-1])
 
 
+cor_socio_sign <- cor_socio_var %>%
+  filter(assoc >= 0.7 | assoc <= -0.7)
 
+ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
+  geom_tile()+
+  xlab("")+
+  ylab("")+
+  theme(axis.text.x = element_text(face="plain", size=10, angle=90, vjust = 0, hjust = 1))+
+  scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
+socio_var2 <- socio_var %>%
+  select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
-
-
+# save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
+save(geo_var2, file="Rdata/selected_geographic_variables.rdata")
 save(samp_var2, file="Rdata/selected_sampling_variables.rdata")
+save(socio_var2, file="Rdata/selected_socioeconomic_variables.rdata")
 
 #---------------------------------------------------------------------------------------------------
 # Assemble all
 #-----------------------------------------------------------------------------------------------------
 
-exp_var <- cbind(env_var2, geo_var[,-1], samp_var2[,-1])
+exp_var <- cbind(env_var2, socio_var2[,-1], geo_var2[,-1], samp_var2[,-1])
+
+cor_exp_var <- mixed_assoc(exp_var[,-1])
+
+cor_var_sign <- cor_exp_var %>%
+  filter(assoc >= 0.7 | assoc <= -0.7)
+
+ggplot(cor_var_sign, aes(x,y,fill=assoc))+
+  geom_tile()+
+  xlab("")+
+  ylab("")+
+  theme(axis.text.x = element_text(face="plain", size=10, angle=90, vjust = 0, hjust = 1))+
+  scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 
 
@@ -117,20 +144,11 @@ exp_var_num <- exp_var %>%
     sample_method == "transect_deep" ~ 7,
     sample_method == "transect_rectangle" ~ 8,
     sample_method == "transect_rond" ~ 9)) %>%
-  mutate(province = case_when(
-    province == "Arctic" ~ 1,
-    province == "Cold_Temperate_Northwest_Pacific" ~ 2,
-    province == "Lusitanian" ~ 3,
-    province == "Mediterranean_Sea" ~ 4,
-    province == "Northern_European_Seas" ~ 5,
-    province == "Scotia_Sea" ~ 6,
-    province == "Southeast_Polynesia" ~ 7,
-    province == "Tropical_East_Pacific" ~ 8,
-    province == "Tropical_Northwestern_Atlantic" ~ 9,
-    province == "Tropical_Southwestern_Pacific" ~ 10,
-    province == "Western_Coral_Triangle" ~ 11,
-    province == "Western_Indian_Ocean" ~ 12
-  ))
+   mutate(sequencer = case_when(
+    sequencer == "Miseq" ~ 1,
+    sequencer == "Hiseq" ~ 2,
+    sequencer == "NestSeq" ~ 3,
+    sequencer == "IonTorrent" ~ 4))
 
 
 
