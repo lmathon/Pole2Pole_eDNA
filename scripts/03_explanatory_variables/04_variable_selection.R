@@ -1,6 +1,7 @@
 library(tidyverse)
 library(rcompanion)
 library(ggplot2)
+library(missMethods)
 
 source("scripts/04_analysis/00_functions.R")
 
@@ -105,6 +106,9 @@ ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
 socio_var2 <- socio_var %>%
   select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
+# replace NA in Antarctica with median imputation
+socio_var2 <- impute_median(socio_var2, type = "columnwise", ordered_low = FALSE)
+
 # save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
 save(geo_var2, file="Rdata/selected_geographic_variables.rdata")
@@ -143,11 +147,12 @@ exp_var_num <- exp_var %>%
     sample_method == "transect_benthique" ~ 6,
     sample_method == "transect_deep" ~ 7,
     sample_method == "transect_rectangle" ~ 8,
-    sample_method == "transect_rond" ~ 9)) %>%
+    sample_method == "transect_rond" ~ 9,
+    sample_method == "bottle" ~ 10)) %>%
    mutate(sequencer = case_when(
     sequencer == "Miseq" ~ 1,
     sequencer == "Hiseq" ~ 2,
-    sequencer == "NestSeq" ~ 3,
+    sequencer == "NextSeq" ~ 3,
     sequencer == "IonTorrent" ~ 4))
 
 

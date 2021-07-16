@@ -11,7 +11,7 @@ load("Rdata/MNTD_pairwise_station.rdata")
 
 load("Rdata/geographic_distance_stations.rdata")
 load("Rdata/selected_environmental_variables.rdata")
-#load("Rdata/socioeconomic_variables.rdata")
+load("Rdata/selected_socioeconomic_variables.rdata")
 
 # select same stations in big geographic distance matrix
 dist_km <- dist_km[rownames(mntd), colnames(mntd)]
@@ -24,7 +24,7 @@ mntd <- as.dist(mntd)
 
 # environmental distance matrix
 dist_env <- vegdist(env_var2[,-1], "mahalanobis", na.rm = TRUE)
-dist_socio <- vegdist(socio_var[,-1], "mahalanobis", na.rm = TRUE)
+dist_socio <- vegdist(socio_var2[,-1], "mahalanobis", na.rm = TRUE)
 
 save(dist_env, file="Rdata/environmental_distance_matrix.rdata")
 save(dist_socio, file="Rdata/socioeconomic_distance_matrix.rdata")
