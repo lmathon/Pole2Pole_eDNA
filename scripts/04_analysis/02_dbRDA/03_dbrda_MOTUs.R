@@ -24,73 +24,57 @@ load("Rdata/db_mem.rdata")
 # transform data
 
 df <- exp_var_num
-df <- df[,-16] # remove temporarily incomplete variables (sequencer)
+df_sel <- df %>%
+  select(-c("station", "pH_mean", "NGO"))
 df_mem <- cbind(df[,-1], dbmem)
 
 #---------------------------------------------------------------------------------------------------------------------------
-#### Full model ####
 
-dbrda_full <- capscale(dist_jac_mo ~ .,df_mem)
-
-RsquareAdj(dbrda_full)
-anova(dbrda_full)
-anova(dbrda_full, by = "term", permutations = 99)
-AIC(dbrda_full)
-
-
-# check for colinearity and select variables
-vif(dbrda_full)
-mctest::imcdiag(dbrda_full, method="VIF")
-
-df_sel <- df_mem[]
-
-#### GLM with selected variables ####
-dbrda_full <- capscale(dist_jac_mo ~ .,df_sel)
+#### dbRDA with selected variables ####
+dbrda_sel <- capscale(dist_jac_mo ~ .,df_sel)
 
 RsquareAdj(dbrda_sel)
 anova(dbrda_sel)
 anova(dbrda_sel, by = "term", permutations = 99)
-AIC(dbrda_sel)
 
-vif(dbrda_sel)
 mctest::imcdiag(dbrda_sel, method="VIF")
 
 #---------------------------------------------------------------------------------------------------------------------------
 #### dbrda final with all selected variables, correcting for spatial ####
 
-dbrda_fin <- capscale(dist_jac_mo ~ dist_to_coast+mean_sss_1year+depth_fin+sample_method+mean_npp_1year+mean_SST_1year+dist_to_CT+province+volume+depth_sampling+pH_mean+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5), df_sel)
+dbrda_fin <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+sample_method+sequencer+volume+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5), df_sel)
 RsquareAdj(dbrda_fin)
 anova(dbrda_fin)
 anova(dbrda_fin, by = "term", permutations = 99)
-AIC(dbrda_fin)
 
 
 # var part (need to remove almost constant variables i.e. filter, sequencing_depth)
-env_var <- df_sel[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "pH_mean", "mean_DHW_1year")]
-geo_var <- df_sel[, c("dist_to_coast", "latitude_start", "depth_fin", "dist_to_CT", "province", "depth_sampling")]
-samp_var <- df[, c("sample_method", "volume")]
+env_var <- df_sel[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
+geo_var <- df_sel[, c("distCoast", "latitude", "bathy", "dist_to_CT", "depth_sampling")]
+socio_var <- df_sel[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Naturalresourcesrents")]
+samp_var <- df[, c("sample_method", "volume", "sequencer")]
 dist_jac_mo <- as.dist(dist_jac_mo)
 
-varpart_tot <- varpart(dist_jac_mo, env_var, geo_var, samp_var)
+varpart_tot <- varpart(dist_jac_mo, env_var, geo_var, socio_var, samp_var)
 varpart_tot
 
-plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow'))
+plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'socio_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow', 'green'))
 
 # get scores
-station_scores <- scores(dbrda_fin)$sites
-var_scores <- dbrda_fin[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
+station_scores <- scores(dbrda_sel)$sites
+var_scores <- dbrda_sel[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
 
 # get most differentiated species along first axis
 quant75_cap1 <- quantile(abs(var_scores$CAP1), probs = c(0.75))
 quant75_cap2 <- quantile(abs(var_scores$CAP2), probs = c(0.75))
-quant75 <- rbind(quant75_cap1, quant975_cap2 )
+quant75 <- rbind(quant75_cap1, quant75_cap2 )
 var_scores_diff75_cap1 <- var_scores[which(abs(var_scores$CAP1) > quant75_cap1["75%"]),]
 var_scores_diff75_cap2 <- var_scores[which(abs(var_scores$CAP2) > quant75_cap2["75%"]),]
 var_scores_diff75 <- rbind(var_scores_diff75_cap1, var_scores_diff75_cap2)
 var_scores_diff75 <- unique(var_scores_diff75)
 
 # extract the percentage variability explained by axes
-sumdbrda <- summary(dbrda_fin)
+sumdbrda <- summary(dbrda_sel)
 CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
 CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
@@ -145,22 +129,23 @@ grda_variables <- ggplot() +
   guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
 grda_variables
 
+ggarrange(grda_station, grda_variables, nrow=2)
+ggsave("outputs/dbRDA/MOTU/dbrda_tot.png", width = 5, height = 8)
+
 #---------------------------------------------------------------------------------------------------------------------------------
 #### partial dbrda correcting for sampling and spatial ####
 
-dbrda_part <- capscale(dist_jac_mo ~ dist_to_coast+mean_sss_1year+latitude_start+depth_fin+mean_npp_1year+mean_SST_1year+dist_to_CT+province+depth_sampling+pH_mean+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5+filter+sequencing_depth+volume+sample_method), df_sel)
+dbrda_part <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+mean_DHW_1year + Condition(sequencer+volume+sample_method), df_sel) # MEM1+MEM2+MEM3+MEM4+MEM5+
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
-AIC(dbrda_part)
 
-vif(dbrda_part)
 
 # variation partitioning
-varpart_part <- varpart(dist_jac_mo, env_var, geo_var)
+varpart_part <- varpart(dist_jac_mo, env_var, geo_var, socio_var)
 varpart_part
 
-plot(varpart_part, digits = 2, Xnames = c('env_var', 'geo_var'), bg = c('navy', 'tomato'))
+plot(varpart_part, digits = 2, Xnames = c('env_var', 'geo_var', 'socio_var'), bg = c('navy', 'tomato', 'yellow'))
 
 
 # get scores
@@ -170,7 +155,7 @@ var_scores <- dbrda_part[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
 # get most differentiated species along first axis
 quant75_cap1 <- quantile(abs(var_scores$CAP1), probs = c(0.75))
 quant75_cap2 <- quantile(abs(var_scores$CAP2), probs = c(0.75))
-quant75 <- rbind(quant75_cap1, quant975_cap2 )
+quant75 <- rbind(quant75_cap1, quant75_cap2 )
 var_scores_diff75_cap1 <- var_scores[which(abs(var_scores$CAP1) > quant75_cap1["75%"]),]
 var_scores_diff75_cap2 <- var_scores[which(abs(var_scores$CAP2) > quant75_cap2["75%"]),]
 var_scores_diff75 <- rbind(var_scores_diff75_cap1, var_scores_diff75_cap2)
@@ -231,3 +216,6 @@ grda_variables <- ggplot() +
              size = 0, stroke = 0) + 
   guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
 grda_variables
+
+ggarrange(grda_station, grda_variables, nrow=2)
+ggsave("outputs/dbRDA/MOTU/dbrda_part.png", width = 5, height = 8)
