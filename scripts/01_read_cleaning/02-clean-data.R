@@ -22,7 +22,7 @@ load("Rdata/01_read_data.Rdata")
 
 # Combien d'sp sont perdues par projet 
 
-# Detail technique: une seule PCR sur la totalité du jeu de données, ou par projet (comme c'est le cas en ce moment) ? 
+# Detail technique: une seule PCR sur la totalité du jeu de données, ou par projet (comme c'est le cas en ce moment) ? --> changer vers 1 PCR sur tout le jeu de données et voir l'impact sur la richesse??
 # Clean with default values
 list_read_step3 <- lapply(list_read_step2, function(x){
   clean_motus(x, min_PCR = 1)[[1]]

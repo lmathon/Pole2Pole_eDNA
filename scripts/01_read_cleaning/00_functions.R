@@ -278,6 +278,13 @@ add_class_name_archive <- function(edna_file, archive_file=NULL){
   
   archive_file <- rbind(archive_file, liste_classification_class)
   
+  # Correct known errors ! 
+  archive_file <- archive_file %>%
+    mutate(class_name = case_when(
+      scientific_name_ncbi_corrected == "Schindleria" ~ "Actinopteri", 
+      TRUE ~ class_name
+    ))
+  
   # Add the class to the dataframe
   edna_with_class <- edna_file %>%
     left_join(., archive_file, by=c("scientific_name_ncbi_corrected"))
