@@ -22,8 +22,9 @@ load("Rdata/db_mem.rdata")
 # transform data
 
 df <- exp_var_num
-df <- df[,-1] # remove station
-df_mem <- cbind(df[,-1], dbmem)
+df <- df %>%
+  select(-c("station", "province")) # remove station
+df_mem <- cbind(df, dbmem)
 
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####

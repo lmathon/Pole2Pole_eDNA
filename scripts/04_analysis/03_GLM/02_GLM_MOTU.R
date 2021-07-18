@@ -11,8 +11,10 @@ load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-df <- exp_var[,-c(1,16)]
-df_num <- exp_var_num[,-c(1,16)]
+df <- exp_var%>%
+  select(-c("station", "province"))
+df_num <- exp_var_num%>%
+  select(-c("station", "province"))
 MOTUs <- rich_station$MOTUs
 
 
@@ -27,7 +29,8 @@ AIC(glm_full)
 vif(glm_full)
 mctest::imcdiag(glm_full, method="VIF")
 
-df_sel <- df_num[]
+df_sel <- df_num %>%
+  select(-c("pH_mean", "NGO","latitude"))
 
 #### GLM with selected variables ####
 glm_sel <- glm(MOTUs ~ ., data=df_sel, family="poisson")

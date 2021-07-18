@@ -25,7 +25,7 @@ load("Rdata/db_mem.rdata")
 
 df <- exp_var_num
 df_sel <- df %>%
-  select(-c("station", "pH_mean", "NGO"))
+  select(-c("station", "province", "pH_mean", "NGO"))
 df_mem <- cbind(df[,-1], dbmem)
 
 #---------------------------------------------------------------------------------------------------------------------------

@@ -69,8 +69,8 @@ ggplot(cor_geo_var, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 geo_var2 <- geo_var %>%
-  select(station, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
-colnames(geo_var2) <- c("station", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
+  select(station, province, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
+colnames(geo_var2) <- c("station", "province", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
 
 # sampling
 cor_samp_var <- mixed_assoc(samp_var[,-1]) 
