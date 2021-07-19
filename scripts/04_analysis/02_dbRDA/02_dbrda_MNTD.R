@@ -21,8 +21,8 @@ load("Rdata/db_mem.rdata")
 
 # transform data
 
-df <- exp_var_num
-df <- df %>%
+data <- exp_var_num
+df <- data %>%
   select(-c("station", "province")) # remove station
 df_mem <- cbind(df, dbmem)
 
@@ -94,7 +94,7 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
 # add metadata
 identical(as.character(rownames(df)), rownames(station_scores)) # verify that data in same order
-station_scores_met <- cbind(station_scores, df)
+station_scores_met <- cbind(station_scores, data)
 
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey") +
@@ -181,18 +181,20 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
 # add metadata
 identical(as.character(rownames(df)), rownames(station_scores)) # verify that data in same order
-station_scores_met <- cbind(station_scores, df)
+station_scores_met <- cbind(station_scores, data)
 
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey") +
   geom_vline(xintercept = 0, lty = 2, col = "grey") +
+  geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
+                alpha = 0.4, show.legend = TRUE) + # hull area 
   geom_point(col = "black", cex = 1) +
+  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
        title = "") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
-        legend.position = c(0, 1),             # position in top left corner
-        legend.justification = c(0, 1),        # correct legend justificaton
+        legend.position = "none",             # position in top left corner
         legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
         legend.title = element_text(size=11),
         legend.text = element_text(size=11),
@@ -230,5 +232,5 @@ grda_variables <- ggplot() +
   guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
 grda_variables
 
-ggarrange(grda_station, grda_variables, nrow=2)
-ggsave("outputs/dbRDA/MNTD/dbrda_part.png", width = 5, height = 8)
+ggarrange(grda_station, grda_variables, nrow=2, common.legend = TRUE, legend = "right")
+ggsave("outputs/dbRDA/MNTD/dbrda_part.png", width = 8, height = 8)

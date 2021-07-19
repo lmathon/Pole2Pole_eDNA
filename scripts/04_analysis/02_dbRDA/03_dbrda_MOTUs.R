@@ -139,6 +139,7 @@ dbrda_part <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1yea
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
+anova(dbrda_part, by = "axis", permutations = 99)
 
 
 # variation partitioning
@@ -173,16 +174,15 @@ station_scores_met <- cbind(station_scores, df)
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey") +
   geom_vline(xintercept = 0, lty = 2, col = "grey") +
+  geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
+                alpha = 0.4, show.legend = TRUE) + # hull area 
   geom_point(col = "black", cex = 1) +
+  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
        title = "") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
-        legend.position = c(0, 1),             # position in top left corner
-        legend.justification = c(0, 1),        # correct legend justificaton
-        legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
-        legend.title = element_text(size=11),
-        legend.text = element_text(size=11),
+        legend.position = "none",             
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
@@ -217,5 +217,5 @@ grda_variables <- ggplot() +
   guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
 grda_variables
 
-ggarrange(grda_station, grda_variables, nrow=2)
-ggsave("outputs/dbRDA/MOTU/dbrda_part.png", width = 5, height = 8)
+ggarrange(grda_station, grda_variables, nrow=2, common.legend = TRUE, legend = "right")
+ggsave("outputs/dbRDA/MOTU/dbrda_part.png", width = 8, height = 8)
