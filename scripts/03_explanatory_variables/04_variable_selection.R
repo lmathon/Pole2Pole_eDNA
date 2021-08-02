@@ -2,6 +2,7 @@ library(tidyverse)
 library(rcompanion)
 library(ggplot2)
 library(missMethods)
+library(DMwR2)
 
 source("scripts/04_analysis/00_functions.R")
 
@@ -107,7 +108,8 @@ socio_var2 <- socio_var %>%
   select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
 # replace NA in Antarctica with median imputation
-socio_var2 <- impute_median(socio_var2, type = "columnwise", ordered_low = FALSE)
+socio_var2 <- knnImputation(socio_var2[,-1])
+socio_var2$station <- socio_var$station
 
 # save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
@@ -119,7 +121,7 @@ save(socio_var2, file="Rdata/selected_socioeconomic_variables.rdata")
 # Assemble all
 #-----------------------------------------------------------------------------------------------------
 
-exp_var <- cbind(env_var2, socio_var2[,-1], geo_var2[,-1], samp_var2[,-1])
+exp_var <- cbind(env_var2, socio_var2[,-7], geo_var2[,-1], samp_var2[,-1])
 
 cor_exp_var <- mixed_assoc(exp_var[,-1])
 
@@ -135,27 +137,16 @@ ggplot(cor_var_sign, aes(x,y,fill=assoc))+
 
 
 
-# transform factor to numeric
+# separate numeric and categorical
 exp_var_num <- exp_var %>%
-  mutate(sample_method = case_when(
-    sample_method == "control" ~ 0,
-    sample_method == "bag_underwater" ~ 1,
-    sample_method == "boat" ~ 2,
-    sample_method == "niskin" ~ 3,
-    sample_method == "transect_aller" ~ 4,
-    sample_method == "transect_aller_retour" ~ 5,
-    sample_method == "transect_benthique" ~ 6,
-    sample_method == "transect_deep" ~ 7,
-    sample_method == "transect_rectangle" ~ 8,
-    sample_method == "transect_rond" ~ 9,
-    sample_method == "bottle" ~ 10)) %>%
-   mutate(sequencer = case_when(
-    sequencer == "Miseq" ~ 1,
-    sequencer == "Hiseq" ~ 2,
-    sequencer == "NextSeq" ~ 3,
-    sequencer == "IonTorrent" ~ 4))
+  select( -c(sample_method, sequencer, province))
 
+exp_var_cat <- exp_var %>%
+  select(sample_method, sequencer, province)
 
-
+# save all variables
 save(exp_var, file="Rdata/all_explanatory_variables.rdata")
+# save numeric variables
 save(exp_var_num, file="Rdata/all_explanatory_variables_numeric.rdata")
+# save categorical variables
+save(exp_var_cat, file="Rdata/all_explanatory_variables_categorical.rdata")

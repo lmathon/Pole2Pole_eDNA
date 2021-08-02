@@ -9,7 +9,8 @@ df_filtered <- df_all_filters %>%
   filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
   filter(habitat=="marine")%>%
   filter(sample_method !="control") %>%
-  filter(depth_sampling < 40) #%>%
+  filter(depth_sampling < 40) %>%
+  filter(site_name != "Kirkenes")
   #filter(family_name_corrected %ni% "Salmonidae") %>%
   #filter(site_name!="kirkenes") %>%
   #filter(site_name %ni% c("mallorca", "menorca"))
@@ -20,7 +21,8 @@ list_read_step4 <- lapply(list_read_step4, function(x){
       filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
       filter(habitat=="marine")%>%
       filter(sample_method !="control") %>%
-      filter(depth_sampling < 40) #%>%
+      filter(depth_sampling < 40) %>%
+      filter(site_name != "Kirkenes") #%>%
       #filter(family_name_corrected %ni% "Salmonidae") %>%
       #filter(site_name!="kirkenes") %>%
       #filter(site_name %ni% c("mallorca", "menorca"))
