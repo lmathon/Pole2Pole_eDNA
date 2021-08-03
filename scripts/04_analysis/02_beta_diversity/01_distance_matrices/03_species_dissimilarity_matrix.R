@@ -18,7 +18,7 @@ com <- data.frame(species=species)
 for (i in 1:length(stations)) {
   st[[i]] <- df %>%
     subset(station == stations[i])%>%
-    select(species_name_corrected, count_reads) %>%
+    dplyr::select(species_name_corrected, count_reads) %>%
     group_by(species_name_corrected) %>% 
     summarise_all(funs(sum))
   colnames(st[[i]]) <- c("species", stations[[i]])

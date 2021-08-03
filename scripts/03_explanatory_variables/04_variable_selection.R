@@ -43,7 +43,7 @@ ggplot(cor_env_var, aes(x,y,fill=assoc))+
 
 
 env_var2 <- env_var %>% # selection of non colinear variables
-  select(station, mean_DHW_1year, mean_DHW_5year, mean_sss_1year, mean_SST_1year, mean_npp_1year, pH_mean)
+  dplyr::select(station, mean_DHW_1year, mean_DHW_5year, mean_sss_1year, mean_SST_1year, mean_npp_1year, pH_mean)
 
 cor_env_var2 <- mixed_assoc(env_var2[,-1])
 
@@ -70,7 +70,7 @@ ggplot(cor_geo_var, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 geo_var2 <- geo_var %>%
-  select(station, province, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
+  dplyr::select(station, province, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
 colnames(geo_var2) <- c("station", "province", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
 
 # sampling
@@ -87,7 +87,7 @@ ggplot(cor_samp_sign, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 samp_var2 <- samp_var %>%
-  select(station, sample_method, sequencer, volume)
+  dplyr::select(station, sample_method, sequencer, volume)
 
 # socioeco
 
@@ -105,7 +105,7 @@ ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 socio_var2 <- socio_var %>%
-  select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
+  dplyr::select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
 # replace NA in Antarctica with median imputation
 socio_var2 <- knnImputation(socio_var2[,-1])
@@ -139,10 +139,10 @@ ggplot(cor_var_sign, aes(x,y,fill=assoc))+
 
 # separate numeric and categorical
 exp_var_num <- exp_var %>%
-  select( -c(sample_method, sequencer, province))
+  dplyr::select( -c(sample_method, sequencer, province))
 
 exp_var_cat <- exp_var %>%
-  select(sample_method, sequencer, province)
+  dplyr::select(sample_method, sequencer, province)
 
 # save all variables
 save(exp_var, file="Rdata/all_explanatory_variables.rdata")

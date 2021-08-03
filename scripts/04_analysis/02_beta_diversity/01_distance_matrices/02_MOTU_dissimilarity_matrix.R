@@ -18,7 +18,7 @@ com <- data.frame(amplicon=amplicon)
 for (i in 1:length(stations)) {
   st[[i]] <- df %>%
     subset(station == stations[i])%>%
-    select(sequence, count_reads) %>%
+    dplyr::select(sequence, count_reads) %>%
     group_by(sequence) %>% 
     summarise_all(funs(sum))
   colnames(st[[i]]) <- c("amplicon", stations[[i]])

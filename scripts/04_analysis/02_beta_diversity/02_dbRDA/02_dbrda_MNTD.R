@@ -236,3 +236,5 @@ grda_variables
 
 ggarrange(grda_station, grda_variables, nrow=2, common.legend = TRUE, legend = "right")
 ggsave("outputs/dbRDA/MNTD/dbrda_part.png", width = 8, height = 8)
+
+

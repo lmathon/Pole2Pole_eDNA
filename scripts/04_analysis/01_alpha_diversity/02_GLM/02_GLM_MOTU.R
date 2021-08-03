@@ -5,50 +5,49 @@ library(car)
 library(visreg)
 library(ecospat)
 library(modEvA)
+library(psych)
+library(MASS)
+library(AER)
+library(pscl)
+library(spdep)
+library(tidyverse)
 
 load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-df <- exp_var%>%
-  select(-c("station", "province"))
-df_num <- exp_var_num%>%
-  select(-c("station", "province"))
+data <- left_join(exp_var, rich_station, by="station")
+data <- data %>%
+  dplyr::select(c(MOTUs, mean_sss_1year, mean_SST_1year, Gravity, NGO, Naturalresourcesrents, dist_to_CT, bathy, latitude, distCoast, volume, sample_method, sequencer))
+
 MOTUs <- rich_station$MOTUs
 
 
 #### full model ####
-glm_full <- glm(MOTUs ~ ., data=df_num, family="poisson")
-
+glm_full <- glm(MOTUs ~ ., data=data, family="poisson")
 summary(glm_full)
 anova(glm_full)
-AIC(glm_full)
+
 
 # check for colinearity and select variables
-vif(glm_full)
 mctest::imcdiag(glm_full, method="VIF")
 
-df_sel <- df_num %>%
-  select(-c("pH_mean", "NGO","latitude"))
+# select best model
+glm_select=step(glm_full)
+summary(glm_select)
+dispersiontest(glm_select) # overdispersed
+pchisq(glm_select$deviance,glm_select$df.residual,lower.tail = F) # not well adjusted to data
 
-#### GLM with selected variables ####
-glm_sel <- glm(MOTUs ~ ., data=df_sel, family="poisson")
+# GLM negative binomial
+glm_nb <- glm.nb(data=data, MOTUs ~ . -Gravity)
+summary(glm_nb)
+pchisq(glm_nb$deviance,glm_nb$df.residual,lower.tail = F) # well adjusted to data
 
-summary(glm_sel)
-anova(glm_sel)
-AIC(glm_sel)
 
-vif(glm_sel)
-mctest::imcdiag(glm_sel, method="VIF") # should be ok, but if not remove correlated variables
-
-# check residuals : if weird test overdispersion
-simulateResiduals(glm_sel, plot=TRUE)
-
-testOverdispersion(glm_sel) # si significatif --> quasi-poisson
-
-# visualise regression
-visreg(glm_sel)
+# check residuals :and overdispersion
+simulateResiduals(glm_nb, plot=TRUE, refit = T)
+testDispersion(glm_nb, alternative = "greater") 
 
 
 #### check spatial autocorrelation ####
@@ -58,19 +57,40 @@ meta <- meta %>%
   distinct(station, .keep_all=T)
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
+identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- as.matrix(cbind(meta[,"longitude_start"], meta[,"latitude_start"]))
 
-nb <- knn2nb(knearneigh(coor, 1)) 
-lstw <- nb2listw((knn2nb(knearneigh(coor, k=1))))
+nb <- knn2nb(knearneigh(coor, 1, longlat = TRUE)) 
+lstw <- nb2listw(nb)
 
 # Compute Moran's I using residuals of model and also raw data
-moran.test(glm_sel$residuals, lstw) 
+moran.test(glm_nb$residuals, lstw) # spatial autocorrelation in residuals
+
+# create variable of autocorrelation
+bw <- max(unlist(nbdists(nb, coor)))
+
+autocor <- autocov_dist(MOTUs, nbs=bw, coor, longlat = T, zero.policy = T)
+autocor[which(!is.finite(autocor))] <- 0
+
+# regress autocorrelation variable with all other variables
+lm_autocor <- lm(autocor~ mean_sss_1year+mean_SST_1year+NGO+Naturalresourcesrents+dist_to_CT+bathy+latitude+distCoast+volume+sample_method+sequencer, data=data)
+autocorVar <- residuals(lm_autocor)
+
+
+## GLM with autocorVar
+glm_nb2 <- glm.nb(data=data, MOTUs ~ scale(autocorVar)+mean_sss_1year+mean_SST_1year+NGO+Naturalresourcesrents+dist_to_CT+bathy+latitude+distCoast+volume+sample_method+sequencer)
+summary <- summary(glm_nb2)
+
+pchisq(glm_nb2$deviance,glm_nb2$df.residual,lower.tail = F) # well adjusted to data
+simulateResiduals(glm_nb2, plot=TRUE, refit = T)
+testDispersion(glm_nb2, alternative = "greater") 
 
 
 #### Variation partitioning ####
-env_var <- df_num[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "pH_mean", "mean_DHW_1year")]
-geo_var <- df_num[, c("dist_to_coast", "latitude_start", "depth_fin", "dist_to_CT", "province", "depth_sampling")]
-samp_var <- df_num[, c("sample_method", "volume")]
+env_var <- data[,c("mean_sss_1year", "mean_SST_1year")]
+geo_var <- data[, c("distCoast", "latitude", "bathy", "dist_to_CT")]
+socio_var <- data[,c("NGO", "Naturalresourcesrents")]
+samp_var <- data[, c("volume")]
 
-
-varPart()
+varpart <- varpart(glm_nb2$fitted.values, env_var, geo_var, socio_var, samp_var)
+plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
