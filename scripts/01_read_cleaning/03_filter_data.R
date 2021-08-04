@@ -2,7 +2,7 @@ library(tidyverse)
 '%ni%' <- Negate("%in%")
 
 load("Rdata/02-clean-data.Rdata")
-
+df_all_filters$depth_sampling <- as.numeric(df_all_filters$depth_sampling)
 
 df_filtered <- df_all_filters %>%
   filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%

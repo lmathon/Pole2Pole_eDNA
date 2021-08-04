@@ -26,7 +26,7 @@ mntd <- as.dist(mntd)
 
 # environmental distance matrix
 dist_env <- vegdist(env_var2[,-1], "mahalanobis", na.rm = TRUE)
-dist_socio <- vegdist(socio_var2[,-7], "mahalanobis", na.rm = TRUE)
+dist_socio <- vegdist(socio_var2[,-6], "mahalanobis", na.rm = TRUE)
 
 save(dist_env, file="Rdata/environmental_distance_matrix.rdata")
 save(dist_socio, file="Rdata/socioeconomic_distance_matrix.rdata")
