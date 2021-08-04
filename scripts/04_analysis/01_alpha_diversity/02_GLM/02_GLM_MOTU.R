@@ -11,79 +11,86 @@ library(AER)
 library(pscl)
 library(spdep)
 library(tidyverse)
+library(nlme)
+library(MuMIn)
 
 load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data <- left_join(exp_var, rich_station, by="station")
+data <- left_join(exp_var_num, rich_station[,c("MOTUs", "station")], by="station")
 data <- data %>%
-  dplyr::select(c(MOTUs, mean_sss_1year, mean_SST_1year, Gravity, NGO, Naturalresourcesrents, dist_to_CT, bathy, latitude, distCoast, volume, sample_method, sequencer))
+  select(-c(station))
+#data <- data %>%
+  #dplyr::select(c(MOTUs, mean_sss_1year, mean_SST_1year, Gravity, NGO, Naturalresourcesrents, dist_to_CT, bathy, latitude, distCoast, volume, sample_method, sequencer))
 
 MOTUs <- rich_station$MOTUs
 
-
-#### full model ####
-glm_full <- glm(MOTUs ~ ., data=data, family="poisson")
-summary(glm_full)
-anova(glm_full)
-
-
-# check for colinearity and select variables
-mctest::imcdiag(glm_full, method="VIF")
-
-# select best model
-glm_select=step(glm_full)
-summary(glm_select)
-dispersiontest(glm_select) # overdispersed
-pchisq(glm_select$deviance,glm_select$df.residual,lower.tail = F) # not well adjusted to data
-
-# GLM negative binomial
-glm_nb <- glm.nb(data=data, MOTUs ~ . -Gravity)
-summary(glm_nb)
-pchisq(glm_nb$deviance,glm_nb$df.residual,lower.tail = F) # well adjusted to data
-
-
-# check residuals :and overdispersion
-simulateResiduals(glm_nb, plot=TRUE, refit = T)
-testDispersion(glm_nb, alternative = "greater") 
-
-
-#### check spatial autocorrelation ####
-
+# join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
 meta <- meta %>%
   distinct(station, .keep_all=T)
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
-coor <- as.matrix(cbind(meta[,"longitude_start"], meta[,"latitude_start"]))
+coor <- meta[, c("longitude_start", "latitude_start")]
+data <- cbind(data, coor)
 
-nb <- knn2nb(knearneigh(coor, 1, longlat = TRUE)) 
-lstw <- nb2listw(nb)
+#### full model -- GLM negative binomial ####
+glm_nb <- glm.nb(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume+sample_method+sequencer, data=data, family="poisson")
+summary(glm_nb)
+pchisq(glm_nb$deviance,glm_nb$df.residual,lower.tail = F) # well adjusted to data
 
+# check for colinearity and select variables
+mctest::imcdiag(glm_full, method="VIF")
+
+# check residuals :and overdispersion
+simulateResiduals(glm_nb, plot=TRUE, refit = T)
+testDispersion(glm_nb, alternative = "greater") 
+
+
+# check spatial autocorrelation 
 # Compute Moran's I using residuals of model and also raw data
 moran.test(glm_nb$residuals, lstw) # spatial autocorrelation in residuals
 
-# create variable of autocorrelation
-bw <- max(unlist(nbdists(nb, coor)))
 
-autocor <- autocov_dist(MOTUs, nbs=bw, coor, longlat = T, zero.policy = T)
-autocor[which(!is.finite(autocor))] <- 0
+#### GLS to account for spatial autocorrelation ####
 
-# regress autocorrelation variable with all other variables
-lm_autocor <- lm(autocor~ mean_sss_1year+mean_SST_1year+NGO+Naturalresourcesrents+dist_to_CT+bathy+latitude+distCoast+volume+sample_method+sequencer, data=data)
-autocorVar <- residuals(lm_autocor)
+mexp <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corExp(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+
+mgau <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+
+msph <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corSpher(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+
+mlin <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corLin(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+
+mrat <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corRatio(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+            
+
+# select best model
+AIC(mexp, mgau, msph, mlin, mrat)
+
+gls.final <- mgau
+stepAIC(gls.final)
 
 
-## GLM with autocorVar
-glm_nb2 <- glm.nb(data=data, MOTUs ~ scale(autocorVar)+mean_sss_1year+mean_SST_1year+NGO+Naturalresourcesrents+dist_to_CT+bathy+latitude+distCoast+volume+sample_method+sequencer)
-summary <- summary(glm_nb2)
+imp=dredge(gls.final)
 
-pchisq(glm_nb2$deviance,glm_nb2$df.residual,lower.tail = F) # well adjusted to data
-simulateResiduals(glm_nb2, plot=TRUE, refit = T)
-testDispersion(glm_nb2, alternative = "greater") 
+importance(imp)
+
+summary(gls.final)
+
+rsquared(gls.final)
+
+
+anova(gls.final)
+
+Anova(gls.final)
+
+visreg(gls.final,"SST",scale="response")
+
+visreg(gls.final,"logport",scale="response")
 
 
 #### Variation partitioning ####

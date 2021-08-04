@@ -108,9 +108,9 @@ socio_var2 <- socio_var %>%
   dplyr::select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
 # replace NA in Antarctica with median imputation
-socio_var2 <- knnImputation(socio_var2[,-1])
+socio_var2 <- knnImputation(socio_var2[,-c(1,5)])
 socio_var2$station <- socio_var$station
-
+socio_var2$NGO <- socio_var$NGO
 # save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
 save(geo_var2, file="Rdata/selected_geographic_variables.rdata")
@@ -121,7 +121,7 @@ save(socio_var2, file="Rdata/selected_socioeconomic_variables.rdata")
 # Assemble all
 #-----------------------------------------------------------------------------------------------------
 
-exp_var <- cbind(env_var2, socio_var2[,-7], geo_var2[,-1], samp_var2[,-1])
+exp_var <- cbind(env_var2, socio_var2[,-6], geo_var2[,-1], samp_var2[,-1])
 
 cor_exp_var <- mixed_assoc(exp_var[,-1])
 

@@ -24,7 +24,7 @@ load("Rdata/02-clean-data.Rdata")
 columns_delete_field_metadata <- c("turbidity", "gps_start", "gps_b", "lat_gps_b", "long_gps_b", "gps_c", "long_gps_c", "lat_gps_d", "gps_half_turn", "longitude_turn", "latitude_end", "longitude_end", 
                                    "gps_end", "long_gps_d", "gps_d", "lat_gps_c", "latitude_turn", "data_manager", "gps_owner", "project")
 
-metadata_field <- read.csv("metadata/Metadata_eDNA_global_V6.csv", sep=";", stringsAsFactors = F)
+metadata_field <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";", stringsAsFactors = F)
 metadata_field <- select(metadata_field, -c(columns_delete_field_metadata))
 
 # Load functions
@@ -35,13 +35,12 @@ source("scripts/01_read_cleaning/00_functions.R")
 fct_filter_station <- function(x){
   x <- x %>%
     # Remove non-marine Colombia
-    filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3")) %>%
-    filter(sample_method !="niskin" & province!="East_Pacific" & comment %ni% c("Distance decay 600m", "Distance decay 300m") & station!="glorieuse_distance_300m") %>%
-    # Remove for NC
-    filter(project != "SEAMOUNTS") %>% 
-    filter(habitat_type %ni% c("BAIE", "Sommet")) %>%
-    # Unused projects
-    filter(project_i %ni% c("atlantique", "Med", "curacao", "malpelo"))
+    filter(station %ni% c("estuaire_rio_don_diego_1", "estuaire_rio_don_diego_2", "estuaire_rio_don_diego_3", "glorieuse_distance_300m")) %>%
+    filter(sample_method !="niskin" & comment %ni% c("Distance decay 600m", "Distance decay 300m"))%>%
+    filter(habitat=="marine")%>%
+    filter(sample_method !="control") %>%
+    filter(depth_sampling < 40) %>%
+    filter(site_name != "Kirkenes")
   
   return(x)
 }
@@ -51,12 +50,9 @@ fct_filter_station <- function(x){
 # ------------------------------- # 
 
 # ----- # After LULU 
-df_all_filters_temp <- do.call("rbind", list_read_step4) %>%
-  filter(province != "Tropical_East_Pacific") %>%
+df_all_filters_temp <- bind_rows(list_read_step4) %>%
   # Filter marine 
-  filter(habitat == "marine") %>%
-  # Unused projects
-  filter(project_i %ni% c("atlantique", "Med", "curacao", "malpelo"))
+  filter(habitat == "marine") 
 
 unique(df_all_filters_temp$project_i)
 unique(df_all_filters_temp$habitat)
@@ -66,14 +62,11 @@ unique(df_all_filters_temp$province)
 liste_read_edna_LULU <- split(df_all_filters_temp, df_all_filters_temp$province)
 
 # -----# Before everything 
-df_all_filters_temp <- do.call("rbind", list_read_step2) %>%
-  mutate(sample_name_all_pcr = substr(sample_name,1, nchar(sample_name) -3)) %>%
+df_all_filters_temp <- bind_rows(list_read_step2) %>%
+  mutate(sample_name_all_pcr = word(sample_name, sep="_")) %>%
   left_join(., metadata_field, by=c("sample_name_all_pcr" = "code_spygen")) %>%
-  filter(province != "East_Pacific") %>%
   # Filter marine 
-  filter(habitat == "marine") %>%
-  # Unused projects
-  filter(project_i %ni% c("atlantique", "Med", "curacao", "malpelo"))
+  filter(habitat == "marine")
 
 unique(df_all_filters_temp$project_i)
 unique(df_all_filters_temp$habitat)
@@ -82,13 +75,12 @@ unique(df_all_filters_temp$province)
 liste_read_edna <- split(df_all_filters_temp, df_all_filters_temp$province)
 
 # ----- # After cleaning but before LULU
-df_all_filters_temp <- do.call("rbind", list_read_step3) %>%
-  mutate(sample_name_all_pcr = substr(sample_name,1, nchar(sample_name) -3)) %>%
+df_all_filters_temp <- bind_rows(list_read_step3) %>%
+  mutate(sample_name_all_pcr = word(sample_name, sep="_")) %>%
   left_join(., metadata_field, by=c("sample_name_all_pcr" = "code_spygen")) %>%
   # Filter marine 
-  filter(habitat == "marine") %>%
-  # Unused projects
-  filter(project_i %ni% c("atlantique", "Med", "curacao", "malpelo"))
+  filter(habitat == "marine")
+  
 
 unique(df_all_filters_temp$project_i)
 unique(df_all_filters_temp$habitat)
@@ -234,8 +226,11 @@ stat_by_project <- rbind(before, tenreads, blanks, fishonly, readlength, PCR_all
   arrange(province) %>%
   select(province, step, colnames(.))
 
+stat_by_project <- stat_by_project %>%
+  filter(province != "Northern_European_Seas")
+
 # Write
-write.csv(stat_by_project, "outputs/01_read_data_stats/stats_by_project.csv", row.names = FALSE)
+write.csv(stat_by_project, "outputs/count_by_project.csv", row.names = FALSE)
 write.csv(stat_by_project, "outputs/00_Figures_for_paper/Extended_Data/ED_Table3.csv", row.names = FALSE)
 
 
@@ -245,9 +240,10 @@ write.csv(stat_by_project, "outputs/00_Figures_for_paper/Extended_Data/ED_Table3
 # --------------------------------------------------------- # 
 
 # Before
-before <- lapply(liste_read_edna, clean_data, remove_blanks = FALSE, min_reads=0, remove_chimera=FALSE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = FALSE,
-                 min_size_seq = 0, max_size_seq = 500, tag_jump=FALSE, tag_jump_value = 0.001, min_PCR = 0,
-                 min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+before <- lapply(liste_read_edna, clean_motus, min_reads=0, remove_chimera=FALSE, remove_not_fish_taxize = FALSE,
+                 min_size_seq = 0, max_size_seq = 500, min_PCR = 0, min_percentage_id = 0, remove_PCR_blanks = FALSE) %>%
+  # Select first element of list 
+  map(., 1) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -258,9 +254,10 @@ before <- lapply(liste_read_edna, clean_data, remove_blanks = FALSE, min_reads=0
 
 # ---- # 10 reads
 
-tenreads <- lapply(liste_read_edna, clean_data, remove_blanks = FALSE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = FALSE,
-                   min_size_seq = 0, max_size_seq = 500, tag_jump=FALSE, tag_jump_value = 0.001, min_PCR = 0,
-                   min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+tenreads <- lapply(liste_read_edna, clean_motus, min_reads=10, remove_chimera=FALSE, remove_not_fish_taxize = FALSE,
+                   min_size_seq = 0, max_size_seq = 500, min_PCR = 0, min_percentage_id = 0, remove_PCR_blanks = FALSE) %>%
+  # Select first element of list 
+  map(., 1) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -271,9 +268,10 @@ tenreads <- lapply(liste_read_edna, clean_data, remove_blanks = FALSE, min_reads
 
 # ---- # PCR blanks & tag-jump
 
-blanks <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = FALSE,
-                 min_size_seq = 0, max_size_seq = 500, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 0,
-                 min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+blanks <- lapply(liste_read_edna, clean_motus, min_reads=10, remove_chimera=TRUE, remove_not_fish_taxize = FALSE,
+                 min_size_seq = 0, max_size_seq = 500, min_PCR = 0, min_percentage_id = 0, remove_PCR_blanks = TRUE) %>%
+  # Select first element of list 
+  map(., 1) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -284,9 +282,10 @@ blanks <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10
 
 # ---- # Fishes only 
 
-fishonly <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = TRUE,
-                   min_size_seq = 0, max_size_seq = 500, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 0,
-                   min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+fishonly <- lapply(liste_read_edna, clean_motus, min_reads=10, remove_chimera=TRUE, remove_not_fish_taxize = TRUE,
+                   min_size_seq = 0, max_size_seq = 500, min_PCR = 0, min_percentage_id = 0, remove_PCR_blanks = TRUE) %>%
+  # Select first element of list 
+  map(., 1) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -297,9 +296,10 @@ fishonly <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=
 
 # ---- # Length 
 
-readlength <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = TRUE,
-                     min_size_seq = 30, max_size_seq = 90, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 0,
-                     min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+readlength <- lapply(liste_read_edna, clean_motus, min_reads=10, remove_chimera=TRUE, remove_not_fish_taxize = TRUE,
+                     min_size_seq = 30, max_size_seq = 100, min_PCR = 0, min_percentage_id = 0, remove_PCR_blanks = TRUE) %>%
+  # Select first element of list 
+  map(., 1) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -310,9 +310,7 @@ readlength <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_read
 
 # ---- # PCRfilter: on the whole dataset 
 
-PCR_all <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = TRUE,
-                  min_size_seq = 30, max_size_seq = 90, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 1,
-                  min_PCR_sample = 0, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+PCR_all <- liste_read_edna_cleaned %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -349,7 +347,7 @@ LULU <- liste_read_edna_LULU %>%
 
 LULU_family <- lapply(liste_read_edna_LULU, function(x){
   x %>% 
-    filter(new_rank_ncbi != "higher")}) %>%
+    filter(rank_ncbi_corrected != "higher")}) %>%
   # filter stations
   lapply(., fct_filter_station) %>%
   # Stat
@@ -366,7 +364,7 @@ LULU_family <- lapply(liste_read_edna_LULU, function(x){
 stat_all_project <- rbind(before, tenreads, blanks, fishonly, readlength, PCR_all, LULU, LULU_family)
 
 # Write
-write.csv(stat_all_project, "outputs/01_read_data_stats/stats_all_project.csv", row.names = FALSE)
+write.csv(stat_all_project, "outputs/counts_all_project.csv", row.names = FALSE)
 write.csv(stat_all_project, "outputs/00_Figures_for_paper/Extended_Data/ED_Table1.csv", row.names = FALSE)
 
 

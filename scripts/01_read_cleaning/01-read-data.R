@@ -5,6 +5,8 @@
 library(tidyverse)
 library(data.table)
 
+conflict_prefer("select", "dplyr")
+
 # Source functions
 source("scripts/01_read_cleaning/00_functions.R")
 load("Rdata/archive_class_ncbi.Rdata")

@@ -104,24 +104,6 @@ list_read_step4 <- lapply(list_read_step4, function(x){
 
 # Clean wrong family assigment
 
-# BUG chez moi ici 
-list_read_step4 <- lapply(list_read_step4, function(x){
-  scaridae <- c("Scarus", "Bolbometopon", "Cetoscarus", "Chlorurus", "Hipposcarus", "Calotomus", "Cryptotomus", "Leptoscarus", "Nicholsina", "Sparisoma")
-  x_scaridae <- x%>%
-    filter(genus_name_corrected%in%scaridae)
-  x <- x%>%
-    filter(genus_name_corrected%ni%scaridae)
-  x_scaridae$family_name_corrected <- "Scaridae"
-  x <- rbind(x, x_scaridae)
-  x_taeniura <- x%>%
-    filter(genus_name_corrected=="Taeniura")
-  x <- x%>%
-    filter(genus_name_corrected!="Taeniura")
-  x_taeniura$family_name_corrected <- "Dasyatidae"
-  x <- rbind(x, x_taeniura)
-})
-
-# même chose codé différement pour que ça marche
 scaridae <- c("Scarus", "Bolbometopon", "Cetoscarus", "Chlorurus", "Hipposcarus", "Calotomus", "Cryptotomus", "Leptoscarus", "Nicholsina", "Sparisoma")
 list_read_step4 <- lapply(list_read_step4, function(x){
   
