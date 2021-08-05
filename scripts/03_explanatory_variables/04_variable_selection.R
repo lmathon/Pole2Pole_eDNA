@@ -55,6 +55,19 @@ ggplot(cor_env_var2, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0, breaks=c(-1, -0.5, 0, 0.5, 1))+
   theme_bw()
 
+    # transform data to log(x+1)
+hist(env_var2$mean_sss_1year, col = "grey")
+hist(env_var2$pH_mean, col = "grey")
+hist(env_var2$mean_SST_1year, col = "grey")
+hist(log1p(env_var2$mean_npp_1year), col = "grey")
+hist(log1p(env_var2$mean_DHW_1year), col = "grey")
+hist(log1p(env_var2$mean_DHW_5year), col = "grey")
+
+
+env_var2$mean_DHW_1year <- log1p(env_var2$mean_DHW_1year)
+env_var2$mean_npp_1year <- log1p(env_var2$mean_npp_1year)
+env_var2$mean_DHW_5year <- log1p(env_var2$mean_DHW_5year)
+
 
 # geographic
 cor_geo_var <- mixed_assoc(geo_var[,-1]) 
@@ -73,6 +86,25 @@ geo_var2 <- geo_var %>%
   dplyr::select(station, province, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
 colnames(geo_var2) <- c("station", "province", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
 
+    # transform data to log(x+1)
+geo_var2$bathy <- gsub("-", "", geo_var2$bathy)
+geo_var2$bathy <- as.numeric(geo_var2$bathy)
+
+geo_var2$depth_sampling <- gsub("-", "", geo_var2$depth_sampling)
+geo_var2$depth_sampling <- as.numeric(geo_var2$depth_sampling)
+
+
+hist(geo_var2$latitude, col="grey")
+hist(log1p(geo_var2$dist_to_CT), col="grey")
+hist(log1p(geo_var2$bathy), col="grey")
+hist(log1p(geo_var2$depth_sampling), col="grey")
+hist(log1p(geo_var2$distCoast), col="grey")
+
+geo_var2$dist_to_CT <- log1p(geo_var2$dist_to_CT)
+geo_var2$bathy <- log1p(geo_var2$bathy)
+geo_var2$depth_sampling <- log1p(geo_var2$depth_sampling)
+geo_var2$distCoast <- log1p(geo_var2$distCoast)
+
 # sampling
 cor_samp_var <- mixed_assoc(samp_var[,-1]) 
 
@@ -88,6 +120,12 @@ ggplot(cor_samp_sign, aes(x,y,fill=assoc))+
 
 samp_var2 <- samp_var %>%
   dplyr::select(station, sample_method, sequencer, volume)
+
+    # transform data to log(x+1)
+
+hist(log1p(samp_var2$volume), col="grey")
+
+samp_var2$volume <- log1p(samp_var2$volume)
 
 # socioeco
 
@@ -108,9 +146,20 @@ socio_var2 <- socio_var %>%
   dplyr::select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
 
 # replace NA in Antarctica with median imputation
-socio_var2 <- knnImputation(socio_var2[,-c(1,5)])
-socio_var2$station <- socio_var$station
-socio_var2$NGO <- socio_var$NGO
+socio_var2 <- knnImputation(socio_var2)
+
+hist(socio_var2$HDI2019, col="grey")
+hist(log1p(socio_var2$neartt), col="grey")
+hist(log1p(socio_var2$Gravity), col="grey")
+hist(log1p(socio_var2$NGO), col="grey")
+hist(socio_var2$MarineEcosystemDependency, col="grey")
+hist(socio_var2$Naturalresourcesrents, col="grey")
+
+socio_var2$neartt <- log1p(socio_var2$neartt)
+socio_var2$Gravity <- log1p(socio_var2$Gravity)
+socio_var2$NGO <- log1p(socio_var2$NGO)
+
+
 # save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
 save(geo_var2, file="Rdata/selected_geographic_variables.rdata")
@@ -121,7 +170,7 @@ save(socio_var2, file="Rdata/selected_socioeconomic_variables.rdata")
 # Assemble all
 #-----------------------------------------------------------------------------------------------------
 
-exp_var <- cbind(env_var2, socio_var2[,-6], geo_var2[,-1], samp_var2[,-1])
+exp_var <- cbind(env_var2, socio_var2[,-1], geo_var2[,-1], samp_var2[,-1])
 
 cor_exp_var <- mixed_assoc(exp_var[,-1])
 

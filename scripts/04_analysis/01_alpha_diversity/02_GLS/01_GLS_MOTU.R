@@ -79,7 +79,7 @@ Anova(gls.full)
 
 stepAIC(gls.full)
 
-gls.final <- gls(MOTUs ~ mean_DHW_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+MarineEcosystemDependency+dist_to_CT+latitude+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.final <- gls(MOTUs ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+bathy+depth_sampling, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 AIC(gls.final)
 
 summary(gls.final)
@@ -93,22 +93,24 @@ Anova(gls.final)
 
 plot(gls.final)
 
-visreg(gls.final,"mean_DHW_1year",scale="response")
+visreg(gls.final,"mean_DHW_5year",scale="response")
 visreg(gls.final,"mean_SST_1year",scale="response")
-visreg(gls.final,"pH_mean",scale="response")
+visreg(gls.final,"mean_sss_1year",scale="response")
+visreg(gls.final,"mean_npp_1year",scale="response")
 visreg(gls.final,"HDI2019",scale="response")
 visreg(gls.final,"neartt",scale="response")
+visreg(gls.final,"Gravity",scale="response")
 visreg(gls.final,"MarineEcosystemDependency",scale="response")
-visreg(gls.final,"dist_to_CT",scale="response")
-visreg(gls.final,"latitude",scale="response")
-visreg(gls.final,"volume",scale="response")
+visreg(gls.final,"NGO",scale="response")
+visreg(gls.final,"bathy",scale="response")
+visreg(gls.final,"depth_sampling",scale="response")
 
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year","mean_SST_1year","mean_npp_1year","pH_mean")]
-geo_var <- data[, c("dist_to_CT","latitude")]
-socio_var <- data[,c("HDI2019","neartt","MarineEcosystemDependency")]
+env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_npp_1year","mean_sss_1year")]
+geo_var <- data[, c("bathy","depth_sampling")]
+socio_var <- data[,c("HDI2019","neartt","MarineEcosystemDependency","Gravity","NGO")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)

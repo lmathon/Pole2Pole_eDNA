@@ -12,6 +12,7 @@ library(stringr)
 library(maps)
 library(mapdata)
 
+
 load("Rdata/MNTD_pairwise_station.rdata")
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -21,78 +22,36 @@ rownames(meta) <- meta$station
 meta <- meta[rownames(mntd),]
 coor <- meta[,c("latitude_start", "longitude_start")]
 
-plot(coor, asp=1)
 
 DistSpatial=gcd.hf(coor)
 
 dbmem = dbmem(DistSpatial)
 
-
 summary(dbmem)
 
 adegraphics::s.label(coor, nb = attr(dbmem, "listw"))
 
-ade4::s.value(coor, dbmem[,1])
+ade4::s.value(coor, dbmem[,13])
 
-
+attributes(dbmem)$values
 
 
 # check with dbrda wich MEM explain the most spatial autocorrelation
-dbrda_mem <- capscale(mntd ~ ., dbmem)
-RsquareAdj(dbrda_mem)
-anova(dbrda_mem)
-anova(dbrda_mem, by = "axis",  permutations = 99)
-anova(dbrda_mem, by = "term", permutations = 99)
+dbrda0 <- capscale(mntd ~ 1, dbmem[,1:15])
+dbrdaG <- capscale(mntd ~ ., dbmem[,1:15])
+mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
-vif(dbrda_mem)
-# --> MEM1:5 most explicative
+RsquareAdj(mem_sel)
+
+anova(mem_sel)
+mem_sel$anova
+anova(mem_sel, by = "axis",  permutations = 99)
+anova(mem_sel, by = "margin", permutations = 99)
+
 
 dbmem <- dbmem[,1:5]
-dbmem_coor <- cbind(coor, dbmem)
+
 
 save(dbmem, file="Rdata/db_mem.rdata")
 
 
-# change from wide to long format
-dbmem_gps_long <- gather(dbmem_coor, MEM, Value, MEM1:ncol(dbmem_coor))
-# Calculate an MEM average value for each GPS point.
-
-dbmem_gps <- dbmem_gps_long %>% group_by(longitude_start, latitude_start, MEM)%>%
-  summarise(mem_mean <- mean(Value))
-setnames(dbmem_gps, "mem_mean <- mean(Value)", "Average_MEM")
-dbmem_wide <- spread(dbmem_gps, MEM, Average_MEM)
-
-
-#  Download a high resolution map with the sf package
-
-
-wH <- map_data("worldHires",  xlim=c(-179,179), ylim=c(-90,90)) # subset polygons surrounding med sea
-
-ggplot() +
-  geom_polygon(data = wH, aes(x=long, y = lat, group = group), fill = "gray80", color = NA) +
-  coord_fixed(xlim=c(-179,179), ylim=c(-90,90), ratio = 1.3) +
-  theme(panel.background = element_rect(fill = "white", colour = "black"),
-        axis.title = element_blank())
-
-dbmem_gps_long_mem14 <- subset(dbmem_gps, subset=MEM=="MEM1"| MEM=="MEM4")
-
-
-pdf("MEM1_4_fas.pdf", width=5, height=5)
-x_title="Longitude"
-y_title="Latitude"
-graph1 <- ggplot() +
-  geom_polygon(data = wH, aes(x=long, y = lat, group = group), fill = "gray80", color = NA) +
-  coord_fixed(xlim = c(-179,179), ylim=c(-90,90))+
-  facet_wrap(~MEM)+
-  theme(panel.background = element_rect(fill = "white", colour = "black"),
-        axis.title = element_blank())+
-  geom_point(aes(x = longitude_start, y = latitude_start,fill=Average_MEM), data=dbmem_gps_long_mem14,shape = 21, size=1.5)+
-  theme_bw()+theme(legend.position = "none",
-                   panel.grid.major = element_blank(), panel.grid.minor = element_blank())+
-  labs(y=y_title)+  
-  labs(x=x_title)+
-  theme(axis.text.x=element_text(colour="black"))+
-  theme(axis.text.y=element_text(colour="black"))+
-  scale_fill_continuous(high="yellow",low="red")
-graph1
-dev.off()

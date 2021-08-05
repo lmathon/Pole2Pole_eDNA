@@ -13,6 +13,8 @@ library(spdep)
 library(tidyverse)
 library(nlme)
 library(MuMIn)
+library(rcompanion)
+library(ggpubr)
 
 load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
@@ -21,7 +23,7 @@ rownames(rich_station) <- rich_station$station
 
 data <- left_join(exp_var_num, rich_station[,c("Family", "station")], by="station")
 data <- data %>%
-  select(-c(station))
+  dplyr::select(-c(station))
 #data <- data %>%
 #dplyr::select(c(Family, mean_sss_1year, mean_SST_1year, Gravity, NGO, Naturalresourcesrents, dist_to_CT, bathy, latitude, distCoast, volume, sample_method, sequencer))
 
@@ -63,41 +65,55 @@ mgau <- gls(Family ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year
 
 msph <- gls(Family ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corSpher(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
-mlin <- gls(Family ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corLin(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+#mlin <- gls(Family ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corLin(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 mrat <- gls(Family ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+NGO+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+volume, correlation = corRatio(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 
 # select best model
-AIC(mexp, mgau, msph, mlin, mrat)
+AIC(mexp, mgau, msph, mrat)
 
-gls.final <- mgau
-stepAIC(gls.final)
+gls.full <- mgau
+summary(gls.full)
+Anova(gls.full)
 
+stepAIC(gls.full)
 
-imp=dredge(gls.final)
-
-importance(imp)
+gls.final <- gls(Family ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+pH_mean+HDI2019+neartt+Gravity+NGO+bathy+depth_sampling+latitude+distCoast, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+AIC(gls.final)
 
 summary(gls.final)
 
-rsquared(gls.final)
+# calculate Rsquare
+nagelkerke(gls.final)
 
 
-anova(gls.final)
 
 Anova(gls.final)
 
-visreg(gls.final,"SST",scale="response")
+plot(gls.final)
 
-visreg(gls.final,"logport",scale="response")
+visreg(gls.final,"mean_DHW_5year",scale="response")
+visreg(gls.final,"mean_SST_1year",scale="response")
+visreg(gls.final,"mean_sss_1year",scale="response")
+visreg(gls.final,"mean_npp_1year",scale="response")
+visreg(gls.final,"pH_mean",scale="response")
+visreg(gls.final,"HDI2019",scale="response")
+visreg(gls.final,"neartt",scale="response")
+visreg(gls.final,"Gravity",scale="response")
+visreg(gls.final,"NGO",scale="response")
+visreg(gls.final,"bathy",scale="response")
+visreg(gls.final,"depth_sampling",scale="response")
+visreg(gls.final,"latitude",scale="response")
+visreg(gls.final,"distCoast",scale="response")
+
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_sss_1year", "mean_SST_1year")]
-geo_var <- data[, c("distCoast", "latitude", "bathy", "dist_to_CT")]
-socio_var <- data[,c("NGO", "Naturalresourcesrents")]
+env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_npp_1year","mean_sss_1year", "pH_mean")]
+geo_var <- data[, c("bathy","depth_sampling", "latitude", "distCoast")]
+socio_var <- data[,c("HDI2019","neartt","Gravity","NGO")]
 samp_var <- data[, c("volume")]
 
-varpart <- varpart(glm_nb2$fitted.values, env_var, geo_var, socio_var, samp_var)
+varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
 plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))

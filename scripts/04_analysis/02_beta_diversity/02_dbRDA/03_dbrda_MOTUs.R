@@ -1,12 +1,9 @@
 library(dplyr)
-library(forcats)
 library(stringr)
 library(rsq)
 library(margins)
-library(betapart)
 library(reshape)
 library(tidyverse)
-library(tidyselect)
 library(vegan)
 library(ggplot2)
 library(patchwork)
@@ -15,6 +12,7 @@ library(ggrepel)
 library(grid)
 library(spdep)
 library(mctest)
+library(ggpubr)
 source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/all_explanatory_variables.rdata")
@@ -26,131 +24,52 @@ load("Rdata/db_mem.rdata")
 
 data <- exp_var
 df <- exp_var_num %>%
-  select(-c("station")) 
-df_sel <- exp_var_num %>%
-  select(-c("station", "pH_mean", "NGO"))
-df_mem <- cbind(df[,-1], dbmem)
+  select(-c("station")) # remove station
+df_mem <- cbind(df, dbmem)
 
 #---------------------------------------------------------------------------------------------------------------------------
+#### Full model ####
 
-#### dbRDA with selected variables ####
-dbrda_sel <- capscale(dist_jac_mo ~ .,df_sel)
+dbrda_full <- capscale(dist_jac_mo ~ .,df_mem)
 
-RsquareAdj(dbrda_sel)
-anova(dbrda_sel)
-anova(dbrda_sel, by = "term", permutations = 99)
-
-mctest::imcdiag(dbrda_sel, method="VIF")
-
-#---------------------------------------------------------------------------------------------------------------------------
-#### dbrda final with all selected variables, correcting for spatial ####
-
-dbrda_fin <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+sample_method+sequencer+volume+mean_DHW_1year + Condition(MEM1+MEM2+MEM3+MEM4+MEM5), df_sel)
-RsquareAdj(dbrda_fin)
-anova(dbrda_fin)
-anova(dbrda_fin, by = "term", permutations = 99)
+RsquareAdj(dbrda_full)
+anova(dbrda_full)
+anova(dbrda_full, by = "margin", permutations = 99)
 
 
-# var part (need to remove almost constant variables i.e. filter, sequencing_depth)
-env_var <- df_sel[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
-geo_var <- df_sel[, c("distCoast", "latitude", "bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_sel[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Naturalresourcesrents")]
-samp_var <- df[, c("volume")]
-dist_jac_mo <- as.dist(dist_jac_mo)
 
-varpart_tot <- varpart(dist_jac_mo, env_var, geo_var, socio_var, samp_var)
-varpart_tot
+# check for colinearity and select variables
+mctest::imcdiag(dbrda_full, method="VIF")
 
-plot(varpart_tot, digits = 2, Xnames = c('env_var', 'geo_var', 'socio_var', 'samp_var'), bg = c('navy', 'tomato', 'yellow', 'green'))
+# selection variables
+dbrda0 <- capscale(dist_jac_mo ~ 1, df_mem)
+dbrdaG <- capscale(dist_jac_mo ~ ., df_mem)
+mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both", R2scope = F)
 
-# get scores
-station_scores <- scores(dbrda_sel)$sites
-var_scores <- dbrda_sel[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
+mem_sel$anova
 
-# get most differentiated species along first axis
-quant75_cap1 <- quantile(abs(var_scores$CAP1), probs = c(0.75))
-quant75_cap2 <- quantile(abs(var_scores$CAP2), probs = c(0.75))
-quant75 <- rbind(quant75_cap1, quant75_cap2 )
-var_scores_diff75_cap1 <- var_scores[which(abs(var_scores$CAP1) > quant75_cap1["75%"]),]
-var_scores_diff75_cap2 <- var_scores[which(abs(var_scores$CAP2) > quant75_cap2["75%"]),]
-var_scores_diff75 <- rbind(var_scores_diff75_cap1, var_scores_diff75_cap2)
-var_scores_diff75 <- unique(var_scores_diff75)
+#### partial dbrda correcting for sampling ####
 
-# extract the percentage variability explained by axes
-sumdbrda <- summary(dbrda_sel)
-CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
-CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
-
-# add metadata
-identical(as.character(df$station), rownames(station_scores)) # verify that data in same order
-station_scores_met <- cbind(station_scores, df)
-
-grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
-  geom_hline(yintercept = 0, lty = 2, col = "grey") +
-  geom_vline(xintercept = 0, lty = 2, col = "grey") +
-  geom_point(col = "black", cex = 1) +
-  labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
-       title = "") +
-  theme_bw() +
-  theme(axis.line = element_line(colour = "black"),
-        legend.position = c(0, 1),             # position in top left corner
-        legend.justification = c(0, 1),        # correct legend justificaton
-        legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
-        legend.title = element_text(size=11),
-        legend.text = element_text(size=11),
-        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
-        panel.background = element_rect(colour = "black", size=1)) 
-grda_station
-
-grda_variables <- ggplot() + 
-  geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
-               arrow=arrow(length=unit(0.01,"npc"))) + # all species
-  geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
-               arrow=arrow(length=unit(0.01,"npc"))) + # most differentiated species
-  geom_hline(yintercept = 0, lty = 2, col = "grey") +
-  geom_vline(xintercept = 0, lty = 2, col = "grey") +
-  geom_label_repel(data= var_scores_diff75, 
-                   aes(x= CAP1, y=CAP2, #hjust=0.5*(1-sign(CAP1)),vjust=0.5*(1-sign(CAP2)),
-                       fontface=3, size = 3),
-                   label = rownames(var_scores_diff75),
-                   show.legend = F) +
-  labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)")) +
-  theme_bw() +
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
-        panel.background = element_rect(colour = "black", size=1),
-        legend.position = c(0, 1),              # position in top left corner
-        legend.justification = c(0, 1),         # correct legend justificaton
-        legend.box.margin=margin(c(2,2,2,2)),   # add margin as to not overlap with axis box
-        legend.background = element_rect(fill =  alpha("white", 0.0)),
-        legend.title = element_text(size=11),
-        legend.text = element_text(size=11)) +
-  # re-add legend and change text legend key by making invisible points and overriding its key shape
-  geom_point(data= var_scores_diff75, 
-             aes(x=CAP1, y=CAP2),
-             size = 0, stroke = 0) + 
-  guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
-grda_variables
-
-ggarrange(grda_station, grda_variables, nrow=2)
-ggsave("outputs/dbRDA/MOTU/dbrda_tot.png", width = 5, height = 8)
-
-#---------------------------------------------------------------------------------------------------------------------------------
-#### partial dbrda correcting for sampling and spatial ####
-
-dbrda_part <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+Naturalresourcesrents+dist_to_CT+bathy+depth_sampling+latitude+distCoast+mean_DHW_1year + Condition(volume), df_sel) # MEM1+MEM2+MEM3+MEM4+MEM5+
+dbrda_part <- capscale(dist_jac_mo ~ NGO+mean_sss_1year+mean_SST_1year+MEM2+latitude+pH_mean+MEM4+MEM3+MarineEcosystemDependency+MEM1+dist_to_CT+MEM5+Naturalresourcesrents+HDI2019+neartt+depth_sampling+mean_npp_1year+mean_DHW_1year+mean_DHW_5year+bathy+distCoast+Gravity + Condition(volume), df_mem) 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
-anova(dbrda_part, by = "axis", permutations = 99)
 anova(dbrda_part, by = "margin", permutations = 99)
 
 
 # variation partitioning
-varpart_part <- varpart(dist_jac_mo, env_var, geo_var, socio_var, samp_var)
+#
+env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year", "pH_mean")]
+geo_var <- df_mem[, c("distCoast", "latitude", "bathy", "dist_to_CT", "depth_sampling")]
+socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Naturalresourcesrents", "NGO")]
+spatial_var <- df_mem[, c("MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
+dist_jac_mo <- as.dist(dist_jac_mo)
+
+
+varpart_part <- varpart(dist_jac_mo, env_var, geo_var, socio_var, spatial_var)
 varpart_part
 
-plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
+plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'spatial'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # get scores
@@ -172,54 +91,37 @@ CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
 CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
 # add metadata
-identical(as.character(rownames(df)), rownames(station_scores)) # verify that data in same order
+identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
 
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
-  geom_hline(yintercept = 0, lty = 2, col = "grey") +
-  geom_vline(xintercept = 0, lty = 2, col = "grey") +
+  geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
+  geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
                 alpha = 0.4, show.legend = TRUE) + # hull area 
-  geom_point(col = "black", cex = 1) +
+  geom_point(col = "black", cex = 1, show.legend = F) +
   scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
+  geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
+               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # all variables
+  geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
+               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
+  geom_label_repel(data= var_scores_diff75, 
+                   aes(x= CAP1, y=CAP2, 
+                       fontface=3),
+                   label = rownames(var_scores_diff75),
+                   label.size = NA, 
+                   size = 4,
+                   fill = alpha(c("white"),0),
+                   show.legend = F) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
        title = "") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
-        legend.position = "none",             
+        legend.position = "right",             # position in top left corner
+        legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
 
-grda_variables <- ggplot() + 
-  geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
-               arrow=arrow(length=unit(0.01,"npc"))) + # all species
-  geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
-               arrow=arrow(length=unit(0.01,"npc"))) + # most differentiated species
-  geom_hline(yintercept = 0, lty = 2, col = "grey") +
-  geom_vline(xintercept = 0, lty = 2, col = "grey") +
-  geom_label_repel(data= var_scores_diff75, 
-                   aes(x= CAP1, y=CAP2, #hjust=0.5*(1-sign(CAP1)),vjust=0.5*(1-sign(CAP2)),
-                       fontface=3, size = 3),
-                   label = rownames(var_scores_diff75),
-                   show.legend = F) +
-  labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)")) +
-  theme_bw() +
-  theme(axis.line = element_line(colour = "black"),
-        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
-        panel.background = element_rect(colour = "black", size=1),
-        legend.position = c(0, 1),              # position in top left corner
-        legend.justification = c(0, 1),         # correct legend justificaton
-        legend.box.margin=margin(c(2,2,2,2)),   # add margin as to not overlap with axis box
-        legend.background = element_rect(fill =  alpha("white", 0.0)),
-        legend.title = element_text(size=11),
-        legend.text = element_text(size=11)) +
-  # re-add legend and change text legend key by making invisible points and overriding its key shape
-  geom_point(data= var_scores_diff75, 
-             aes(x=CAP1, y=CAP2),
-             size = 0, stroke = 0) + 
-  guides(colour = guide_legend(override.aes = list(size = 5, shape = c(utf8ToInt("C"), utf8ToInt("B"), utf8ToInt("D"), utf8ToInt("P")))))
-grda_variables
-
-ggarrange(grda_station, grda_variables, nrow=2, common.legend = TRUE, legend = "right")
-ggsave("outputs/dbRDA/MOTU/dbrda_part.png", width = 8, height = 8)
