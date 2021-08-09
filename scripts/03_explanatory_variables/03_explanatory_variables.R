@@ -26,7 +26,7 @@ save(env_var, file="Rdata/environmental_variables.rdata")
 # Socioeconomic variables variables
 #---------------------------------------------------------------------------------------------------------------------
 socio <- read.csv("metadata/eDNA_all_socio_variables.csv", sep=";")
-socio_var <- socio[, -c(1,2,4,5,6,7, 10, 11)]
+socio_var <- socio[, -c(1,2,4,5,6,7, 10, 11,17)]
 
 socio_var <- socio_var %>%
   distinct(station, .keep_all=T) %>%
@@ -38,7 +38,7 @@ save(socio_var, file="Rdata/socioeconomic_variables.rdata")
 # Geographic variables
 #---------------------------------------------------------------------------------------------------------------------
 
-geo_var <- meta[,c("station", "dist_to_CT", "province", "depth_fin", "depth_sampling", "latitude_start")] 
+geo_var <- meta[,c("station", "dist_to_CT", "province", "depth_fin", "depth_sampling")] 
 geo_var <- left_join(geo_var, socio[,c("station", "distCoast")])
 
 geo_var <- geo_var %>%

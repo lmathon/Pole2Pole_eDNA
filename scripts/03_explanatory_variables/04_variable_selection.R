@@ -83,8 +83,8 @@ ggplot(cor_geo_var, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 geo_var2 <- geo_var %>%
-  dplyr::select(station, province, dist_to_CT, depth_fin, depth_sampling, latitude_start, distCoast)
-colnames(geo_var2) <- c("station", "province", "dist_to_CT", "bathy", "depth_sampling", "latitude", "distCoast")
+  dplyr::select(station, province, dist_to_CT, depth_fin, depth_sampling, distCoast)
+colnames(geo_var2) <- c("station", "province", "dist_to_CT", "bathy", "depth_sampling", "distCoast")
 
     # transform data to log(x+1)
 geo_var2$bathy <- gsub("-", "", geo_var2$bathy)
@@ -94,15 +94,13 @@ geo_var2$depth_sampling <- gsub("-", "", geo_var2$depth_sampling)
 geo_var2$depth_sampling <- as.numeric(geo_var2$depth_sampling)
 
 
-hist(geo_var2$latitude, col="grey")
+
 hist(log1p(geo_var2$dist_to_CT), col="grey")
-hist(log1p(geo_var2$bathy), col="grey")
-hist(log1p(geo_var2$depth_sampling), col="grey")
+hist(geo_var2$bathy, col="grey")
+hist(geo_var2$depth_sampling, col="grey")
 hist(log1p(geo_var2$distCoast), col="grey")
 
 geo_var2$dist_to_CT <- log1p(geo_var2$dist_to_CT)
-geo_var2$bathy <- log1p(geo_var2$bathy)
-geo_var2$depth_sampling <- log1p(geo_var2$depth_sampling)
 geo_var2$distCoast <- log1p(geo_var2$distCoast)
 
 # sampling
@@ -143,17 +141,18 @@ ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 socio_var2 <- socio_var %>%
-  dplyr::select(station, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, Naturalresourcesrents)
+  dplyr::select(station, NoViolence_mean, Corruption_mean, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, conflicts)
 
-# replace NA in Antarctica with median imputation
-socio_var2 <- knnImputation(socio_var2)
 
 hist(socio_var2$HDI2019, col="grey")
+hist(socio_var2$NoViolence_mean, col="grey")
+hist(socio_var2$Corruption_mean, col="grey")
+hist(socio_var2$conflicts, col="grey")
 hist(log1p(socio_var2$neartt), col="grey")
 hist(log1p(socio_var2$Gravity), col="grey")
 hist(log1p(socio_var2$NGO), col="grey")
 hist(socio_var2$MarineEcosystemDependency, col="grey")
-hist(socio_var2$Naturalresourcesrents, col="grey")
+
 
 socio_var2$neartt <- log1p(socio_var2$neartt)
 socio_var2$Gravity <- log1p(socio_var2$Gravity)

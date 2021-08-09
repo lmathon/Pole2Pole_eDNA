@@ -50,7 +50,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling ####
 
-dbrda_part <- capscale(mntd ~ mean_SST_1year+MEM1+MEM2+MEM4+pH_mean+mean_sss_1year+dist_to_CT+MEM3+latitude+HDI2019+Naturalresourcesrents+MarineEcosystemDependency+MEM5+bathy+NGO+mean_npp_1year+depth_sampling+Gravity+mean_DHW_1year+mean_DHW_5year+neartt+distCoast + Condition(volume), df_mem) 
+dbrda_part <- capscale(mntd ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem) 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
@@ -59,17 +59,16 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year", "pH_mean")]
-geo_var <- df_mem[, c("distCoast", "latitude", "bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Naturalresourcesrents", "NGO")]
-spatial_var <- df_mem[, c("MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
+env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
+geo_var <- df_mem[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
+socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
 mntd <- as.dist(mntd)
 
 
-varpart_part <- varpart(mntd, env_var, geo_var, socio_var, spatial_var)
+varpart_part <- varpart(mntd, env_var, geo_var, socio_var)
 varpart_part
 
-plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'spatial'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
+plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 
 # get scores
@@ -93,6 +92,85 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 # add metadata
 identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
+
+grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+  geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
+  geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
+  geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
+                alpha = 0.4, show.legend = TRUE) + # hull area 
+  geom_point(col = "black", cex = 1, show.legend = F) +
+  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
+  geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
+               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # all variables
+  geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
+               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
+  geom_label_repel(data= var_scores_diff75, 
+                   aes(x= CAP1, y=CAP2, 
+                       fontface=3),
+                   label = rownames(var_scores_diff75),
+                   label.size = NA, 
+                   size = 4,
+                   fill = alpha(c("white"),0),
+                   show.legend = F) +
+  labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
+       title = "") +
+  theme_bw() +
+  theme(axis.line = element_line(colour = "black"),
+        legend.position = "right",             # position in top left corner
+        legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
+        legend.title = element_blank(),
+        legend.text = element_text(size=9),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.background = element_rect(colour = "black", size=1)) 
+grda_station
+
+
+
+#### partial dbrda correcting for sampling, without Antarctica ####
+df_mem2 <- df_mem[-c(1:42),]
+mntd2 <- mntd[-c(1:42),-c(1:42)]
+dbrda_part <- capscale(mntd2 ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem2) 
+RsquareAdj(dbrda_part)
+anova(dbrda_part)
+anova(dbrda_part, by = "term", permutations = 99)
+anova(dbrda_part, by = "margin", permutations = 99)
+
+
+# variation partitioning
+#
+env_var <- df_mem2[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
+geo_var <- df_mem2[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
+socio_var <- df_mem2[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
+mntd <- as.dist(mntd2)
+
+
+varpart_part <- varpart(mntd2, env_var, geo_var, socio_var)
+varpart_part
+
+plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
+
+
+# get scores
+station_scores <- scores(dbrda_part)$sites
+var_scores <- dbrda_part[["CCA"]][["biplot"]][, 1:2] %>% as.data.frame()
+
+# get most differentiated species along first axis
+quant75_cap1 <- quantile(abs(var_scores$CAP1), probs = c(0.75))
+quant75_cap2 <- quantile(abs(var_scores$CAP2), probs = c(0.75))
+quant75 <- rbind(quant75_cap1, quant75_cap2 )
+var_scores_diff75_cap1 <- var_scores[which(abs(var_scores$CAP1) > quant75_cap1["75%"]),]
+var_scores_diff75_cap2 <- var_scores[which(abs(var_scores$CAP2) > quant75_cap2["75%"]),]
+var_scores_diff75 <- rbind(var_scores_diff75_cap1, var_scores_diff75_cap2)
+var_scores_diff75 <- unique(var_scores_diff75)
+
+# extract the percentage variability explained by axes
+sumdbrda <- summary(dbrda_part)
+CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
+CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
+
+# add metadata
+identical(as.character(rownames(data[-c(1:42),])), rownames(station_scores)) # verify that data in same order
+station_scores_met <- cbind(station_scores, data[-c(1:42),])
 
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +

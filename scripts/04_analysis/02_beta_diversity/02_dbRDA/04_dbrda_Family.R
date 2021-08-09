@@ -17,7 +17,7 @@ source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/Jaccard_MOTU_dissimilarity.rdata")
+load("Rdata/Jaccard_Family_dissimilarity.rdata")
 load("Rdata/db_mem.rdata")
 
 # transform data
@@ -30,7 +30,7 @@ df_mem <- cbind(df, dbmem)
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(dist_jac_mo ~ .,df_mem)
+dbrda_full <- capscale(dist_jac_fam ~ .,df_mem)
 
 RsquareAdj(dbrda_full)
 anova(dbrda_full)
@@ -42,15 +42,15 @@ anova(dbrda_full, by = "margin", permutations = 99)
 mctest::imcdiag(dbrda_full, method="VIF")
 
 # selection variables
-dbrda0 <- capscale(dist_jac_mo ~ 1, df_mem)
-dbrdaG <- capscale(dist_jac_mo ~ ., df_mem)
+dbrda0 <- capscale(dist_jac_fam ~ 1, df_mem)
+dbrdaG <- capscale(dist_jac_fam ~ ., df_mem)
 mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 
 
 #### partial dbrda correcting for sampling ####
 
-dbrda_part <- capscale(dist_jac_mo ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem) 
+dbrda_part <- capscale(dist_jac_fam ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem) 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
@@ -62,10 +62,10 @@ anova(dbrda_part, by = "margin", permutations = 99)
 env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
 geo_var <- df_mem[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
 socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
-dist_jac_mo <- as.dist(dist_jac_mo)
+dist_jac_fam <- as.dist(dist_jac_fam)
 
 
-varpart_part <- varpart(dist_jac_mo, env_var, geo_var, socio_var)
+varpart_part <- varpart(dist_jac_fam, env_var, geo_var, socio_var)
 varpart_part
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
