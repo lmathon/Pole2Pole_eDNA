@@ -26,7 +26,7 @@ mntd <- as.dist(mntd)
 
 # environmental distance matrix
 dist_env <- vegdist(env_var2[,-1], "mahalanobis", na.rm = TRUE)
-dist_socio <- vegdist(socio_var2[,-6], "mahalanobis", na.rm = TRUE)
+dist_socio <- vegdist(socio_var2[,-1], "mahalanobis", na.rm = TRUE)
 
 save(dist_env, file="Rdata/environmental_distance_matrix.rdata")
 save(dist_socio, file="Rdata/socioeconomic_distance_matrix.rdata")
@@ -54,7 +54,6 @@ mantel.rtest(dist_jac_mo, dist_km) # geographic distance & Motu composition diss
 mantel.rtest(dist_km, mntd) # geographic distance & mntd correlated
 mantel.rtest(dist_env, mntd)
 mantel.rtest(dist_socio, mntd)
-mantel.rtest(dist_env, dist_jac_mo)
-mantel.rtest(dist_socio, dist_jac_mo)
+mantel.rtest(dist_socio, dist_env)
 
 

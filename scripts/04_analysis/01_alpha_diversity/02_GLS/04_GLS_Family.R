@@ -85,7 +85,7 @@ Family_pred <- predict(gls.full)
 fit <- lm(Family_pred ~ Family)
 RsquareAdj(fit)
 
-plot(gls.full$residuals)
+plot(gls.full)
 
 
 env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_npp_1year","mean_sss_1year", "mean_DHW_5year", "pH_mean")]
@@ -106,6 +106,7 @@ gls.final <- gls(Family ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_
 AIC(gls.final)
 summary(gls.final)
 anova(gls.final)
+plot(gls.final)
 
 # R² for GLS
 Family_pred <- predict(gls.final)
@@ -143,10 +144,10 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.1+0.199+0.238+0.116+0.097+0.001+0.051, 
-                        geography=0.100+0.001+0.238+0.116+0.001+0.008, 
-                        socioeconomy=0.077+0.001+0.238+0.199+0.097+0.116+0.025, 
-                        sampling=0.008+0.116+0.097+0.051+0.001+0.008)
+partition <- data.frame(environment=0.124+0.256+0.111+0.006+0.048+0.099+0.175, 
+                        geography=0.09+0.011+0.008+0.006+0.111+0.256, 
+                        socioeconomy=0.075+0.026+0.111+0.099+0.175+0.256+0.011, 
+                        sampling=0.007+0.008+0.006+0.048+0.099+0.111+0.026)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -161,7 +162,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 #### GLS on log(Family) ####
 data$Family <- log1p(data$Family)
-gls.final <- gls(Family ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.final <- gls(Family ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 AIC(gls.final)
 summary(gls.final)
