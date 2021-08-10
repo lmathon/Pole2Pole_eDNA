@@ -23,8 +23,8 @@ load("Rdata/db_mem.rdata")
 # transform data
 
 data <- exp_var
-df <- exp_var_num %>%
-  select(-c("station")) # remove station
+df <- data %>%
+  select(-c("station", "province")) # remove station
 df_mem <- cbind(df, dbmem)
 
 #---------------------------------------------------------------------------------------------------------------------------
@@ -47,10 +47,12 @@ dbrdaG <- capscale(mntd ~ ., df_mem)
 mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 
-
 #### partial dbrda correcting for sampling ####
 
-dbrda_part <- capscale(mntd ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem) 
+dbrda_part <- capscale(mntd ~ mean_sss_1year+MEM4+mean_SST_1year+MEM3+NoViolence_mean+pH_mean+neartt+HDI2019+MEM5+bathy+conflicts+dist_to_CT+MEM2+MEM1+mean_npp_1year+MarineEcosystemDependency+depth_sampling+Corruption_mean+NGO+distCoast+mean_DHW_1year+Gravity +Condition(volume), df_mem) 
+
+mctest::imcdiag(dbrda_part, method="VIF")
+
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
@@ -59,9 +61,9 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
+env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "pH_mean")]
 geo_var <- df_mem[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
-socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
+socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts", "NoViolence_mean", "NGO")]
 mntd <- as.dist(mntd)
 
 
@@ -124,12 +126,11 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
 
+#### partial dbrda correcting for sampling and MEM ####
+
+dbrda_part <- capscale(mntd ~ mean_sss_1year+mean_SST_1year+NoViolence_mean+pH_mean+neartt+HDI2019+bathy+conflicts+dist_to_CT+mean_npp_1year+MarineEcosystemDependency+depth_sampling+Corruption_mean+NGO+distCoast+mean_DHW_1year+Gravity +Condition(volume+MEM4+MEM3+MEM5+MEM2+MEM1), df_mem) 
 
 
-#### partial dbrda correcting for sampling, without Antarctica ####
-df_mem2 <- df_mem[-c(1:42),]
-mntd2 <- mntd[-c(1:42),-c(1:42)]
-dbrda_part <- capscale(mntd2 ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem2) 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
@@ -138,17 +139,33 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem2[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
-geo_var <- df_mem2[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
-socio_var <- df_mem2[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
-mntd <- as.dist(mntd2)
+env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "pH_mean")]
+geo_var <- df_mem[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling")]
+socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts", "NGO", "NoViolence_mean")]
+mntd <- as.dist(mntd)
 
 
-varpart_part <- varpart(mntd2, env_var, geo_var, socio_var)
+varpart_part <- varpart(mntd, env_var, geo_var, socio_var)
 varpart_part
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
+# boxplot partition per variable type
+
+partition <- data.frame(environment=0.112+0.147+0.007+0.011, 
+                        geography=0.054+0.007+0.011+0.036, 
+                        socioeconomy=0.093+0.147+0.011+0.036) 
+                        
+
+partition <- as.data.frame(t(partition))
+partition$variables <- rownames(partition)
+partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "geography"))
+
+ggplot(partition, aes(x=variables2,y = V1))+
+  geom_col(width = 0.2)+
+  xlab("Variable type")+
+  ylab("cumulated variance explained")+
+  theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 # get scores
 station_scores <- scores(dbrda_part)$sites
@@ -169,8 +186,8 @@ CAP1 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP1"]*100, 1)
 CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 
 # add metadata
-identical(as.character(rownames(data[-c(1:42),])), rownames(station_scores)) # verify that data in same order
-station_scores_met <- cbind(station_scores, data[-c(1:42),])
+identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
+station_scores_met <- cbind(station_scores, data)
 
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
@@ -202,4 +219,3 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
-
