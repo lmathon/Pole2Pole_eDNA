@@ -27,6 +27,15 @@ df <- data %>%
   select(-c("station", "province")) # remove station
 df_mem <- cbind(df, dbmem)
 
+meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
+meta <- meta %>%
+  distinct(station, .keep_all=T)
+rownames(meta) <- meta$station
+meta <- meta[rownames(data),]
+identical(as.character(rownames(meta)), rownames(data))
+coor <- meta[, c("longitude_start", "latitude_start")]
+data <- cbind(data, coor)
+
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
@@ -219,3 +228,13 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
+
+
+# plot Axis1~latitude
+
+ggplot(station_scores_met, aes(x=latitude_start, y=CAP1))+
+  geom_point(aes(col=province))+
+  scale_color_brewer(palette="Paired", direction = 1, aesthetics = "col")+
+  theme_bw() +
+  theme(panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.background = element_rect(colour = "black", size=1))
