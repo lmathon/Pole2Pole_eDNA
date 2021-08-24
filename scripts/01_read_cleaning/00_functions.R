@@ -404,6 +404,7 @@ apply_lulu <- function(edna_file, path_lulu, match_lulu = 84, co_occurence_lulu 
   
   # Format for LULU function
   otutab <- edna_file %>%
+    ungroup() %>%
     select(definition, count_reads, sample_name) %>% # Here, sample name or sample name no pcr to try 
     spread(sample_name, count_reads) %>%
     mutate_if(is.integer, ~replace_na(., 0)) %>%
