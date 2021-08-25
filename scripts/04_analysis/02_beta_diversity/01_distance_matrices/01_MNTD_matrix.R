@@ -10,8 +10,15 @@ seq <- df_filtered %>%
   distinct(sequence, definition)
 seq2 <- seq[,1]
 rownames(seq2) <- seq$definition
+seq2 <- strsplit(seq2, split = character(0))
+seq3 <- data.frame()
 
-dist_gen <- as.matrix(dist.gene(seq, method = "pairwise"))
+for (i in 1:length(seq2)) {
+  seq3 <- qpcR:::rbind.na(seq3, seq2[[i]])
+  
+}
+
+dist_gen <- as.matrix(dist.gene(seq3, method = "percentage"))
 rownames(dist_gen) <- seq$definition
 colnames(dist_gen) <- seq$definition
 

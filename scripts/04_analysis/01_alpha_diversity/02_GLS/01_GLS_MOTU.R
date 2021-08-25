@@ -26,10 +26,8 @@ rownames(rich_station) <- rich_station$station
 data <- left_join(exp_var_num, rich_station[,c("MOTUs", "station")], by="station")
 data <- data %>%
   dplyr::select(-c(station))
-#data <- data %>%
-  #dplyr::select(c(MOTUs, mean_sss_1year, mean_SST_1year, Gravity, NGO, Naturalresourcesrents, dist_to_CT, bathy, latitude, distCoast, volume, sample_method, sequencer))
 
-MOTUs <- rich_station$MOTUs
+data$MOTUs <- log1p(data$MOTUs)
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -40,23 +38,6 @@ meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
-
-#### full model -- GLM negative binomial ####
-glm_nb <- glm.nb(MOTUs ~ . -latitude_start - longitude_start -NGO -pH_mean -NoViolence_mean, data=data)
-summary(glm_nb)
-pchisq(glm_nb$deviance,glm_nb$df.residual,lower.tail = F) # well adjusted to data
-
-# check for colinearity and select variables
-mctest::imcdiag(glm_nb, method="VIF")
-
-# check residuals :and overdispersion
-simulateResiduals(glm_nb, plot=TRUE, refit = T)
-testDispersion(glm_nb, alternative = "greater") 
-
-
-# check spatial autocorrelation 
-# Compute Moran's I using residuals of model and also raw data
-moran.test(glm_nb$residuals, lstw) # spatial autocorrelation in residuals
 
 
 #### GLS to account for spatial autocorrelation ####
@@ -82,7 +63,7 @@ AIC(gls.full)
 
 # R² for GLS
 MOTU_pred <- predict(gls.full)
-fit <- lm(MOTU_pred ~ MOTUs)
+fit <- lm(MOTU_pred ~ data$MOTUs)
 RsquareAdj(fit)
 
 plot(gls.full$residuals)
@@ -101,7 +82,7 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 gls.final <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 stepAIC(gls.final)
 
-gls.final <- gls(MOTUs ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.final <- gls(MOTUs ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 AIC(gls.final)
 summary(gls.final)
@@ -109,28 +90,32 @@ anova(gls.final)
 
 # R² for GLS
 MOTU_pred <- predict(gls.final)
-fit <- lm(MOTU_pred ~ MOTUs)
+fit <- lm(MOTU_pred ~ data$MOTUs)
 RsquareAdj(fit)
 
-
+hist(gls.final$residuals)
 
 visreg(gls.final,"mean_DHW_5year",scale="response")
 visreg(gls.final,"mean_SST_1year",scale="response")
 visreg(gls.final,"mean_sss_1year",scale="response")
+visreg(gls.final,"mean_npp_1year",scale="response")
+visreg(gls.final,"Corruption_mean",scale="response")
 visreg(gls.final,"HDI2019",scale="response")
 visreg(gls.final,"neartt",scale="response")
 visreg(gls.final,"Gravity",scale="response")
 visreg(gls.final,"MarineEcosystemDependency",scale="response")
 visreg(gls.final,"conflicts",scale="response")
 visreg(gls.final,"dist_to_CT",scale="response")
+visreg(gls.final,"depth_sampling",scale="response")
+visreg(gls.final,"distCoast",scale="response")
 visreg(gls.final,"volume",scale="response")
 
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_sss_1year")]
-geo_var <- data[, c("dist_to_CT")]
-socio_var <- data[,c("HDI2019","neartt","MarineEcosystemDependency","Gravity","conflicts")]
+env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_sss_1year", "mean_npp_1year")]
+geo_var <- data[, c("dist_to_CT", "depth_sampling","distCoast" )]
+socio_var <- data[,c("Corruption_mean","HDI2019","neartt","MarineEcosystemDependency","Gravity","conflicts")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
@@ -139,10 +124,10 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.141+0.32+0.003+0.202+0.102, 
-                        geography=0.231+0.320, 
-                        socioeconomy=0.163+0.049+0.320+0.003+0.202, 
-                        sampling=0.028++0.202+0.102)
+partition <- data.frame(environment=0.124+0.083+0.109+0.075+0.034+0.149+0.214, 
+                        geography=0.075+0.214+0.149+0.034+0.045+0.027, 
+                        socioeconomy=0.046+0.027+0.214+0.083+0.109+0.149+0.032, 
+                        sampling=0.032+0.149+0.109+0.075+0.034+0.045+0.031)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -154,16 +139,3 @@ ggplot(partition, aes(x=variables2,y = V1))+
   ylab("cumulated variance explained")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
-
-#### GLS on log(MOTUs) ####
-data$MOTUs <- log1p(data$MOTUs)
-gls.final <- gls(MOTUs ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-
-AIC(gls.final)
-summary(gls.final)
-anova(gls.final)
-
-# R² for GLS
-MOTU_pred <- predict(gls.final)
-fit <- lm(MOTU_pred ~ MOTUs)
-RsquareAdj(fit)
