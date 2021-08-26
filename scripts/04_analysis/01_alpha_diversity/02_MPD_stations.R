@@ -11,7 +11,7 @@ seq <- df_filtered %>%
   distinct(sequence, definition)
 seq2 <- seq[,1]
 rownames(seq2) <- seq$definition
-seq2 <- strsplit(seq2, split = character(0))
+seq2 <- strsplit(seq2$sequence, split = character(0))
 seq3 <- data.frame()
 
 for (i in 1:length(seq2)) {
@@ -49,21 +49,19 @@ com <- com[,-1]
 com <- as.data.frame(t(com))
 com[is.na(com)] <- 0
 
-# calculate MPD between pairs of stations
+# calculate MPD within stations
+df <- data.frame()
+mpd <- data.frame(station=rownames(com), mpd=numeric(263))
 
-mpd <- comdist(com, dist_gen, abundance.weighted = FALSE)
-mpd <- as.matrix(mpd)
+for (i in 1:nrow(com)) {
+  df <- com[i,]
+  df <- rbind(df, df)
+  value <- comdist(df, dist_gen, abundance.weighted = FALSE)
+  value <- as.matrix(value)
+  mpd[i,2] <- value[1,2]
+}
 
 
 # save Rdata
 
-save(mpd, file="Rdata/MPD_pairwise_station.rdata")
-
-# plot distance matrix
-
-dissplot(mpd, method=NA, 
-         upper_tri = TRUE, 
-         lower_tri = FALSE, 
-         reverse_columns=TRUE,
-         main="Mean Pairwise Distance between stations",
-         col=bluered(100))
+save(mpd, file="Rdata/MPD_station.rdata")

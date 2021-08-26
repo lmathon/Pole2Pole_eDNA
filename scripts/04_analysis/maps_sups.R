@@ -46,8 +46,7 @@ data <- cbind(exp_var, coor)
 # select variables
 
 data <- left_join(data, rich_station, by="station")
-data <- data %>%
-  dplyr::select(-c(station))
+
 
 
 # plot dist_to_CT ~ Gravity
@@ -66,6 +65,8 @@ data$metadata_map_sf = st_as_sf(data[,c("longitude_start", "latitude_start")], c
                            crs = 4326)
 
 # MOTUs richness
+data <- data[order(data$MOTUs),]
+
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80") + 
   geom_sf(aes(fill = data$MOTUs), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
@@ -86,6 +87,8 @@ ggplot() +
         plot.title = element_text(lineheight=.8, face="bold"))
 
 # Family richness
+data <- data[order(data$Family),]
+
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80") + 
   geom_sf(aes(fill = data$Family), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
@@ -106,6 +109,8 @@ ggplot() +
         plot.title = element_text(lineheight=.8, face="bold"))
 
 # Chondri richness
+data <- data[order(data$chondri_MOTUs),]
+
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80") + 
   geom_sf(aes(fill = data$chondri_MOTUs), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
@@ -126,12 +131,38 @@ ggplot() +
         plot.title = element_text(lineheight=.8, face="bold"))
 
 # Crypto richness
+data <- data[order(data$crypto_MOTUs),]
+
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80") + 
   geom_sf(aes(fill = data$crypto_MOTUs), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(crs = "+proj=robin") + 
   scale_fill_gradient(low="blue", high="red", aesthetics = "fill")+
   labs(fill="Cryptobenthics richness")+
+  theme_minimal() +
+  theme(panel.grid.minor = element_line(linetype = "blank"),
+        plot.background = element_rect(colour = NA), 
+        panel.background = element_blank(),
+        panel.border = element_blank(),
+        text = element_text(size=25),
+        legend.position = "bottom",
+        legend.title = element_text(size=10),
+        legend.text = element_text(size=10),
+        legend.key.height = unit(4, "mm"),
+        panel.grid.major = element_line(colour = "gray70"),
+        plot.title = element_text(lineheight=.8, face="bold"))
+
+# MPD
+load("Rdata/MPD_station.rdata")
+data <- left_join(data, mpd)
+data <- data[order(data$mpd),]
+
+ggplot() + 
+  geom_sf(aes(), data = world, fill = "grey80") + 
+  geom_sf(aes(fill = data$mpd), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
+  coord_sf(crs = "+proj=robin") + 
+  scale_fill_gradient(low="blue", high="red", aesthetics = "fill")+
+  labs(fill="Mean Pairwise genetic distance")+
   theme_minimal() +
   theme(panel.grid.minor = element_line(linetype = "blank"),
         plot.background = element_rect(colour = NA), 
@@ -191,6 +222,7 @@ ggplot() +
         plot.title = element_text(size=12, face="bold", hjust = 0.5))
 
 #### map for explanatory variables (change variable and title) ####
+data <- data[order(data$volume),]
 
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80") + 

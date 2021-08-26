@@ -13,24 +13,32 @@ library(grid)
 library(spdep)
 library(mctest)
 library(ggpubr)
-source("scripts/04_analysis/00_functions.R")
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/Jaccard_Family_dissimilarity.rdata")
+load("Rdata/MNTD_chondri_pairwise_station.rdata")
 load("Rdata/db_mem.rdata")
 
 # transform data
 
 data <- exp_var
-df <- exp_var_num %>%
+df <- data %>%
   select(-c("station")) # remove station
 df_mem <- cbind(df, dbmem)
+
+meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
+meta <- meta %>%
+  distinct(station, .keep_all=T)
+rownames(meta) <- meta$station
+meta <- meta[rownames(data),]
+identical(as.character(rownames(meta)), rownames(data))
+coor <- meta[, c("longitude_start", "latitude_start")]
+data <- cbind(data, coor)
 
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(dist_jac_fam ~ .,df_mem)
+dbrda_full <- capscale(mntd_chondri ~ .,df_mem)
 
 RsquareAdj(dbrda_full)
 anova(dbrda_full)
@@ -42,15 +50,16 @@ anova(dbrda_full, by = "margin", permutations = 99)
 mctest::imcdiag(dbrda_full, method="VIF")
 
 # selection variables
-dbrda0 <- capscale(dist_jac_fam ~ 1, df_mem)
-dbrdaG <- capscale(dist_jac_fam ~ ., df_mem)
+dbrda0 <- capscale(mntd_chondri ~ 1, df_mem)
+dbrdaG <- capscale(mntd_chondri ~ ., df_mem)
 mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 
+#### partial dbrda correcting for sampling and MEM ####
 
-#### partial dbrda correcting for sampling ####
+dbrda_part <- capscale(mntd_chondri ~ mean_DHW_1year+mean_SST_1year+neartt+HDI2019+bathy+province+depth_sampling +Condition(volume+MEM1), df_mem) 
 
-dbrda_part <- capscale(dist_jac_fam ~ mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+MEM1+MEM2+MEM3+MEM4+MEM5 + Condition(volume), df_mem) 
+
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
@@ -59,17 +68,33 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "mean_SST_1year", "mean_DHW_1year", "mean_DHW_5year")]
-geo_var <- df_mem[, c("distCoast", "bathy", "dist_to_CT", "depth_sampling","MEM1", "MEM2", "MEM4", "MEM3", "MEM5")]
-socio_var <- df_mem[,c("HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "Corruption_mean", "conflicts")]
-dist_jac_fam <- as.dist(dist_jac_fam)
+env_var <- df_mem[,c("mean_DHW_1year", "mean_SST_1year")]
+geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
+socio_var <- df_mem[,c("HDI2019", "neartt")]
+mntd_chondri <- as.dist(mntd_chondri)
 
 
-varpart_part <- varpart(dist_jac_fam, env_var, geo_var, socio_var)
+varpart_part <- varpart(mntd_chondri, env_var, geo_var, socio_var)
 varpart_part
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
+# boxplot partition per variable type
+
+partition <- data.frame(environment=0.122+0.011+0.023+0.083, 
+                        geography=0.071+0.011+0.023+0.01, 
+                        socioeconomy=0.049+0.083+0.023+0.01)
+
+
+partition <- as.data.frame(t(partition))
+partition$variables <- rownames(partition)
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
+
+ggplot(partition, aes(x=variables2,y = V1))+
+  geom_col(width = 0.2)+
+  xlab("Variable type")+
+  ylab("cumulated variance explained")+
+  theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 # get scores
 station_scores <- scores(dbrda_part)$sites
@@ -123,3 +148,4 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
+
