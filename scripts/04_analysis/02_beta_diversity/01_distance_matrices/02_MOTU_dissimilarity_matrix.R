@@ -31,22 +31,21 @@ com <- com[,-1]
 com[is.na(com)] <- 0
 save(com, file="Rdata/station_presence_absence.rdata")
 com <- as.data.frame(t(com))
+com[com > 1] <- 1
 
 
 #### calculate dissimilarity matrix with jaccard ####
 jaccard_motu <- as.matrix(vegdist(com, method = "jaccard"))
 
-
-
 save(jaccard_motu, file="Rdata/Jaccard_MOTU_dissimilarity.rdata")
 
 # plot dissimilarity matrix
 
-dissplot(jaccard_motu, method=NA, 
+dissplot(diss_motu, method=NA, 
          upper_tri = TRUE, 
          lower_tri = FALSE, 
          reverse_columns=TRUE,
-         main="Jaccard dissimilarity in MOTU composition",
+         main="Dissimilarity in MOTU composition",
          col=bluered(100))
 
 
@@ -67,9 +66,10 @@ chondri_order <- c("Myliobatiformes", "Rajiformes", "Rhinopristiformes", "Torped
                    "Hexanchiformes", "Pristiophoriformes", "Squaliformes", "Squatiniformes")
 
 df_chondri <- filter(df_filtered, order_name %in% chondri_order | family_name_corrected %in% chondri_family)
-chondri_motu <- unique(df_chondri$definition)
+chondri_motu <- unique(df_chondri$sequence)
 
 com_chondri <- com[chondri_motu]
+com_chondri <- com_chondri[rowSums(com_chondri[])>0,]
 
 jaccard_chondri <- as.matrix(vegdist(com_chondri, method = "jaccard"))
 
@@ -80,9 +80,10 @@ cryptic_family <- c("Tripterygiidae", "Grammatidae", "Aploactinidae", "Creediida
 cryptic_order <- c("Kurtiformes", "Gobiiformes", "Blenniiformes", "Syngnathiformes")
 df_crypto <- filter(df_filtered, order_name %in% cryptic_order | family_name_corrected %in% cryptic_family)
 
-crypto_motu <- unique(df_crypto$definition)
+crypto_motu <- unique(df_crypto$sequence)
 
 com_crypto <- com[crypto_motu]
+com_crypto <- com_crypto[rowSums(com_crypto[])>0,]
 
 jaccard_crypto <- as.matrix(vegdist(com_crypto, method = "jaccard"))
 

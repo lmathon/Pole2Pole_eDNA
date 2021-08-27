@@ -35,10 +35,12 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
+df_mem <- df_mem[rownames(mntd_chondri),]
+data <- data[rownames(mntd_chondri),]
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(mntd_chondri ~ .,df_mem)
+dbrda_full <- capscale(mntd_chondri ~ .,data=df_mem, na.action = na.exclude)
 
 RsquareAdj(dbrda_full)
 anova(dbrda_full)
@@ -57,7 +59,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling and MEM ####
 
-dbrda_part <- capscale(mntd_chondri ~ mean_DHW_1year+mean_SST_1year+neartt+HDI2019+bathy+province+depth_sampling +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mntd_chondri ~ province+pH_mean+Gravity+HDI2019+MarineEcosystemDependency+Corruption_mean+mean_npp_1year+mean_DHW_1year+mean_DHW_5year+dist_to_CT+mean_SST_1year +Condition(MEM2), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -68,9 +70,9 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_DHW_1year", "mean_SST_1year")]
-geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "neartt")]
+env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year", "mean_SST_1year", "mean_npp_1year", "pH_mean")]
+geo_var <- df_mem[, c("dist_to_CT", "depth_sampling")]
+socio_var <- df_mem[,c("HDI2019", "MarineEcosystemDependency", "Gravity", "Corruption_mean")]
 mntd_chondri <- as.dist(mntd_chondri)
 
 
@@ -81,14 +83,14 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.122+0.011+0.023+0.083, 
-                        geography=0.071+0.011+0.023+0.01, 
-                        socioeconomy=0.049+0.083+0.023+0.01)
+partition <- data.frame(environment=0.121+0.037+0.099, 
+                        geography=0.048+0.037+0.01, 
+                        socioeconomy=0.099+0.089+0.1)
 
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
+partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "geography"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+

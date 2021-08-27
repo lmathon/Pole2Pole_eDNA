@@ -57,7 +57,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling and MEM ####
 
-dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+province+HDI2019+NoViolence_mean+MarineEcosystemDependency+pH_mean+depth_sampling+bathy+mean_SST_1year+mean_sss_1year+mean_npp_1year+NGO+Corruption_mean +Condition(volume+sample_method+MEM2+MEM3+MEM1), df_mem) 
+dbrda_part <- capscale(jaccard_motu ~ province+conflicts+HDI2019+NoViolence_mean+MarineEcosystemDependency+pH_mean+depth_sampling+bathy+mean_SST_1year+dist_to_CT+mean_sss_1year+neartt+mean_npp_1year+mean_DHW_1year +Condition(volume+sample_method+MEM2+MEM3+MEM1), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -70,7 +70,7 @@ anova(dbrda_part, by = "margin", permutations = 99)
 #
 env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "pH_mean", "mean_SST_1year", "mean_DHW_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "MarineEcosystemDependency", "Corruption_mean", "NGO", "NoViolence_mean")]
+socio_var <- df_mem[,c("HDI2019", "MarineEcosystemDependency", "NoViolence_mean", "neartt", "conflicts")]
 jaccard_motu <- as.dist(jaccard_motu)
 
 
@@ -81,9 +81,9 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.060+0.002+0.051, 
-                        geography=0.027+0.002+0.005, 
-                        socioeconomy=0.037+0.051+0.005) 
+partition <- data.frame(environment=0.070+0.004+0.041, 
+                        geography=0.025+0.004+0.007, 
+                        socioeconomy=0.038+0.041+0.007) 
 
 
 partition <- as.data.frame(t(partition))

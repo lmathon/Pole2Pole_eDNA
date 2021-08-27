@@ -35,6 +35,8 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
+df_mem <- df_mem[rownames(jaccard_chondri),]
+data <- data[rownames(jaccard_chondri),]
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
@@ -57,8 +59,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling and MEM ####
 
-dbrda_part <- capscale(jaccard_chondri ~ mean_DHW_1year+province+HDI2019+NoViolence_mean+MarineEcosystemDependency+pH_mean+depth_sampling+bathy+mean_SST_1year+mean_sss_1year+mean_npp_1year+NGO+Corruption_mean +Condition(volume+sample_method+MEM2+MEM3+MEM1), df_mem) 
-
+dbrda_part <- capscale(jaccard_chondri ~ pH_mean+mean_SST_1year+mean_npp_1year+province+conflicts+HDI2019+Corruption_mean+dist_to_CT +Condition(volume+MEM1), df_mem)
 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
@@ -68,9 +69,9 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "pH_mean", "mean_SST_1year", "mean_DHW_1year")]
-geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "MarineEcosystemDependency", "Corruption_mean", "NGO", "NoViolence_mean")]
+env_var <- df_mem[,c("mean_npp_1year", "pH_mean", "mean_SST_1year")]
+geo_var <- df_mem[, c("dist_to_CT")]
+socio_var <- df_mem[,c("HDI2019", "Corruption_mean", "conflicts")]
 jaccard_chondri <- as.dist(jaccard_chondri)
 
 
@@ -81,9 +82,9 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.060+0.002+0.051, 
-                        geography=0.027+0.002+0.005, 
-                        socioeconomy=0.037+0.051+0.005) 
+partition <- data.frame(environment=0.038+0.005, 
+                        geography=0.022+0.002, 
+                        socioeconomy=0.032+0.002+0.005) 
 
 
 partition <- as.data.frame(t(partition))

@@ -13,6 +13,7 @@ library(grid)
 library(spdep)
 library(mctest)
 library(ggpubr)
+library(ade4)
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")

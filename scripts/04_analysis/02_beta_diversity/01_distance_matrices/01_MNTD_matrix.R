@@ -88,6 +88,7 @@ df_chondri <- filter(df_filtered, order_name %in% chondri_order | family_name_co
 chondri_motu <- unique(df_chondri$definition)
 
 com_chondri <- com[chondri_motu]
+com_chondri <- com_chondri[rowSums(com_chondri[])>0,]
 
 # compute MNTD
 mntd_chondri <- comdistnt(com_chondri, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
@@ -105,6 +106,7 @@ df_crypto <- filter(df_filtered, order_name %in% cryptic_order | family_name_cor
 crypto_motu <- unique(df_crypto$definition)
 
 com_crypto <- com[crypto_motu]
+com_crypto <- com_crypto[rowSums(com_crypto[])>0,]
 
 # compute MNTD
 mntd_crypto <- comdistnt(com_crypto, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
