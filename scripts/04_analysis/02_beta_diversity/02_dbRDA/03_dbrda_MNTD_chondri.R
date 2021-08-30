@@ -85,12 +85,12 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 partition <- data.frame(environment=0.121+0.037+0.099, 
                         geography=0.048+0.037+0.01, 
-                        socioeconomy=0.099+0.089+0.1)
+                        socioeconomy=0.099+0.089+0.01)
 
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "geography"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
