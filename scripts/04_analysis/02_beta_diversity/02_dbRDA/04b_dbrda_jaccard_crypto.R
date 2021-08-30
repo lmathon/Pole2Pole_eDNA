@@ -35,10 +35,13 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
+df_mem <- df_mem[rownames(jaccard_crypto),]
+data <- data[rownames(jaccard_crypto),]
+
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(jaccard_crypto ~ .,df_mem)
+dbrda_full <- capscale(jaccard_crypto ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_npp_1year+pH_mean+NoViolence_mean+Corruption_mean+HDI2019+neartt+Gravity+NGO+MarineEcosystemDependency+conflicts+province+dist_to_CT+bathy+depth_sampling+distCoast +Condition(sample_method+sequencer+volume+MEM1+MEM2+MEM3+MEM4+MEM5),df_mem)
 
 RsquareAdj(dbrda_full)
 anova(dbrda_full)
@@ -57,7 +60,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling and MEM ####
 
-dbrda_part <- capscale(jaccard_crypto ~ mean_DHW_1year+province+HDI2019+NoViolence_mean+MarineEcosystemDependency+pH_mean+depth_sampling+bathy+mean_SST_1year+mean_sss_1year+mean_npp_1year+NGO+Corruption_mean +Condition(volume+sample_method+MEM2+MEM3+MEM1), df_mem) 
+dbrda_part <- capscale(jaccard_crypto ~ mean_DHW_5year+mean_npp_1year+mean_sss_1year+pH_mean+province+depth_sampling+dist_to_CT+distCoast +Condition(volume+MEM2), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -68,27 +71,26 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "pH_mean", "mean_SST_1year", "mean_DHW_1year")]
-geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "MarineEcosystemDependency", "Corruption_mean", "NGO", "NoViolence_mean")]
+env_var <- df_mem[,c("mean_sss_1year", "mean_npp_1year", "pH_mean", "mean_DHW_5year")]
+geo_var <- df_mem[, c("distCoast", "dist_to_CT", "depth_sampling")]
 jaccard_crypto <- as.dist(jaccard_crypto)
 
 
-varpart_part <- varpart(jaccard_crypto, env_var, geo_var, socio_var)
+varpart_part <- varpart(jaccard_crypto, env_var, geo_var)
 varpart_part
 
-plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
+plot(varpart_part, digits = 2, Xnames = c('environment', 'geography'), bg = c('navy', 'tomato'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.060+0.002+0.051, 
-                        geography=0.027+0.002+0.005, 
-                        socioeconomy=0.037+0.051+0.005) 
+partition <- data.frame(environment=0.063+0.003, 
+                        geography=0.026+0.003, 
+                        socioeconomy=0) 
 
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
+partition$variables2 <- factor(partition$variables, levels = c("environment",  "geography", "socioeconomy"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+

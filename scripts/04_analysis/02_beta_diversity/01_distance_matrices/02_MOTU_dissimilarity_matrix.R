@@ -1,6 +1,7 @@
 library(tidyverse)
 library(ape)
 library(vegan)
+library(ade4)
 
 load("Rdata/03-filter-data.Rdata")
 
@@ -36,6 +37,9 @@ com[com > 1] <- 1
 
 #### calculate dissimilarity matrix with jaccard ####
 jaccard_motu <- as.matrix(vegdist(com, method = "jaccard"))
+jaccard2 <- as.matrix(dist.binary(com, method=1))
+sokal <- as.matrix(dist.binary(com, method=2))
+
 
 save(jaccard_motu, file="Rdata/Jaccard_MOTU_dissimilarity.rdata")
 
@@ -75,7 +79,7 @@ jaccard_chondri <- as.matrix(vegdist(com_chondri, method = "jaccard"))
 
 save(jaccard_chondri, file="Rdata/Jaccard_chondri_dissimilarity.rdata")
 
-#### MNTD on crypto MOTUs ####
+#### Jaccard on crypto MOTUs ####
 cryptic_family <- c("Tripterygiidae", "Grammatidae", "Aploactinidae", "Creediidae", "Gobiidae", "Chaenopsidae", "Gobiesocidae", "Labrisomidae", "Pseudochromidae", "Bythitidae", "Plesiopidae", "Dactyloscopidae", "Blenniidae", "Apogonidae", "Callionymidae", "Opistognathidae", "Syngnathidae", "Kurtidae")
 cryptic_order <- c("Kurtiformes", "Gobiiformes", "Blenniiformes", "Syngnathiformes")
 df_crypto <- filter(df_filtered, order_name %in% cryptic_order | family_name_corrected %in% cryptic_family)

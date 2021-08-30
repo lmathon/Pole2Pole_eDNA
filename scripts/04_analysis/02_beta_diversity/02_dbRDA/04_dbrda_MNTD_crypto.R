@@ -35,6 +35,9 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
+df_mem <- df_mem[rownames(mntd_crypto),]
+data <- data[rownames(mntd_crypto),]
+
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
@@ -57,7 +60,7 @@ mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
 #### partial dbrda correcting for sampling and MEM ####
 
-dbrda_part <- capscale(mntd_crypto ~ mean_DHW_1year+mean_SST_1year+neartt+HDI2019+bathy+province+depth_sampling +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mntd_crypto ~ mean_SST_1year+mean_npp_1year+province+neartt+conflicts+MarineEcosystemDependency+depth_sampling+dist_to_CT +Condition(volume+MEM2), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -68,9 +71,9 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_DHW_1year", "mean_SST_1year")]
-geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("HDI2019", "neartt")]
+env_var <- df_mem[,c("mean_SST_1year", "mean_npp_1year")]
+geo_var <- df_mem[, c("dist_to_CT", "depth_sampling")]
+socio_var <- df_mem[,c("conflicts", "neartt", "MarineEcosystemDependency")]
 mntd_crypto <- as.dist(mntd_crypto)
 
 
@@ -81,9 +84,9 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.122+0.011+0.023+0.083, 
-                        geography=0.071+0.011+0.023+0.01, 
-                        socioeconomy=0.049+0.083+0.023+0.01)
+partition <- data.frame(environment=0.122+0.009+0.006, 
+                        geography=0.052+0.009+0.006+0.014, 
+                        socioeconomy=0.089+0.006+0.014)
 
 
 partition <- as.data.frame(t(partition))
