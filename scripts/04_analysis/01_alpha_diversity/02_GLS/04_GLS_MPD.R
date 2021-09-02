@@ -54,28 +54,13 @@ mrat <- gls(mpd ~ . -latitude_start - longitude_start, correlation = corRatio(fo
 AIC(mexp, mgau, msph, mlin, mrat)
 
 gls.full <- mgau
-summary(gls.full)
-anova(gls.full)
-AIC(gls.full)
-
-# R² for GLS
-mpd_pred <- predict(gls.full)
-fit <- lm(mpd_pred ~ data$mpd)
-RsquareAdj(fit)
-
 
 # remove colinear variables from VIF
 gls.final <- gls(mpd ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-stepAIC(gls.final)
-
-gls.final <- gls(mpd ~ mean_DHW_1year + mean_DHW_5year + mean_sss_1year + mean_SST_1year + 
-                   mean_npp_1year + Corruption_mean + HDI2019 + neartt + Gravity + 
-                   MarineEcosystemDependency + dist_to_CT + bathy + depth_sampling + 
-                   volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 AIC(gls.final)
 summary(gls.final)
-anova(gls.final)
+anova(gls.final, type="marginal")
 
 # R² for GLS
 mpd_pred <- predict(gls.final)
@@ -84,26 +69,18 @@ RsquareAdj(fit)
 
 hist(gls.final$residuals)
 
-visreg(gls.final,"mean_DHW_5year",scale="response")
-visreg(gls.final,"mean_SST_1year",scale="response")
-visreg(gls.final,"mean_sss_1year",scale="response")
-visreg(gls.final,"mean_npp_1year",scale="response")
-visreg(gls.final,"mean_DHW_1year",scale="response")
-visreg(gls.final,"HDI2019",scale="response")
-visreg(gls.final,"neartt",scale="response")
-visreg(gls.final,"Gravity",scale="response")
-visreg(gls.final,"MarineEcosystemDependency",scale="response")
-visreg(gls.final,"dist_to_CT",scale="response")
-visreg(gls.final,"depth_sampling",scale="response")
-visreg(gls.final,"bathy",scale="response")
-visreg(gls.final,"volume",scale="response")
 
+visreg(gls.final,"mean_npp_1year",scale="response")
+visreg(gls.final,"mean_SST_1year",scale="response")
+visreg(gls.final,"mean_DHW_5year",scale="response")
+visreg(gls.final,"bathy",scale="response")
+visreg(gls.final,"mean_DHW_1year",scale="response")
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_DHW_5year","mean_SST_1year","mean_sss_1year", "mean_npp_1year", "mean_DHW_1year")]
-geo_var <- data[, c("dist_to_CT", "depth_sampling","bathy" )]
-socio_var <- data[,c("Corruption_mean","HDI2019","neartt","MarineEcosystemDependency","Gravity")]
+env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
+geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
+socio_var <- data[,c("HDI2019","neartt", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
@@ -112,10 +89,10 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.363+0.130+0.018+0.044+0.005+0.403, 
-                        geography=0.020+0.002+0.001+0.008+0.018+0.130, 
-                        socioeconomy=0.015+0.002+0.130+0.403+0.005+0.018+0.001, 
-                        sampling=0.001+0.001+0.018+0.005+0.044+0.008)
+partition <- data.frame(environment=0.177+0.586+0.037+0.003+0.031+0.067+0.058, 
+                        geography=0.020+0.002+0.01+0.031+0.067+0.058, 
+                        socioeconomy=0.024+0.002+0.067+0.586+0.037+0.031, 
+                        sampling=0.01+0.031+0.037+0.003)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)

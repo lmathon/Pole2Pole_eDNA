@@ -27,9 +27,10 @@ data <- left_join(exp_var_num, rich_station[,c("crypto_MOTUs", "station")], by="
 data <- data %>%
   dplyr::select(-c(station))
 
-hist(data$crypto_MOTUs)
+hist(data$crypto_MOTUs, main = "MOTUs_crypto", xlab ="MOTUs_crypto")
 
 data$crypto_MOTUs <- log1p(data$crypto_MOTUs)
+hist(data$crypto_MOTUs, main = "log(MOTUs_crypto)", xlab ="log(MOTUs_crypto)")
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -59,52 +60,42 @@ mrat <- gls(crypto_MOTUs ~ . -latitude_start - longitude_start, correlation = co
 AIC(mexp, mgau, mlin, msph, mrat)
 
 gls.full <- mgau
-summary(gls.full)
-anova(gls.full)
-AIC(gls.full)
-
-# R² for GLS
-MOTU_pred <- predict(gls.full)
-fit <- lm(MOTU_pred ~ data$crypto_MOTUs)
-RsquareAdj(fit)
-
-
-
 
 # remove colinear variables from VIF
 gls.final <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-stepAIC(gls.final)
 
-gls.final <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+HDI2019+neartt+conflicts+depth_sampling+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-
-AIC(gls.final)
 summary(gls.final)
-anova(gls.final)
+anova(gls.final, type = "marginal")
+AIC(gls.final)
 
-shapiro.test(gls.final$residuals)
-hist(gls.final$residuals)
 
 # R² for GLS
 MOTU_pred <- predict(gls.final)
 fit <- lm(MOTU_pred ~ data$crypto_MOTUs)
 RsquareAdj(fit)
 
+shapiro.test(gls.final$residuals)
+hist(gls.final$residuals)
 
 
-visreg(gls.final,"mean_DHW_1year",scale="response")
+
+
 visreg(gls.final,"mean_DHW_5year",scale="response")
+visreg(gls.final,"mean_sss_1year",scale="response")
+visreg(gls.final,"mean_SST_1year",scale="response")
+visreg(gls.final,"MarineEcosystemDependency",scale="response")
 visreg(gls.final,"HDI2019",scale="response")
 visreg(gls.final,"neartt",scale="response")
 visreg(gls.final,"volume",scale="response")
-visreg(gls.final,"conflicts",scale="response")
+visreg(gls.final,"dist_to_CT",scale="response")
 visreg(gls.final,"depth_sampling",scale="response")
 
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year")]
-geo_var <- data[, c("depth_sampling")]
-socio_var <- data[,c("HDI2019","neartt", "conflicts")]
+env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
+geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
+socio_var <- data[,c("HDI2019","neartt", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
@@ -113,14 +104,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.043+0.243+0.005+0.001, 
-                        geography=0.005+0.005+0.001+0.021+0.07, 
-                        socioeconomy=0.426+0.219+0.07+0.021+0.005+0.243+0.001, 
-                        sampling=0.219+0.021+0.001+0.046)
+partition <- data.frame(environment=0.132+0.219+0.167+0.159+0.082+0.086, 
+                        geography=0.124+0.219+0.159+0.001, 
+                        socioeconomy=0.085+0.018+0.219+0.167+0.082, 
+                        sampling=0.018+0.008+0.159+0.001+0.082+0.086)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "sampling", "geography"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
