@@ -23,7 +23,7 @@ load("Rdata/db_mem.rdata")
 
 data <- exp_var
 df <- data %>%
-  select(-c("station")) # remove station
+  select(-c("station", "province")) # remove station
 df_mem <- cbind(df, dbmem)
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -42,24 +42,11 @@ data <- data[rownames(jaccard_chondri),]
 
 dbrda_full <- capscale(jaccard_chondri ~ .,df_mem)
 
-RsquareAdj(dbrda_full)
-anova(dbrda_full)
-anova(dbrda_full, by = "margin", permutations = 99)
-
-
-
 # check for colinearity and select variables
 mctest::imcdiag(dbrda_full, method="VIF")
 
-# selection variables
-dbrda0 <- capscale(jaccard_chondri ~ 1, df_mem)
-dbrdaG <- capscale(jaccard_chondri ~ ., df_mem)
-mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
-
-
 #### partial dbrda correcting for sampling and MEM ####
-
-dbrda_part <- capscale(jaccard_chondri ~ pH_mean+mean_SST_1year+mean_npp_1year+province+conflicts+HDI2019+Corruption_mean+dist_to_CT +Condition(volume+MEM1), df_mem)
+dbrda_part <- capscale(jaccard_chondri ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem)
 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
@@ -69,22 +56,21 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_npp_1year", "pH_mean", "mean_SST_1year")]
-geo_var <- df_mem[, c("dist_to_CT")]
-socio_var <- df_mem[,c("HDI2019", "Corruption_mean", "conflicts")]
+env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
+geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
+socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "conflicts")]
 jaccard_chondri <- as.dist(jaccard_chondri)
 
 
 varpart_part <- varpart(jaccard_chondri, env_var, geo_var, socio_var)
-varpart_part
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.038+0.005, 
-                        geography=0.022+0.002, 
-                        socioeconomy=0.032+0.002+0.005) 
+partition <- data.frame(environment=0.043+0.023+0.012, 
+                        geography=0.017+0.012+0.015, 
+                        socioeconomy=0.04+0.015+0.023) 
 
 
 partition <- as.data.frame(t(partition))

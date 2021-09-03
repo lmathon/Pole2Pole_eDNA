@@ -39,14 +39,13 @@ attributes(dbmem)$values
 # check with dbrda wich MEM explain the most spatial autocorrelation
 dbrda0 <- capscale(mntd ~ 1, dbmem[,1:15])
 dbrdaG <- capscale(mntd ~ ., dbmem[,1:15])
-mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
 
-RsquareAdj(mem_sel)
+RsquareAdj(dbrdaG)
 
 anova(mem_sel)
 mem_sel$anova
 anova(mem_sel, by = "axis",  permutations = 99)
-anova(mem_sel, by = "margin", permutations = 99)
+anova(dbrdaG, by = "margin", permutations = 99)
 
 
 dbmem <- dbmem[,1:5]

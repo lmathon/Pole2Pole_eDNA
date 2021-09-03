@@ -43,24 +43,11 @@ data <- data[rownames(mntd_crypto),]
 
 dbrda_full <- capscale(mntd_crypto ~ .,df_mem)
 
-RsquareAdj(dbrda_full)
-anova(dbrda_full)
-anova(dbrda_full, by = "margin", permutations = 99)
-
-
-
 # check for colinearity and select variables
 mctest::imcdiag(dbrda_full, method="VIF")
 
-# selection variables
-dbrda0 <- capscale(mntd_crypto ~ 1, df_mem)
-dbrdaG <- capscale(mntd_crypto ~ ., df_mem)
-mem_sel <- ordiR2step(dbrda0, scope = formula(dbrdaG), direction="both")
-
-
 #### partial dbrda correcting for sampling and MEM ####
-
-dbrda_part <- capscale(mntd_crypto ~ mean_SST_1year+mean_npp_1year+province+neartt+conflicts+MarineEcosystemDependency+depth_sampling+dist_to_CT +Condition(volume+MEM2), df_mem) 
+dbrda_part <- capscale(mntd_crypto ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -71,22 +58,21 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_SST_1year", "mean_npp_1year")]
-geo_var <- df_mem[, c("dist_to_CT", "depth_sampling")]
-socio_var <- df_mem[,c("conflicts", "neartt", "MarineEcosystemDependency")]
+env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
+geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
+socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "conflicts")]
 mntd_crypto <- as.dist(mntd_crypto)
 
 
 varpart_part <- varpart(mntd_crypto, env_var, geo_var, socio_var)
-varpart_part
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.122+0.009+0.006, 
-                        geography=0.052+0.009+0.006+0.014, 
-                        socioeconomy=0.089+0.006+0.014)
+partition <- data.frame(environment=0.119+0.031+0.012+0.078, 
+                        geography=0.04+0.031+0.012+0.046, 
+                        socioeconomy=0.069+0.012+0.078+0.046)
 
 
 partition <- as.data.frame(t(partition))
