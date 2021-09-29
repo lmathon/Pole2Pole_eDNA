@@ -62,26 +62,39 @@ AIC(mexp, mgau, msph, mlin, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.final <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
-AIC(gls.final)
-summary(gls.final)
-anova(gls.final, type = "marginal")
+AIC(gls.motus)
+summary(gls.motus)
+anova(gls.motus, type = "marginal")
 
 # R² for GLS
-MOTU_pred <- predict(gls.final)
+MOTU_pred <- predict(gls.motus)
 fit <- lm(MOTU_pred ~ data$MOTUs)
 RsquareAdj(fit)
 
-hist(gls.final$residuals)
+hist(gls.motus$residuals)
 
-visreg(gls.final,"mean_SST_1year",scale="response")
-visreg(gls.final,"dist_to_CT",scale="response")
-visreg(gls.final,"volume",scale="response")
-visreg(gls.final,"Gravity",scale="response")
-visreg(gls.final,"MarineEcosystemDependency",scale="response")
-visreg(gls.final,"neartt",scale="response")
-visreg(gls.final,"mean_sss_1year",scale="response")
+
+fit.grav.motus <- visreg(gls.motus,"Gravity",scale="response")
+save(fit.grav.motus, file="Rdata/fit.grav.motus.rdata")
+fit.SST.motus <- visreg(gls.motus,"mean_SST_1year",scale="response")
+save(fit.SST.motus, file="Rdata/fit.SST.motus.rdata")
+fit.SSS.motus <- visreg(gls.motus,"mean_sss_1year",scale="response")
+save(fit.SSS.motus, file="Rdata/fit.SSS.motus.rdata")
+fit.MED.motus <- visreg(gls.motus,"MarineEcosystemDependency",scale="response")
+save(fit.MED.motus, file="Rdata/fit.MED.motus.rdata")
+fit.CT.motus <- visreg(gls.motus,"dist_to_CT",scale="response")
+save(fit.CT.motus, file="Rdata/fit.CT.motus.rdata")
+fit.coast.motus <- visreg(gls.motus,"distCoast",scale="response")
+save(fit.coast.motus, file="Rdata/fit.coast.motus.rdata")
+fit.vol.motus <- visreg(gls.motus,"volume",scale="response")
+save(fit.vol.motus, file="Rdata/fit.vol.motus.rdata")
+fit.samp.motus <- visreg(gls.motus,"depth_sampling",scale="response")
+save(fit.samp.motus, file="Rdata/fit.samp.motus.rdata")
+fit.DHW.motus <- visreg(gls.motus,"mean_DHW_5year",scale="response")
+save(fit.DHW.motus, file="Rdata/fit.DHW.motus.rdata")
+
 
 
 
@@ -89,23 +102,23 @@ visreg(gls.final,"mean_sss_1year",scale="response")
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019","neartt", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
+socio_var <- data[,c("HDI2019", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
-varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
+varpart <- varpart(gls.motus$fitted, env_var, geo_var, socio_var, samp_var)
 plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.110+0.216+0.084+0.149+0.105+0.013+0.094, 
-                        geography=0.076+0.216+0.026+0.149+0.013+0.051, 
-                        socioeconomy=0.044+0.028+0.026+0.216+0.149+0.084+0.105, 
-                        sampling=0.028+0.027+0.051+0.149+0.105+0.013+0.094)
+partition <- data.frame(environment=0.139+0.004+0.202+0.058+0.091+0.096+0.074+0.107, 
+                        geography=0.086+0.004+0.017+0.202+0.091+0.074+0.062, 
+                        socioeconomy=0.031+0.017+0.202+0.058+0.096+0.091+0.028, 
+                        sampling=0.028+0.028+0.062+0.091+0.096+0.107+0.074)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "geography", "socioeconomy", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+

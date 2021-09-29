@@ -7,7 +7,7 @@ df <- df_filtered %>%
 
 stations <- unique(df$station)
 
-rich_station <- data.frame(station=stations, MOTUs=numeric(length(stations)), Family=numeric(length(stations)), Species=numeric(length(stations)), crypto_MOTUs=numeric(length(stations)), chondri_MOTUs=numeric(length(stations)))
+rich_station <- data.frame(station=stations, MOTUs=numeric(length(stations)), Family=numeric(length(stations)), Species=numeric(length(stations)), crypto_MOTUs=numeric(length(stations)), chondri_MOTUs=numeric(length(stations)), largefish_MOTUs=numeric(length(stations)))
 
 for (i in 1:length(stations)) {
   st <- as.data.frame(df %>%
@@ -56,6 +56,20 @@ for (i in 1:length(stations)) {
   st <- as.data.frame(df_chondri %>%
                         subset(station==stations[[i]]))
   rich_station[i,6] <- n_distinct(st$sequence)
+}
+
+#### Large fish richness ####
+
+load("Rdata/large_families.rdata")
+load("Rdata/large_orders.rdata")
+
+
+df_large <- filter(df_filtered, order_name %in% large_orders | family_name_corrected %in% large_families)
+
+for (i in 1:length(stations)) {
+  st <- as.data.frame(df_large %>%
+                        subset(station==stations[[i]]))
+  rich_station[i,7] <- n_distinct(st$sequence)
 }
 
 

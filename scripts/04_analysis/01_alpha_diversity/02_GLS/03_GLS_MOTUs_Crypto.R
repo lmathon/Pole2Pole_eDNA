@@ -62,52 +62,60 @@ AIC(mexp, mgau, mlin, msph, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.final <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
-summary(gls.final)
-anova(gls.final, type = "marginal")
-AIC(gls.final)
+summary(gls.crypto)
+anova(gls.crypto, type = "marginal")
+AIC(gls.crypto)
 
 
 # R² for GLS
-MOTU_pred <- predict(gls.final)
+MOTU_pred <- predict(gls.crypto)
 fit <- lm(MOTU_pred ~ data$crypto_MOTUs)
 RsquareAdj(fit)
 
-shapiro.test(gls.final$residuals)
-hist(gls.final$residuals)
+shapiro.test(gls.crypto$residuals)
+hist(gls.crypto$residuals)
 
 
 
-
-visreg(gls.final,"mean_DHW_5year",scale="response")
-visreg(gls.final,"mean_sss_1year",scale="response")
-visreg(gls.final,"mean_SST_1year",scale="response")
-visreg(gls.final,"MarineEcosystemDependency",scale="response")
-visreg(gls.final,"HDI2019",scale="response")
-visreg(gls.final,"neartt",scale="response")
-visreg(gls.final,"volume",scale="response")
-visreg(gls.final,"dist_to_CT",scale="response")
-visreg(gls.final,"depth_sampling",scale="response")
+fit.grav.crypto <- visreg(gls.crypto,"Gravity",scale="response")
+save(fit.grav.crypto, file="Rdata/fit.grav.crypto.rdata")
+fit.SST.crypto <- visreg(gls.crypto,"mean_SST_1year",scale="response")
+save(fit.SST.crypto, file="Rdata/fit.SST.crypto.rdata")
+fit.SSS.crypto <- visreg(gls.crypto,"mean_sss_1year",scale="response")
+save(fit.SSS.crypto, file="Rdata/fit.SSS.crypto.rdata")
+fit.MED.crypto <- visreg(gls.crypto,"MarineEcosystemDependency",scale="response")
+save(fit.MED.crypto, file="Rdata/fit.MED.crypto.rdata")
+fit.CT.crypto <- visreg(gls.crypto,"dist_to_CT",scale="response")
+save(fit.CT.crypto, file="Rdata/fit.CT.crypto.rdata")
+fit.coast.crypto <- visreg(gls.crypto,"distCoast",scale="response")
+save(fit.coast.crypto, file="Rdata/fit.coast.crypto.rdata")
+fit.vol.crypto <- visreg(gls.crypto,"volume",scale="response")
+save(fit.vol.crypto, file="Rdata/fit.vol.crypto.rdata")
+fit.samp.crypto <- visreg(gls.crypto,"depth_sampling",scale="response")
+save(fit.samp.crypto, file="Rdata/fit.samp.crypto.rdata")
+fit.DHW.crypto <- visreg(gls.crypto,"mean_DHW_5year",scale="response")
+save(fit.DHW.crypto, file="Rdata/fit.DHW.crypto.rdata")
 
 
 
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019","neartt", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
+socio_var <- data[,c("HDI2019", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
-varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
+varpart <- varpart(gls.crypto$fitted, env_var, geo_var, socio_var, samp_var)
 plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.132+0.219+0.167+0.159+0.082+0.086, 
-                        geography=0.124+0.219+0.159+0.001, 
-                        socioeconomy=0.085+0.018+0.219+0.167+0.082, 
-                        sampling=0.018+0.008+0.159+0.001+0.082+0.086)
+partition <- data.frame(environment=0.164+0.214+0.125+0.140+0.072+0.025+0.099, 
+                        geography=0.130+0.214+0.125+0.025+0.004, 
+                        socioeconomy=0.071+0.018+0.214+0.140+0.125+0.072, 
+                        sampling=0.009+0.018+0.004+0.125+0.072+0.025+0.099)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)

@@ -29,8 +29,8 @@ data <- data %>%
 
 hist(data$chondri_MOTUs, main = "MOTUs_chondri", xlab ="MOTUs_chondri")
 
-data$chondri_MOTUs <- log1p(data$chondri_MOTUs)
-hist(data$chondri_MOTUs, main = "log(MOTUs_chondri)", xlab ="log(MOTUs_chondri)")
+#data$chondri_MOTUs <- log1p(data$chondri_MOTUs)
+#hist(data$chondri_MOTUs, main = "log(MOTUs_chondri)", xlab ="log(MOTUs_chondri)")
 
 
 # join longitude & latitude
@@ -63,51 +63,64 @@ AIC(mexp, mgau, mlin, msph, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.final <- gls(chondri_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.chondri <- gls(chondri_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
-AIC(gls.final)
-summary(gls.final)
-anova(gls.final, type ="marginal")
+AIC(gls.chondri)
+summary(gls.chondri)
+anova(gls.chondri, type ="marginal")
 
-shapiro.test(gls.final$residuals)
-hist(gls.final$residuals)
+shapiro.test(gls.chondri$residuals)
+hist(gls.chondri$residuals)
 
 # R² for GLS
-MOTU_pred <- predict(gls.final)
+MOTU_pred <- predict(gls.chondri)
 fit <- lm(MOTU_pred ~ data$chondri_MOTUs)
 RsquareAdj(fit)
 
 
 
-visreg(gls.final,"Gravity",scale="response")
-visreg(gls.final,"neartt",scale="response")
-visreg(gls.final,"depth_sampling",scale="response")
-visreg(gls.final,"MarineEcosystemDependency",scale="response")
-visreg(gls.final,"mean_sss_1year",scale="response")
-visreg(gls.final,"dist_to_CT",scale="response")
+fit.grav.chondri <- visreg(gls.chondri,"Gravity",scale="response")
+save(fit.grav.chondri, file="Rdata/fit.grav.chondri.rdata")
+fit.SST.chondri <- visreg(gls.chondri,"mean_SST_1year",scale="response")
+save(fit.SST.chondri, file="Rdata/fit.SST.chondri.rdata")
+fit.SSS.chondri <- visreg(gls.chondri,"mean_sss_1year",scale="response")
+save(fit.SSS.chondri, file="Rdata/fit.SSS.chondri.rdata")
+fit.MED.chondri <- visreg(gls.chondri,"MarineEcosystemDependency",scale="response")
+save(fit.MED.chondri, file="Rdata/fit.MED.chondri.rdata")
+fit.CT.chondri <- visreg(gls.chondri,"dist_to_CT",scale="response")
+save(fit.CT.chondri, file="Rdata/fit.CT.chondri.rdata")
+fit.coast.chondri <- visreg(gls.chondri,"distCoast",scale="response")
+save(fit.coast.chondri, file="Rdata/fit.coast.chondri.rdata")
+fit.vol.chondri <- visreg(gls.chondri,"volume",scale="response")
+save(fit.vol.chondri, file="Rdata/fit.vol.chondri.rdata")
+fit.samp.chondri <- visreg(gls.chondri,"depth_sampling",scale="response")
+save(fit.samp.chondri, file="Rdata/fit.samp.chondri.rdata")
+fit.DHW.chondri <- visreg(gls.chondri,"mean_DHW_5year",scale="response")
+save(fit.DHW.chondri, file="Rdata/fit.DHW.chondri.rdata")
+
 
 
 
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019","neartt", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
+socio_var <- data[,c("HDI2019", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
-varpart <- varpart(gls.final$fitted, env_var, geo_var, socio_var, samp_var)
+varpart <- varpart(gls.chondri$fitted, env_var, geo_var, socio_var, samp_var)
 plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.048+0.244+0.140+0.043+0.08+0.036, 
-                        geography=0.131+0.048+0.244+0.043, 
-                        socioeconomy=0.239+0.048+0.244+0.140+0.08+0.043+0.037,
-                        sampling=0.037+0.002+0.043+0.08+0.036)
+partition <- data.frame(environment=0.106+0.055+0.259+0.023+0.055+0.007+0.046, 
+                        geography=0.297+0.031+0.259+0.023+0.007+0.005, 
+                        socioeconomy=0.116+0.031+0.05+0.259+0.023+0.055+0.055,
+                        sampling=0.007+0.05+0.005+0.023+0.055+0.046+0.007)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "geography", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("geography", "socioeconomy", "environment", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
