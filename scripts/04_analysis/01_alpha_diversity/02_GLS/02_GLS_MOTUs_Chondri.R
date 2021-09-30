@@ -29,8 +29,8 @@ data <- data %>%
 
 hist(data$chondri_MOTUs, main = "MOTUs_chondri", xlab ="MOTUs_chondri")
 
-#data$chondri_MOTUs <- log1p(data$chondri_MOTUs)
-#hist(data$chondri_MOTUs, main = "log(MOTUs_chondri)", xlab ="log(MOTUs_chondri)")
+data$chondri_MOTUs <- log1p(data$chondri_MOTUs)
+hist(data$chondri_MOTUs, main = "log(MOTUs_chondri)", xlab ="log(MOTUs_chondri)")
 
 
 # join longitude & latitude
@@ -113,14 +113,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.106+0.055+0.259+0.023+0.055+0.007+0.046, 
-                        geography=0.297+0.031+0.259+0.023+0.007+0.005, 
-                        socioeconomy=0.116+0.031+0.05+0.259+0.023+0.055+0.055,
-                        sampling=0.007+0.05+0.005+0.023+0.055+0.046+0.007)
+partition <- data.frame(environment=0.219+0.074+0.125+0.148+0.037+0.052+0.089+0.011, 
+                        geography=0.070+0.074+0.03+0.125+0.011+0.037+0.089, 
+                        socioeconomy=0.143+0.03+0.011+0.125+0.037+0.148+0.052,
+                        sampling=0.01+0.011+0.037+0.089+0.052+0.011)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("geography", "socioeconomy", "environment", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
