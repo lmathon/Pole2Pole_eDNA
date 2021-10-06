@@ -29,8 +29,8 @@ data <- data %>%
 
 hist(data$chondri_MOTUs, main = "MOTUs_chondri", xlab ="MOTUs_chondri")
 
-data$chondri_MOTUs <- log1p(data$chondri_MOTUs)
-hist(data$chondri_MOTUs, main = "log(MOTUs_chondri)", xlab ="log(MOTUs_chondri)")
+#data$chondri_MOTUs <- log10(data$chondri_MOTUs+1)
+#hist(data$chondri_MOTUs, main = "log10(MOTUs_chondri+1)", xlab ="log10(MOTUs_chondri+1)")
 
 
 # join longitude & latitude
@@ -113,14 +113,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.219+0.074+0.125+0.148+0.037+0.052+0.089+0.011, 
-                        geography=0.070+0.074+0.03+0.125+0.011+0.037+0.089, 
-                        socioeconomy=0.143+0.03+0.011+0.125+0.037+0.148+0.052,
-                        sampling=0.01+0.011+0.037+0.089+0.052+0.011)
+partition <- data.frame(environment=0.106+0.259+0.055+0.055+0.023+0.007+0.046, 
+                        geography=0.297+0.259+0.031+0.023+0.007+0.005, 
+                        socioeconomy=0.116+0.031+0.05+0.259+0.055+0.055+0.023,
+                        sampling=0.007+0.05+0.023+0.055+0.046+0.007+0.005)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("geography", "socioeconomy", "environment", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -129,3 +129,50 @@ ggplot(partition, aes(x=variables2,y = V1))+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 
+
+
+#### Prediction reference ####
+
+# 0 human impact
+
+noimpact <- data %>%
+  dplyr::select("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year", "Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts", "dist_to_CT", "bathy", "depth_sampling", "distCoast", "volume")
+
+noimpact$Corruption_mean <- 2.5
+noimpact$HDI2019 <- 1
+noimpact$Gravity <- 0
+noimpact$MarineEcosystemDependency <- 0
+noimpact$conflicts <- 0
+
+chondri_noimpact <- expm1(predict(gls.chondri, noimpact))
+
+rich_station$chondri_noimpact <- ceiling(chondri_noimpact)
+
+
+# least regional human impact
+
+leastimpact <- exp_var %>%
+  dplyr::select("province", "mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year", "Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts", "dist_to_CT", "bathy", "depth_sampling", "distCoast", "volume")
+
+province <- as.character(unique(exp_var$province))
+
+for (i in 1:length(province)) {
+  df <- exp_var[exp_var$province == province[i],]
+  leastimpact[leastimpact$province == province[i], "Gravity"] <- min(df$Gravity)
+  leastimpact[leastimpact$province == province[i], "conflicts"] <- min(df$conflicts)
+  leastimpact[leastimpact$province == province[i], "MarineEcosystemDependency"] <- min(df$MarineEcosystemDependency)
+  leastimpact[leastimpact$province == province[i], "Corruption_mean"] <- max(df$Corruption_mean)
+  leastimpact[leastimpact$province == province[i], "HDI2019"] <- max(df$HDI2019)
+}
+
+
+chondri_leastimpact <- expm1(predict(gls.chondri, leastimpact))
+
+rich_station$chondri_leastimpact <- ceiling(chondri_leastimpact)
+
+# MOTUs richness prediction by gls
+
+rich_station$chondri_predicted <- ceiling(expm1(MOTU_pred))
+
+
+save(rich_station, file="Rdata/richness_station.rdata")

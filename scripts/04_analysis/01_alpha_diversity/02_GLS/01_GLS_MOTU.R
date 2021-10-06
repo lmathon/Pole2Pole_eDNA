@@ -7,7 +7,7 @@ library(ecospat)
 library(modEvA)
 library(psych)
 library(MASS)
-library(AER)
+library(lmeInfo)
 library(pscl)
 library(spdep)
 library(tidyverse)
@@ -28,9 +28,9 @@ data <- data %>%
   dplyr::select(-c(station))
 
 hist(data$MOTUs, main = "MOTUs", xlab ="MOTUs")
-data$MOTUs <- log1p(data$MOTUs)
+data$MOTUs <- log10(data$MOTUs +1)
 
-hist(data$MOTUs, main = "log(MOTUs)", xlab ="log(MOTUs)")
+hist(data$MOTUs, main = "log10(MOTUs+1)", xlab ="log10(MOTUs+1)")
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -96,8 +96,8 @@ fit.DHW.motus <- visreg(gls.motus,"mean_DHW_5year",scale="response")
 save(fit.DHW.motus, file="Rdata/fit.DHW.motus.rdata")
 
 
-
-
+fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(MOTUs richness +1)", xlab="log10(Gravity +1)")
+save(fit.grav_med.motus, file="Rdata/fit.grav_med.motus.rdata")
 
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
@@ -128,48 +128,3 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 
 
-#### Prediction reference ####
-
-# 0 human impact
-
-noimpact <- data %>%
-  dplyr::select("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year", "Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts", "dist_to_CT", "bathy", "depth_sampling", "distCoast", "volume")
-
-noimpact$Corruption_mean <- 2.5
-noimpact$HDI2019 <- 1
-noimpact$Gravity <- 0
-noimpact$MarineEcosystemDependency <- 0
-noimpact$conflicts <- 0
-
-MOTUs_noimpact <- expm1(predict(gls.motus, noimpact))
-
-rich_station$MOTUs_noimpact <- ceiling(MOTUs_noimpact)
-
-
-# least regional human impact
-
-leastimpact <- exp_var %>%
-  dplyr::select("province", "mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year", "Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts", "dist_to_CT", "bathy", "depth_sampling", "distCoast", "volume")
-
-province <- as.character(unique(exp_var$province))
-
-for (i in 1:length(province)) {
-  df <- exp_var[exp_var$province == province[i],]
-  leastimpact[leastimpact$province == province[i], "Gravity"] <- min(df$Gravity)
-  leastimpact[leastimpact$province == province[i], "conflicts"] <- min(df$conflicts)
-  leastimpact[leastimpact$province == province[i], "MarineEcosystemDependency"] <- min(df$MarineEcosystemDependency)
-  leastimpact[leastimpact$province == province[i], "Corruption_mean"] <- max(df$Corruption_mean)
-  leastimpact[leastimpact$province == province[i], "HDI2019"] <- max(df$HDI2019)
-}
-
-
-MOTUs_leastimpact <- expm1(predict(gls.motus, leastimpact))
-
-rich_station$MOTUs_leastimpact <- ceiling(MOTUs_leastimpact)
-
-# MOTUs richness prediction by gls
-
-rich_station$MOTUs_predicted <- ceiling(MOTU_pred)
-
-
-save(rich_station, file="Rdata/richness_station.rdata")

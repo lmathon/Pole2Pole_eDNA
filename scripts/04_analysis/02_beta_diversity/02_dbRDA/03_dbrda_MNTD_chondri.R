@@ -46,7 +46,7 @@ dbrda_full <- capscale(mntd_chondri ~ .,data=df_mem, na.action = na.exclude)
 mctest::imcdiag(dbrda_full, method="VIF")
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(mntd_chondri ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mntd_chondri ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
@@ -58,7 +58,7 @@ anova(dbrda_part, by = "margin", permutations = 99)
 #
 env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
-socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "conflicts")]
+socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
 mntd_chondri <- as.dist(mntd_chondri)
 
 
@@ -68,9 +68,9 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.096+0.052+0.137, 
-                        geography=0.04+0.052+0.036, 
-                        socioeconomy=0.078+0.036+0.137)
+partition <- data.frame(environment=0.097+0.064+0.136, 
+                        geography=0.038+0.064+0.038, 
+                        socioeconomy=0.067+0.038+0.136)
 
 
 partition <- as.data.frame(t(partition))

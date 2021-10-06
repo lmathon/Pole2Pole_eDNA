@@ -115,4 +115,19 @@ mntd_crypto <- as.matrix(mntd_crypto)
 # save Rdata
 save(mntd_crypto, file="Rdata/MNTD_crypto_pairwise_station.rdata")
 
+#### MNTD Large fish ####
+load("Rdata/large_families.rdata")
+load("Rdata/large_orders.rdata")
+df_large <- filter(df_filtered, order_name %in% large_orders | family_name_corrected %in% large_families)
 
+large_motu <- unique(df_large$definition)
+
+com_large <- com[large_motu]
+com_large <- com_large[rowSums(com_large[])>0,]
+
+# compute MNTD
+mntd_large <- comdistnt(com_large, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
+mntd_large <- as.matrix(mntd_large)
+
+# save Rdata
+save(mntd_large, file="Rdata/MNTD_largefish_pairwise_station.rdata")

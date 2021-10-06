@@ -16,14 +16,14 @@ library(ggpubr)
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/Jaccard_MOTU_dissimilarity.rdata")
+load("Rdata/MNTD_largefish_pairwise_station.rdata")
 load("Rdata/db_mem.rdata")
 
 # transform data
 
 data <- exp_var
 df <- data %>%
-  select(-c("station", "province")) # remove station
+  select(-c("station")) # remove station
 df_mem <- cbind(df, dbmem)
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -35,16 +35,19 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
+df_mem <- df_mem[rownames(mntd_large),]
+data <- data[rownames(mntd_large),]
+
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(jaccard_motu ~ .,df_mem)
+dbrda_full <- capscale(mntd_crypto ~ .,df_mem)
 
 # check for colinearity and select variables
 mctest::imcdiag(dbrda_full, method="VIF")
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+neartt+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mntd_large ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 
 RsquareAdj(dbrda_part)
@@ -57,19 +60,19 @@ anova(dbrda_part, by = "margin", permutations = 99)
 #
 env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
-socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "neartt", "Gravity", "MarineEcosystemDependency", "conflicts")]
-jaccard_motu <- as.dist(jaccard_motu)
+socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
+mntd_large <- as.dist(mntd_large)
 
 
-varpart_part <- varpart(jaccard_motu, env_var, geo_var, socio_var)
+varpart_part <- varpart(mntd_large, env_var, geo_var, socio_var)
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.055+0.007+0.044, 
-                        geography=0.032+0.007+0.006, 
-                        socioeconomy=0.047+0.006+0.044) 
+partition <- data.frame(environment=0.213+0.035+0.009+0.167, 
+                        geography=0.066+0.035+0.009+0.017, 
+                        socioeconomy=0.167+0.055+0.009+0.017)
 
 
 partition <- as.data.frame(t(partition))

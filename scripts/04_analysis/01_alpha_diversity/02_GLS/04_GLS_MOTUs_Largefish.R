@@ -29,8 +29,8 @@ data <- data %>%
 
 hist(data$largefish_MOTUs, main = "MOTUs_largefish", xlab ="MOTUs_largefish")
 
-data$largefish_MOTUs <- log1p(data$largefish_MOTUs)
-hist(data$largefish_MOTUs, main = "log(MOTUs_largefish)", xlab ="log(MOTUs_largefish)")
+data$largefish_MOTUs <- log10(data$largefish_MOTUs+1)
+hist(data$largefish_MOTUs, main = "log10(MOTUs_largefish+1)", xlab ="log10(MOTUs_largefish+1)")
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -97,6 +97,9 @@ fit.samp.large <- visreg(gls.largefish,"depth_sampling",scale="response")
 save(fit.samp.large, file="Rdata/fit.samp.large.rdata")
 fit.DHW.large <- visreg(gls.largefish,"mean_DHW_5year",scale="response")
 save(fit.DHW.large, file="Rdata/fit.DHW.large.rdata")
+
+fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Large fish richness +1)", xlab="lg10(Gravity +1)")
+save(fit.grav_med.large, file="Rdata/fit.grav_med.large.rdata")
 
 
 #### Variation partitioning ####

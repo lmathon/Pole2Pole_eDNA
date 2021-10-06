@@ -29,8 +29,8 @@ data <- data %>%
 
 hist(data$crypto_MOTUs, main = "MOTUs_crypto", xlab ="MOTUs_crypto")
 
-data$crypto_MOTUs <- log1p(data$crypto_MOTUs)
-hist(data$crypto_MOTUs, main = "log(MOTUs_crypto)", xlab ="log(MOTUs_crypto)")
+data$crypto_MOTUs <- log10(data$crypto_MOTUs+1)
+hist(data$crypto_MOTUs, main = "log10(MOTUs_crypto+1)", xlab ="log10(MOTUs_crypto+1)")
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -98,6 +98,8 @@ save(fit.samp.crypto, file="Rdata/fit.samp.crypto.rdata")
 fit.DHW.crypto <- visreg(gls.crypto,"mean_DHW_5year",scale="response")
 save(fit.DHW.crypto, file="Rdata/fit.DHW.crypto.rdata")
 
+fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="lg10(Gravity +1)")
+save(fit.grav_med.crypto, file="Rdata/fit.grav_med.crypto.rdata")
 
 
 #### Variation partitioning ####

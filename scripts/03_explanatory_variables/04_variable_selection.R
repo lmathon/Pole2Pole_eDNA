@@ -64,9 +64,9 @@ hist(log1p(env_var2$mean_DHW_1year), col = "grey")
 hist(log1p(env_var2$mean_DHW_5year), col = "grey")
 
 
-env_var2$mean_DHW_1year <- log1p(env_var2$mean_DHW_1year)
-env_var2$mean_npp_1year <- log1p(env_var2$mean_npp_1year)
-env_var2$mean_DHW_5year <- log1p(env_var2$mean_DHW_5year)
+env_var2$mean_DHW_1year <- log10(env_var2$mean_DHW_1year +1)
+env_var2$mean_npp_1year <- log10(env_var2$mean_npp_1year +1)
+env_var2$mean_DHW_5year <- log10(env_var2$mean_DHW_5year +1)
 
 
 # geographic
@@ -100,8 +100,8 @@ hist(geo_var2$bathy, col="grey")
 hist(geo_var2$depth_sampling, col="grey")
 hist(log1p(geo_var2$distCoast), col="grey")
 
-geo_var2$dist_to_CT <- log1p(geo_var2$dist_to_CT)
-geo_var2$distCoast <- log1p(geo_var2$distCoast)
+geo_var2$dist_to_CT <- log10(geo_var2$dist_to_CT +1)
+geo_var2$distCoast <- log10(geo_var2$distCoast +1)
 
 # sampling
 cor_samp_var <- mixed_assoc(samp_var[,-1]) 
@@ -123,7 +123,7 @@ samp_var2 <- samp_var %>%
 
 hist(log1p(samp_var2$volume), col="grey")
 
-samp_var2$volume <- log1p(samp_var2$volume)
+samp_var2$volume <- log10(samp_var2$volume +1)
 
 # socioeco
 
@@ -145,6 +145,7 @@ socio_var2 <- socio_var %>%
 
 
 hist(socio_var2$HDI2019, col="grey")
+hist(socio_var2$Gravity, col="grey")
 hist(socio_var2$NoViolence_mean, col="grey")
 hist(socio_var2$Corruption_mean, col="grey")
 hist(socio_var2$conflicts, col="grey")
@@ -154,9 +155,9 @@ hist(log1p(socio_var2$NGO), col="grey")
 hist(socio_var2$MarineEcosystemDependency, col="grey")
 
 
-socio_var2$neartt <- log1p(socio_var2$neartt)
-socio_var2$Gravity <- log1p(socio_var2$Gravity)
-socio_var2$NGO <- log1p(socio_var2$NGO)
+socio_var2$neartt <- log10(socio_var2$neartt +1)
+socio_var2$Gravity <- log10(socio_var2$Gravity +1)
+socio_var2$NGO <- log10(socio_var2$NGO+1)
 
 
 # save selected variables

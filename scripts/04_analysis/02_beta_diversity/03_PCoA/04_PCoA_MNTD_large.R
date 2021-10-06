@@ -14,25 +14,25 @@ library(ggpubr)
 library(ade4)
 library(ape)
 
-load("Rdata/Jaccard_chondri_dissimilarity.rdata")
+load("Rdata/MNTD_largefish_pairwise_station.rdata")
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
 meta <- meta %>%
   distinct(station, .keep_all=T)
 rownames(meta) <- meta$station
-meta <- meta[rownames(jaccard_chondri),]
-identical(as.character(rownames(meta)), rownames(jaccard_chondri))
+meta <- meta[rownames(mntd_large),]
+identical(as.character(rownames(meta)), rownames(mntd_large))
 province <- meta$province
 
 
 
 #### PCoA ####
 
-jaccard_chondri <- as.dist(jaccard_chondri)
-pcoa <- dudi.pco(jaccard_chondri)
+mntd_large <- as.dist(mntd_large)
+pcoa <- dudi.pco(mntd_large)
 summary(pcoa)
-CAP1=5.7
-CAP2=5.5
+CAP1=23.6
+CAP2=18.6
 
 plot <- pcoa$li 
 plot$province <- province
@@ -46,7 +46,7 @@ ggplot(plot, aes(x = A1, y=A2))+
                 s_shape = 1, expand = 0, alpha = 0.4, show.legend = TRUE)+
   scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
   labs(x = paste0("PCoA1 (", CAP1, "%)"), y = paste0("PCoA2 (", CAP2, "%)"))+
-  ggtitle("PCoA - Jaccard Chondri")+
+  ggtitle("PCoA - MNTD large fish")+
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
         legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
