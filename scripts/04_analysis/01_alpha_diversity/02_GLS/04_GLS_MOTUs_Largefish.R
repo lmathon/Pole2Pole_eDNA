@@ -16,6 +16,7 @@ library(MuMIn)
 library(rcompanion)
 library(ggpubr)
 library(ggplot2)
+library(effectsize)
 
 
 load("Rdata/richness_station.rdata")
@@ -129,4 +130,12 @@ ggplot(partition, aes(x=variables2,y = V1))+
   ylab("cumulated variance explained")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
+#### effect size ####
+
+large_effectsize <- effectsize(gls.largefish)
+large_effectsize <- large_effectsize[-1,]
+large_effectsize$taxa <- "Large fish"
+large_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+
+save(large_effectsize, file = "Rdata/large_effectsize.rdata")
 

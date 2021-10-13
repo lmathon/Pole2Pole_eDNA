@@ -24,7 +24,7 @@ metadata_sampling <- metadata_sampling %>%
   subset(sample_method!="niskin") %>%
   subset(comment %ni% c("Distance decay 600m", "Distance decay 300m")) %>%
   subset(habitat=="marine") %>%
-  subset(depth<40)
+  subset(depth_sampling<40)
 
 # ---------------------------------------------------------------------------------------------- #
 #                            Some mapping 
