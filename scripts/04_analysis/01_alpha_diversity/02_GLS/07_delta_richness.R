@@ -107,7 +107,6 @@ ggplot(data = delta_rich,
   theme_sleek(base_size = 24) + 
   facet_grid(. ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
   scale_y_continuous(breaks = c(-100,-50,0,50,100)) + 
-  #ylab(expression(delta), "MOTU richness") +
   ylab(expression(paste(Delta,"% MOTU richness")))+
   theme(legend.position = "none", 
         axis.title.y = element_blank(), 

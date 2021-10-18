@@ -1,7 +1,5 @@
 library(ggplot2)
 library(tidyverse)
-install.packages("remotes")
-remotes::install_github("jpwrobinson/funk")
 library(funk)
 
 load("Rdata/motu_effectsize.rdata")

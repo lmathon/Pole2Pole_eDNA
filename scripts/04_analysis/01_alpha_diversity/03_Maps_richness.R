@@ -82,19 +82,14 @@ chondri0 <- ggplot() +
   geom_sf(aes(), data = world, fill = "grey80", col="grey80") + 
   geom_sf(col="grey20", fill = "grey20", size=2, data= df3$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(crs = "+proj=robin") + 
-  labs(fill="Chondrichthyan richness")+
-  ggtitle("46% of stations with 0 Chondrichthyan MOTUs")+
+  xlab("46% of stations with 0 Chondrichthyan MOTUs")+
   theme_minimal() +
   theme(panel.grid.minor = element_line(linetype = "blank"),
         plot.background = element_rect(colour = NA), 
         panel.background = element_blank(),
         panel.border = element_blank(),
-        legend.position = "bottom",
-        legend.title = element_text(size=10),
-        legend.text = element_text(size=8),
-        legend.key.height = unit(3, "mm"),
-        panel.grid.major = element_line(colour = "gray70"),
-        plot.title = element_text(size = 10, face="bold", hjust = 0.5))
+        axis.title.x = element_text(size=12, face = "bold"),
+        panel.grid.major = element_line(colour = "gray70"))
 
 # Crypto richness
 df4 <- data[order(data$crypto_MOTUs),]
@@ -149,20 +144,18 @@ large0 <- ggplot() +
   geom_sf(aes(), data = world, fill = "grey80", col="grey80") + 
   geom_sf(col="grey20", fill = "grey20", size=2, data= df6$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(crs = "+proj=robin") + 
-  labs(fill="Large fish richness")+
-  ggtitle("16% of stations with 0 large fish MOTUs")+
+  xlab("16% of stations with 0 large fish MOTUs")+
   theme_minimal() +
   theme(panel.grid.minor = element_line(linetype = "blank"),
         plot.background = element_rect(colour = NA), 
         panel.background = element_blank(),
         panel.border = element_blank(),
-        legend.position = "bottom",
-        legend.title = element_text(size=10),
-        legend.text = element_text(size=8),
-        legend.key.height = unit(3, "mm"),
         panel.grid.major = element_line(colour = "gray70"),
-        plot.title = element_text(size = 10, face="bold", hjust = 0.5))
+        axis.title.x = element_text(size = 12, face="bold"))
 
 
-ggarrange(MOTUs, crypto, chondri, large, chondri0, large0, nrow=3, ncol=2, labels = c("A", "B", "C", "D", "E", "F"), font.label = list(size=12))
-ggsave("outputs/maps & plot sup/Figure1_maps_richness2.png", width = 8, height = 8)
+ggarrange(MOTUs, crypto, large, large0, nrow=2, ncol=2, labels = c("A", "B", "C", "D"), font.label = list(size=12))
+ggsave("outputs/maps & plot sup/Figure1_maps_richness.png", width = 8, height = 6)
+
+ggarrange(chondri, chondri0, nrow = 1, ncol=2,labels = c("A", "B"), font.label = list(size=12))
+ggsave("outputs/maps & plot sup/chondri_richness_null.png", width = 8, height = 3)
