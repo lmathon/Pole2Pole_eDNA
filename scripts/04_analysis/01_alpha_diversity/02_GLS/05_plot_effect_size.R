@@ -18,9 +18,9 @@ effectsize$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize$Paramete
 effectsize$Parameter <- gsub("distCoast", "distance to shore", effectsize$Parameter)
 effectsize$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize$Parameter)
 
-color <- c("black", "black","red", "red", "black", "black", "red", "red", "red", "red", "red", "black", "black", "red", "red",
-           "black", "dodgerblue4", "dodgerblue4", "dodgerblue4", "dodgerblue4", "black", "dodgerblue4", "black", "dodgerblue4", "black", "dodgerblue4", "black", "dodgerblue4", "black", "dodgerblue4",
-           "black", "black", "forestgreen", "forestgreen", "forestgreen", "black", "black", "forestgreen", "forestgreen", "black", "forestgreen", "forestgreen", "black", "forestgreen","forestgreen")
+color <- c("black", "black","forestgreen", "forestgreen", "black", "black", "red", "red", "red", "red", "red", "black", "black", "red", "forestgreen",
+           "black", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "black", "red", "black", "red", "black", "red", "black", "forestgreen", "black", "forestgreen",
+           "black", "black", "forestgreen", "forestgreen", "forestgreen", "black", "black", "red", "red", "black", "red", "forestgreen", "black", "red","forestgreen")
 
 effectsize <- effectsize %>%
   mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))

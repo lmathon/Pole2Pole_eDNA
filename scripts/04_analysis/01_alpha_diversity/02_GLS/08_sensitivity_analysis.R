@@ -171,16 +171,16 @@ delta_rich_fin <- bind_rows(delta_rich_fin)
 delta_rich_fin <- delta_rich_fin %>%
   mutate(across(variable, factor, levels=c("Gravity + MED","Marine Ecosystem Dependency","Gravity")))
 
-color <- c("red", "black", "forestgreen", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "forestgreen", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "black", "red", "dodgerblue4", "black", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "black", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "black", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "black", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "black", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "forestgreen", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "forestgreen", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen",
-           "red", "black", "forestgreen", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen")
+color <- c("red", "black", "black", "red", "red", "red", "red", "red", "red",
+           "red", "black", "black", "red", "red", "black", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "black", "red", "red", "black", "red", "red", "red",
+           "red", "black", "red", "red", "red", "red", "red", "red", "red",
+           "red", "black", "black", "red", "red", "red", "red", "red", "red")
 
 ggplot(data = delta_rich_fin, 
        aes(x = variable, y = delta)) +
@@ -205,7 +205,7 @@ ggsave("outputs/GLS/delta_socio_sensitivity.png", width=6.5, height = 2)
 
 save(delta_rich_fin, file = "Rdata/delta_richness_sensitivity.rdata")
 
-#### effect size x5 ####
+#### effect size x10 ####
 
 
 effectsize_fin <- bind_rows(effectsize_fin)

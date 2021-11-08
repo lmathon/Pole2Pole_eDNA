@@ -1,6 +1,7 @@
 library(funk)
 library(vegan)
 library(ade4)
+library(lme4)
 library(DHARMa)
 library(car)
 library(visreg)
@@ -40,7 +41,7 @@ meta <- meta %>%
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
-coor <- meta[, c("longitude_start", "latitude_start")]
+coor <- meta[, c("longitude_start", "latitude_start", "province")]
 data <- cbind(data, coor)
 
 

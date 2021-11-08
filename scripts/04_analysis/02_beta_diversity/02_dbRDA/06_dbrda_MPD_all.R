@@ -17,7 +17,7 @@ library(ade4)
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/MNTD_pairwise_station.rdata")
+load("Rdata/MPD_pairwise_station.rdata")
 load("Rdata/db_mem.rdata")
 
 # transform data
@@ -39,14 +39,14 @@ data <- cbind(data, coor)
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(mntd ~ .,df_mem)
+dbrda_full <- capscale(mpd ~ .,df_mem)
 
 # check for colinearity and select variables
 mctest::imcdiag(dbrda_full, method="VIF")
 
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mpd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 
 
@@ -61,10 +61,10 @@ anova(dbrda_part, by = "margin", permutations = 99)
 env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
 socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
-mntd <- as.dist(mntd)
+mpd <- as.dist(mpd)
 
 
-varpart_part <- varpart(mntd, env_var, geo_var, socio_var)
+varpart_part <- varpart(mpd, env_var, geo_var, socio_var)
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
@@ -73,7 +73,7 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 partition <- data.frame(environment=0.159+0.046+0.022+0.180, 
                         geography=0.080+0.046+0.022+0.003, 
                         socioeconomy=0.080+0.180+0.022+0.003)
-                        
+
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -112,7 +112,7 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
   #geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
   #              alpha = 0.4, show.legend = TRUE) + # hull area 
-  geom_point(aes(col = MarineEcosystemDependency), cex = 2, show.legend = T) +
+  geom_point(aes(col = mean_SST_1year), cex = 2, show.legend = T) +
   scale_color_gradient(low="blue", high="red")+
   #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
   geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
@@ -138,4 +138,4 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
 
-ggsave("outputs/dbRDA/MNTD_all/dbrda_MED.png")
+ggsave("outputs/dbRDA/MPD_all/dbrda_SST.png")

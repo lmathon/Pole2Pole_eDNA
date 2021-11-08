@@ -46,7 +46,7 @@ data <- cbind(data, coor)
 
 data <- data %>%
   filter(province %ni% c("Scotia_Sea", "Arctic")) %>%
-  select(-province)
+  dplyr::select(-province)
   
   # GLS MOTUs
   
@@ -167,7 +167,7 @@ data <- data %>%
 delta_rich_fin <- delta_rich_fin %>%
   mutate(across(variable, factor, levels=c("Gravity + MED","Marine Ecosystem Dependency","Gravity")))
 
-color <- c("red", "black", "forestgreen", "black", "black", "black", "red", "dodgerblue4", "forestgreen")
+color <- c("red", "black", "red", "black", "black", "black", "red", "red", "red")
 
 ggplot(data = delta_rich_fin, 
        aes(x = variable, y = delta)) +
@@ -191,7 +191,7 @@ ggplot(data = delta_rich_fin,
 ggsave("outputs/GLS/delta_socio_without_poles.png", width=6.5, height = 2)
 
 
-#### effect size x5 ####
+#### effect size ####
 
 effectsize_fin$vargroup <- gsub("socio", "Socio-economy", effectsize_fin$vargroup)
 effectsize_fin$vargroup <- gsub("environment", "Environment", effectsize_fin$vargroup)

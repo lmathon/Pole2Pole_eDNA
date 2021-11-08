@@ -95,7 +95,7 @@ delta_rich[9,"CI_low"] <- NA
 delta_rich <- delta_rich %>%
   mutate(across(variable, factor, levels=c("Gravity + MED","Marine Ecosystem Dependency","Gravity")))
 
-color <- c("red", "black", "black", "red", "dodgerblue4", "forestgreen", "red", "dodgerblue4", "forestgreen")
+color <- c("red", "black", "black", "red", "red", "red", "red", "red", "red")
 
 ggplot(data = delta_rich, 
        aes(x = variable, y = delta)) +

@@ -19,10 +19,10 @@ gravity <- ggplot() +
   #geom_ribbon(data=fit.grav.chondri$fit, aes(x=Gravity, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.grav.large$fit, aes(Gravity, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.grav.large$fit, aes(x=Gravity, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=3.5, y=2, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=3.5, y=2, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=3.5, y=2, label="Chondri", hjust=1, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=3.5, y=1.85, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
-  annotate(geom="text", x=3.5, y=1.7, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=3.5, y=1.85, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=3.5, y=1.7, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
   labs(x="log10(Gravity+1)", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -81,10 +81,10 @@ sss <- ggplot() +
   #geom_ribbon(data=fit.SSS.chondri$fit, aes(x=mean_sss_1year, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.SSS.large$fit, aes(mean_sss_1year, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.SSS.large$fit, aes(x=mean_sss_1year, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=31.25, y=2, label="all MOTUs", hjust=0, size=4, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=31.25, y=2, label="all MOTUs", hjust=0, size=4, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=31.25, y=4, label="Chondri", hjust=0, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=31.25, y=1.9, label="Crypto", hjust=0, size=4, color="navy", fontface = "bold")+
-  annotate(geom="text", x=31.25, y=1.8, label="Large fish", hjust=0, size=4, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=31.25, y=1.9, label="Crypto", hjust=0, size=4, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=31.25, y=1.8, label="Large fish", hjust=0, size=4, color="darkgreen", fontface = "bold")+
   labs(x="mean SSS", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -112,10 +112,10 @@ med <- ggplot() +
   #geom_ribbon(data=fit.MED.chondri$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.MED.large$fit, aes(MarineEcosystemDependency, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.MED.large$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=0.4, y=2, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=0.4, y=2, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=0.4, y=4, label="Chondri", hjust=1, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=0.4, y=1.88, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
-  annotate(geom="text", x=0.4, y=1.76, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=0.4, y=1.88, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=0.4, y=1.76, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
   labs(x="Marine Ecosystem Dependency", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -143,10 +143,10 @@ distCT <- ggplot() +
   #geom_ribbon(data=fit.CT.chondri$fit, aes(x=dist_to_CT, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.CT.large$fit, aes(dist_to_CT, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.CT.large$fit, aes(x=dist_to_CT, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=4.2, y=2.5, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=4.2, y=2.5, label="all MOTUs", hjust=1, size=3, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=9.6, y=5, label="Chondri", hjust=1, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=4.2, y=2.35, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
-  annotate(geom="text", x=4.2, y=2.2, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=4.2, y=2.35, label="Crypto", hjust=1, size=3, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=4.2, y=2.2, label="Large fish", hjust=1, size=3, color="darkgreen", fontface = "bold")+
   labs(x="log10(Distance to Coral Triangle (km) +1)", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -174,10 +174,10 @@ distcoast <- ggplot() +
   #geom_ribbon(data=fit.coast.chondri$fit, aes(x=distCoast, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.coast.large$fit, aes(distCoast, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.coast.large$fit, aes(x=distCoast, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=5.5, y=2, label="all MOTUs", hjust=1, size=4, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=5.5, y=2, label="all MOTUs", hjust=1, size=4, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=13, y=4.3, label="Chondri", hjust=1, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=5.5, y=1.9, label="Crypto", hjust=1, size=4, color="navy", fontface = "bold")+
-  annotate(geom="text", x=5.5, y=1.8, label="Large fish", hjust=1, size=4, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=5.5, y=1.9, label="Crypto", hjust=1, size=4, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=5.5, y=1.8, label="Large fish", hjust=1, size=4, color="darkgreen", fontface = "bold")+
   labs(x="log10(Distance to coast (m) +1)", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -268,10 +268,10 @@ dhw5 <- ggplot() +
   #geom_ribbon(data=fit.DHW.chondri$fit, aes(x=mean_DHW_5year, ymin=visregLwr, ymax=visregUpr), fill='orange', alpha=.2)+
   geom_line(data=fit.DHW.large$fit, aes(mean_DHW_5year, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.DHW.large$fit, aes(x=mean_DHW_5year, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=0, y=2, label="all MOTUs", hjust=0, size=3, color="darkred", fontface = "bold")+
+  #annotate(geom="text", x=0, y=2, label="all MOTUs", hjust=0, size=3, color="darkred", fontface = "bold")+
   #annotate(geom="text", x=0, y=4.3, label="Chondri", hjust=0, size=4, color="orange", fontface = "bold")+
-  annotate(geom="text", x=0, y=1.88, label="Crypto", hjust=0, size=3, color="navy", fontface = "bold")+
-  annotate(geom="text", x=0, y=1.76, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
+  #annotate(geom="text", x=0, y=1.88, label="Crypto", hjust=0, size=3, color="navy", fontface = "bold")+
+  #annotate(geom="text", x=0, y=1.76, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
   labs(x="log10(mean DHW 5year +1)", y="log10(MOTUs richness+1)")+
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -283,7 +283,7 @@ ggsave("outputs/GLS/visreg_DHW5.png", height = 5, width = 5)
 
 #### plot all together ####
 
-ggarrange(sst, dhw5, gravity, med, distCT, volume, nrow=3, ncol=2, labels = c("A", "B", "C", "D", "E", "F"))
+ggarrange(sst, sss, dhw5, gravity, med, distCT, nrow=3, ncol=2, labels = c("A", "B", "C", "D", "E", "F"))
 ggsave("outputs/GLS/visreg_multiple.png", width = 7, height = 10)
 
 

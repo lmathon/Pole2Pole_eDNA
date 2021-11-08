@@ -58,7 +58,18 @@ mntd <- as.matrix(mntd)
 
 save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
 
-# plot distance matrix
+
+#### MPD between pairs of stations ####
+mpd <- comdist(com, dist_gen, abundance.weighted = FALSE)
+mpd <- as.matrix(mpd)
+
+
+# save Rdata
+
+save(mpd, file="Rdata/MPD_pairwise_station.rdata")
+
+
+##### plot distance matrix ####
 
 dissplot(mntd, method=NA, 
          upper_tri = TRUE, 

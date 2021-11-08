@@ -13,10 +13,11 @@ library(grid)
 library(spdep)
 library(mctest)
 library(ggpubr)
+library(ade4)
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
-load("Rdata/MNTD_chondri_pairwise_station.rdata")
+load("Rdata/Jaccard_MOTU_dissimilarity.rdata")
 load("Rdata/db_mem.rdata")
 
 # transform data
@@ -35,18 +36,19 @@ identical(as.character(rownames(meta)), rownames(data))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 
-df_mem <- df_mem[rownames(mntd_chondri),]
-data <- data[rownames(mntd_chondri),]
 #---------------------------------------------------------------------------------------------------------------------------
 #### Full model ####
 
-dbrda_full <- capscale(mntd_chondri ~ .,data=df_mem, na.action = na.exclude)
+dbrda_full <- capscale(jaccard_motu ~ .,df_mem)
 
 # check for colinearity and select variables
 mctest::imcdiag(dbrda_full, method="VIF")
 
+
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(mntd_chondri ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+
+
 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
@@ -59,18 +61,18 @@ anova(dbrda_part, by = "margin", permutations = 99)
 env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
 socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
-mntd_chondri <- as.dist(mntd_chondri)
+jaccard_motus <- as.dist(jaccard_motus)
 
 
-varpart_part <- varpart(mntd_chondri, env_var, geo_var, socio_var)
+varpart_part <- varpart(jaccard_motus, env_var, geo_var, socio_var)
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.097+0.064+0.136, 
-                        geography=0.038+0.064+0.038, 
-                        socioeconomy=0.067+0.038+0.136)
+partition <- data.frame(environment=0.159+0.046+0.022+0.180, 
+                        geography=0.080+0.046+0.022+0.003, 
+                        socioeconomy=0.080+0.180+0.022+0.003)
 
 
 partition <- as.data.frame(t(partition))
@@ -108,10 +110,11 @@ station_scores_met <- cbind(station_scores, data)
 grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
-                alpha = 0.4, show.legend = TRUE) + # hull area 
-  geom_point(col = "black", cex = 1, show.legend = F) +
-  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
+  #geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
+  #              alpha = 0.4, show.legend = TRUE) + # hull area 
+  geom_point(cex = 2, show.legend = T, aes(col=MarineEcosystemDependency)) +
+  scale_color_gradient(low="blue", high="red")+
+  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
   geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # all variables
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
@@ -125,14 +128,15 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
                    fill = alpha(c("white"),0),
                    show.legend = F) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
-       title = "") +
+       title = "MOTUs composition dissimilarity") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
         legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
-        legend.title = element_blank(),
+        #legend.title = element_blank(),
         legend.text = element_text(size=9),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
 grda_station
 
+ggsave("outputs/dbRDA/Jaccard_all/dbrda_MED.png")
