@@ -107,12 +107,12 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
 
-grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_MOTUs_SST <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
   #geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
   #              alpha = 0.4, show.legend = TRUE) + # hull area 
-  geom_point(cex = 2, show.legend = T, aes(col=MarineEcosystemDependency)) +
+  geom_point(cex = 2, show.legend = T, aes(col=mean_SST_1year)) +
   scale_color_gradient(low="blue", high="red")+
   #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
   geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
@@ -128,15 +128,17 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
                    fill = alpha(c("white"),0),
                    show.legend = F) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
-       title = "MOTUs composition dissimilarity") +
+       title = "") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
-        legend.position = "right",             # position in top left corner
+        legend.position = "bottom",             # position in top left corner
         legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
-        #legend.title = element_blank(),
+        legend.title = element_text(),
         legend.text = element_text(size=9),
+        legend.key.height = unit(0.2, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-grda_station
+dbrda_MOTUs_SST
 
 ggsave("outputs/dbRDA/Jaccard_all/dbrda_MED.png")
+save(dbrda_MOTUs_SST, file="Rdata/dbrda_MOTUs_SST.rdata")

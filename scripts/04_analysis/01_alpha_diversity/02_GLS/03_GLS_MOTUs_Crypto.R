@@ -135,7 +135,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 crypto_effectsize <- effectsize(gls.crypto)
 crypto_effectsize <- crypto_effectsize[-1,]
-crypto_effectsize$taxa <- "Cryptobenthics"
+crypto_effectsize$taxa <- "Richness - Cryptobenthics"
 crypto_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(crypto_effectsize, file = "Rdata/crypto_effectsize.rdata")

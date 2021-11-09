@@ -135,7 +135,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 large_effectsize <- effectsize(gls.largefish)
 large_effectsize <- large_effectsize[-1,]
-large_effectsize$taxa <- "Large fish"
+large_effectsize$taxa <- "Richness - Large fish"
 large_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(large_effectsize, file = "Rdata/large_effectsize.rdata")

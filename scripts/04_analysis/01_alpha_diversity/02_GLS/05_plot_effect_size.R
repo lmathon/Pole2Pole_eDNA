@@ -3,10 +3,11 @@ library(tidyverse)
 library(funk)
 
 load("Rdata/motu_effectsize.rdata")
+load("Rdata/mpd_effectsize.rdata")
 load("Rdata/crypto_effectsize.rdata")
 load("Rdata/large_effectsize.rdata")
 
-effectsize <- rbind(motus_effectsize, crypto_effectsize, large_effectsize)
+effectsize <- rbind(motus_effectsize, MPD_effectsize, crypto_effectsize, large_effectsize)
 
 
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
@@ -19,6 +20,7 @@ effectsize$Parameter <- gsub("distCoast", "distance to shore", effectsize$Parame
 effectsize$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize$Parameter)
 
 color <- c("black", "black","forestgreen", "forestgreen", "black", "black", "red", "red", "red", "red", "red", "black", "black", "red", "forestgreen",
+           "red", "forestgreen","black", "forestgreen", "forestgreen", "black", "black", "black", "forestgreen", "black", "forestgreen", "forestgreen", "black", "black", "red",
            "black", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "black", "red", "black", "red", "black", "red", "black", "forestgreen", "black", "forestgreen",
            "black", "black", "forestgreen", "forestgreen", "forestgreen", "black", "black", "red", "red", "black", "red", "forestgreen", "black", "red","forestgreen")
 
@@ -39,7 +41,7 @@ ggplot(data = effectsize,
   theme(legend.position = "none", 
         axis.title.y = element_blank(), 
         axis.title.x = element_text(size = 12),
-        strip.text.x = element_text(size=12,face="bold"),
+        strip.text.x = element_text(size=10,face="bold"),
         strip.text.y = element_text(size=10,face="bold"),
         strip.placement = "outside")
 

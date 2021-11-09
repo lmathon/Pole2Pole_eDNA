@@ -133,7 +133,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 motus_effectsize <- effectsize(gls.motus)
 motus_effectsize <- motus_effectsize[-1,]
-motus_effectsize$taxa <- "all MOTUs"
+motus_effectsize$taxa <- "Richness - all MOTUs"
 motus_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(motus_effectsize, file = "Rdata/motu_effectsize.rdata")

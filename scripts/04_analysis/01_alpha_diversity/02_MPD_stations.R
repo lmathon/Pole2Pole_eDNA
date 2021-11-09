@@ -50,11 +50,10 @@ com[is.na(com)] <- 0
 
 #### calculate MPD for each stations ####
 
-MPD_stations <- mpd(com, dist_gen, abundance.weighted = FALSE)
+MPD_stations <- ses.mpd(com, dist_gen, abundance.weighted = FALSE, null.model = "trialswap", runs = 999, iterations = 100)
 
-mpd_stations <- data.frame(station=stations, MPD=MPD_stations)
+mpd_stations <- data.frame(station=stations, MPD=MPD_stations$mpd.obs)
 save(mpd_stations, file="Rdata/MPD_station.rdata")
 
-# save Rdata
 
-save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
+
