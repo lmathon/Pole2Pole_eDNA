@@ -90,6 +90,7 @@ delta_rich[9,"delta"] <- (10^(fit_large[99,99]) - 10^(fit_large[1,1]))*100 / 10^
 delta_rich[9,"CI_high"] <- NA
 delta_rich[9,"CI_low"] <- NA
 
+save(delta_rich, file="Rdata/delta_richness.rdata")
 
 #### plot ####
 delta_rich <- delta_rich %>%

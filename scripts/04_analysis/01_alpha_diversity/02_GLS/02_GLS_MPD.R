@@ -110,14 +110,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.139+0.004+0.202+0.058+0.091+0.096+0.074+0.107, 
-                        geography=0.086+0.004+0.017+0.202+0.091+0.074+0.062, 
-                        socioeconomy=0.031+0.017+0.202+0.058+0.096+0.091+0.028, 
-                        sampling=0.028+0.028+0.062+0.091+0.096+0.107+0.074)
+partition <- data.frame(environment=0.197+0.116+0.661+0.006, 
+                        geography=0.073+0.116+0.201, 
+                        socioeconomy=0.033+0.011+0.661, 
+                        sampling=0.011+0.022+0.201+0.006)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "geography", "socioeconomy", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy","geography",  "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+

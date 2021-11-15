@@ -45,4 +45,4 @@ ggplot(data = effectsize,
         strip.text.y = element_text(size=10,face="bold"),
         strip.placement = "outside")
 
-ggsave("outputs/GLS/effect_size.png", width = 6, height = 6.5)
+ggsave("outputs/GLS/effect_size.png", width = 10, height = 6.5)

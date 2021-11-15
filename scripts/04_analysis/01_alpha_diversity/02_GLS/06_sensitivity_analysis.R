@@ -19,20 +19,18 @@ library(ggpubr)
 library(ggplot2)
 library(effectsize)
 
-'%ni%' <- Negate("%in%")
-
 load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data <- left_join(exp_var_num, rich_station, by="station")
-data <- data %>%
+data_init <- left_join(exp_var_num, rich_station, by="station")
+data_init <- data_init %>%
   dplyr::select(-c(station))
 
-data$MOTUs <- log10(data$MOTUs +1)
-data$crypto_MOTUs <- log10(data$crypto_MOTUs +1)
-data$largefish_MOTUs <- log10(data$largefish_MOTUs +1)
+data_init$MOTUs <- log10(data_init$MOTUs +1)
+data_init$crypto_MOTUs <- log10(data_init$crypto_MOTUs +1)
+data_init$largefish_MOTUs <- log10(data_init$largefish_MOTUs +1)
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -41,12 +39,17 @@ meta <- meta %>%
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
-coor <- meta[, c("longitude_start", "latitude_start","province")]
-data <- cbind(data, coor)
+coor <- meta[, c("longitude_start", "latitude_start")]
+data_init <- cbind(data_init, coor)
 
-data <- data %>%
-  filter(province %ni% c("Scotia_Sea", "Arctic")) %>%
-  dplyr::select(-province)
+delta_rich_fin <- vector("list", 10)
+effectsize_fin <- vector("list", 10)
+
+for (i in 1:10) {
+  # select 80%
+  
+  data <- data_init %>%
+    sample_frac(0.8)
   
   # GLS MOTUs
   
@@ -87,7 +90,7 @@ data <- data %>%
   large_effectsize$taxa <- "Large fish"
   large_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
   
-  effectsize_fin <- as.data.frame(rbind(motus_effectsize, crypto_effectsize, large_effectsize))
+  effectsize_fin[[i]] <- as.data.frame(rbind(motus_effectsize, crypto_effectsize, large_effectsize))
   
   # delta richness 
   delta_rich <- data.frame(taxa=character(), vargroup=character(), variable=character(), delta=numeric(), CI_low=numeric(), CI_high=numeric())
@@ -158,40 +161,22 @@ data <- data %>%
   delta_rich[9,"CI_high"] <- NA
   delta_rich[9,"CI_low"] <- NA
   
-  delta_rich_fin <- as.data.frame(delta_rich)
-
+  delta_rich_fin[[i]] <- as.data.frame(delta_rich)
+}
 
 #### delta richness ####
 
+delta_rich_fin <- bind_rows(delta_rich_fin)
 
 delta_rich_fin <- delta_rich_fin %>%
   mutate(across(variable, factor, levels=c("Gravity + MED","Marine Ecosystem Dependency","Gravity")))
 
-color <- c("red", "black", "red", "black", "black", "black", "red", "red", "red")
+save(delta_rich_fin, file = "Rdata/delta_richness_sensitivity.rdata")
 
-ggplot(data = delta_rich_fin, 
-       aes(x = variable, y = delta)) +
-  geom_hline(aes(yintercept = 0), colour = "black") + 
-  geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
-                colour = "black", size = 0.5, width = 0) +
-  geom_point(size = 2, col=color) +
-  coord_flip() + 
-  ylim(-110, 150)+
-  theme_sleek(base_size = 24) + 
-  facet_grid(. ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
-  #scale_y_continuous(breaks = c(-100,-50,0,50,100)) + 
-  ylab(expression(paste(Delta,"% MOTU richness")))+
-  theme(legend.position = "none", 
-        axis.title.y = element_blank(), 
-        axis.title.x = element_text(size = 12),
-        strip.text.x = element_text(size=10,face="bold"),
-        strip.text.y = element_text(size=10,face="bold"),
-        strip.placement = "outside")
-
-ggsave("outputs/GLS/delta_socio_without_poles.png", width=6.5, height = 2)
+#### effect size x10 ####
 
 
-#### effect size ####
+effectsize_fin <- bind_rows(effectsize_fin)
 
 effectsize_fin$vargroup <- gsub("socio", "Socio-economy", effectsize_fin$vargroup)
 effectsize_fin$vargroup <- gsub("environment", "Environment", effectsize_fin$vargroup)
@@ -205,22 +190,4 @@ effectsize_fin$Parameter <- gsub("depth_sampling", "depth of sampling", effectsi
 effectsize_fin <- effectsize_fin %>%
   mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))
 
-ggplot(data = effectsize_fin, 
-       aes(x = Parameter, y = Std_Coefficient)) +
-  geom_hline(aes(yintercept = 0), colour = "black") + 
-  geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
-                colour = "black", size = 0.5, width = 0) +
-  geom_point(size = 2) +
-  coord_flip() + 
-  theme_sleek(base_size = 24) + 
-  facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
-  scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
-  ylab("Standardized effect size") +
-  theme(legend.position = "none", 
-        axis.title.y = element_blank(), 
-        axis.title.x = element_text(size = 12),
-        strip.text.x = element_text(size=12,face="bold"),
-        strip.text.y = element_text(size=10,face="bold"),
-        strip.placement = "outside")
-
-ggsave("outputs/GLS/effect_size_without_poles.png", width = 6, height = 6.5)
+save(effectsize_fin, file = "Rdata/effect_size_sensitivity.rdata")
