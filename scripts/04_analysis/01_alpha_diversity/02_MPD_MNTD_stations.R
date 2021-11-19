@@ -56,4 +56,11 @@ mpd_stations <- data.frame(station=stations, MPD=MPD_stations$mpd.obs)
 save(mpd_stations, file="Rdata/MPD_station.rdata")
 
 
+#### calculate MNTD for each stations ####
+
+mntd_stations <- ses.mntd(com, dist_gen, abundance.weighted = FALSE, null.model = "trialswap", runs = 999, iterations = 100)
+
+mntd_stations <- data.frame(station=stations, MNTD=mntd_stations)
+save(mntd_stations, file="Rdata/MNTD_station.rdata")
+
 

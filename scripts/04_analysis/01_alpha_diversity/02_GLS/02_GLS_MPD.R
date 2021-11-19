@@ -130,7 +130,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 MPD_effectsize <- effectsize(gls.MPD)
 MPD_effectsize <- MPD_effectsize[-1,]
-MPD_effectsize$taxa <- "MPD - all MOTUs"
+MPD_effectsize$taxa <- "MPD"
 MPD_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(MPD_effectsize, file = "Rdata/mpd_effectsize.rdata")

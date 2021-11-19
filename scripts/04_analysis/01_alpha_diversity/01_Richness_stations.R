@@ -7,7 +7,7 @@ df <- df_filtered %>%
 
 stations <- unique(df$station)
 
-rich_station <- data.frame(station=stations, MOTUs=numeric(length(stations)), Family=numeric(length(stations)), Species=numeric(length(stations)), crypto_MOTUs=numeric(length(stations)), chondri_MOTUs=numeric(length(stations)), largefish_MOTUs=numeric(length(stations)))
+rich_station <- data.frame(station=stations, MOTUs=numeric(length(stations)), Family=numeric(length(stations)), Species=numeric(length(stations)), crypto_MOTUs=numeric(length(stations)), chondri_MOTUs=numeric(length(stations)), largefish_MOTUs=numeric(length(stations)), predator_MOTUs=numeric(length(stations)))
 
 for (i in 1:length(stations)) {
   st <- as.data.frame(df %>%
@@ -72,6 +72,16 @@ for (i in 1:length(stations)) {
   rich_station[i,7] <- n_distinct(st$sequence)
 }
 
+#### Predators richness ####
 
+pred_families <- c("Carangidae", "Carcharhinidae", "Ginglymostomatidae", "Heterodontidae", "Lutjanidae", "Serranidae", "Sphyraenidae", "Sphyrnidae")
+
+df_predator <- filter(df_filtered, family_name_corrected %in% pred_families | class_name == "Chondrichthyes")
+
+for (i in 1:length(stations)) {
+  st <- as.data.frame(df_predator %>%
+                        subset(station==stations[[i]]))
+  rich_station[i,8] <- n_distinct(st$sequence)
+}
 
 save(rich_station, file="Rdata/richness_station.rdata")
