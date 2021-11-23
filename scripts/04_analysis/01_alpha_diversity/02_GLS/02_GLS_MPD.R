@@ -110,14 +110,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.197+0.116+0.661+0.006, 
-                        geography=0.073+0.116+0.201, 
-                        socioeconomy=0.033+0.011+0.661, 
-                        sampling=0.011+0.022+0.201+0.006)
+partition <- data.frame(environment=0.301+0.075+0.027+0.283+0.045+0.042, 
+                        geography=0.103+0.027+0.024+0.075+0.042+0.206, 
+                        socioeconomy=0.027+0.027+0.024+0.283, 
+                        sampling=0.026+0.206+0.042+0.045)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy","geography",  "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("environment","geography", "socioeconomy",  "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -130,7 +130,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 
 MPD_effectsize <- effectsize(gls.MPD)
 MPD_effectsize <- MPD_effectsize[-1,]
-MPD_effectsize$taxa <- "MPD"
+MPD_effectsize$taxa <- "ses.MPD"
 MPD_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(MPD_effectsize, file = "Rdata/mpd_effectsize.rdata")

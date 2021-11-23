@@ -6,9 +6,9 @@ load("Rdata/motu_effectsize.rdata")
 load("Rdata/mpd_effectsize.rdata")
 load("Rdata/crypto_effectsize.rdata")
 load("Rdata/large_effectsize.rdata")
-load("Rdata/predator_effectsize.rdata")
 
-effectsize <- rbind(MPD_effectsize, motus_effectsize, crypto_effectsize, large_effectsize, predator_effectsize)
+
+effectsize <- rbind(MPD_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
 effectsize$taxa <- gsub("Richness - Cryptobenthics", "Richness - Crypto", effectsize$taxa)
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
@@ -20,11 +20,10 @@ effectsize$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize$Paramete
 effectsize$Parameter <- gsub("distCoast", "distance to shore", effectsize$Parameter)
 effectsize$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize$Parameter)
 
-color <- c("red", "forestgreen","black", "forestgreen", "forestgreen", "black", "black", "black", "forestgreen", "black", "forestgreen", "forestgreen", "black", "black", "red",
+color <- c("red", "forestgreen","black", "forestgreen", "forestgreen", "forestgreen", "red", "black", "black", "black", "black", "forestgreen", "forestgreen", "forestgreen", "red",
            "black", "black","forestgreen", "forestgreen", "black", "black", "red", "red", "red", "red", "red", "black", "black", "red", "forestgreen",
            "black", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "black", "red", "black", "red", "black", "red", "black", "forestgreen", "black", "forestgreen",
-           "black", "black", "forestgreen", "forestgreen", "forestgreen", "black", "black", "red", "red", "black", "red", "forestgreen", "black", "red","forestgreen",
-           "black", "black", "black", "forestgreen", "black", "black", "red", "black", "black", "black", "black", "black", "black", "red","black")
+           "black", "black", "forestgreen", "forestgreen", "forestgreen", "black", "black", "red", "red", "black", "red", "forestgreen", "black", "red","forestgreen")
 
 effectsize <- effectsize %>%
   mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))

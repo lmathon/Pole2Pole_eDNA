@@ -55,7 +55,6 @@ anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
 anova(dbrda_part, by = "margin", permutations = 99)
 
-
 # variation partitioning
 #
 env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]

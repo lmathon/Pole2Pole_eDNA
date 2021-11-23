@@ -50,17 +50,17 @@ com[is.na(com)] <- 0
 
 #### calculate MPD for each stations ####
 
-MPD_stations <- ses.mpd(com, dist_gen, abundance.weighted = FALSE, null.model = "trialswap", runs = 999, iterations = 100)
+MPD_stations <- ses.mpd(com, dist_gen, abundance.weighted = FALSE, null.model = "independentswap", runs = 999, iterations = 100)
 
-mpd_stations <- data.frame(station=stations, MPD=MPD_stations$mpd.obs)
+mpd_stations <- data.frame(station=stations, MPD=MPD_stations$mpd.obs.z)
 save(mpd_stations, file="Rdata/MPD_station.rdata")
 
 
 #### calculate MNTD for each stations ####
 
-mntd_stations <- ses.mntd(com, dist_gen, abundance.weighted = FALSE, null.model = "trialswap", runs = 999, iterations = 100)
+mntd_stations <- ses.mntd(com, dist_gen, abundance.weighted = FALSE, null.model = "independentswap", runs = 999, iterations = 100)
 
-mntd_stations <- data.frame(station=stations, MNTD=mntd_stations)
+mntd_stations <- data.frame(station=stations, MNTD=mntd_stations$mntd.obs.z)
 save(mntd_stations, file="Rdata/MNTD_station.rdata")
 
 
