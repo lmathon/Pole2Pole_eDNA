@@ -26,6 +26,10 @@ save(env_var, file="Rdata/environmental_variables.rdata")
 # Socioeconomic variables variables
 #---------------------------------------------------------------------------------------------------------------------
 socio <- read.csv("metadata/eDNA_all_socio_variables.csv", sep=";")
+voice <- read.csv("metadata/Voice.csv", sep=";")
+
+socio <- left_join(socio, voice)
+
 socio_var <- socio[, -c(1,2,4,5,6,7, 10, 11,17)]
 
 socio_var <- socio_var %>%

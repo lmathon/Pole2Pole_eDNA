@@ -22,13 +22,13 @@ library(effectsize)
 '%ni%' <- Negate("%in%")
 
 load("Rdata/richness_station.rdata")
-load("Rdata/MPD_station.rdata")
+load("Rdata/MNTD_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
 data <- left_join(exp_var_num, rich_station, by="station")
-data <- left_join(data, mpd_stations[,c("MPD", "station")], by="station")
+data <- left_join(data, mntd_stations[,c("MNTD", "station")], by="station")
 
 data <- data %>%
   dplyr::select(-c(station))
@@ -53,54 +53,44 @@ data <- data %>%
   
   # GLS MOTUs
   
-  gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-  
-  fit.grav.motus <- visreg(gls.motus,"Gravity",scale="response")
-  fit.MED.motus <- visreg(gls.motus,"MarineEcosystemDependency",scale="response")
-  fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(MOTUs richness +1)", xlab="log10(Gravity +1)")
+  gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
   motus_effectsize <- effectsize(gls.motus)
   motus_effectsize <- motus_effectsize[-1,]
   motus_effectsize$taxa <- "Richness - all MOTUs"
-  motus_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+  motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
   
   # GLS crypto
   
-  gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  fit.grav.crypto <- visreg(gls.crypto,"Gravity",scale="response")
-  fit.MED.crypto <- visreg(gls.crypto,"MarineEcosystemDependency",scale="response")
-  fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="lg10(Gravity +1)")
-  
+   
   crypto_effectsize <- effectsize(gls.crypto)
   crypto_effectsize <- crypto_effectsize[-1,]
   crypto_effectsize$taxa <- "Richness - Crypto"
-  crypto_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+  crypto_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
   
   # GLS large fish
   
-  gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  fit.grav.large <- visreg(gls.largefish,"Gravity",scale="response")
-  fit.MED.large <- visreg(gls.largefish,"MarineEcosystemDependency",scale="response")
-  fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Large fish richness +1)", xlab="lg10(Gravity +1)")
   
   large_effectsize <- effectsize(gls.largefish)
   large_effectsize <- large_effectsize[-1,]
   large_effectsize$taxa <- "Richness - Large fish"
-  large_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+  large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
   
   
-  #### GLS MPD ####
-  gls.mpd <- gls(MPD ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  #### GLS MNTD ####
+  gls.MNTD <- gls(MNTD ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  mpd_effectsize <- effectsize(gls.mpd)
-  mpd_effectsize <- mpd_effectsize[-1,]
-  mpd_effectsize$taxa <- "MPD"
-  mpd_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+  MNTD_effectsize <- effectsize(gls.MNTD)
+  MNTD_effectsize <- MNTD_effectsize[-1,]
+  MNTD_effectsize$taxa <- "ses.MNTD"
+  MNTD_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
   
   
-  effectsize_fin <- as.data.frame(rbind(mpd_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
+  effectsize_fin <- as.data.frame(rbind(MNTD_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
   
 
 #### effect size ####
@@ -114,6 +104,18 @@ effectsize_fin$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize_fin$
 effectsize_fin$Parameter <- gsub("distCoast", "distance to shore", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize_fin$Parameter)
 
+effectsize_fin$color <- NA
+for (i in 1:nrow(effectsize_fin)) {
+  if((effectsize_fin[i, "CI_low"]<0) | (effectsize_fin[i,"CI_high"]<0)){
+    effectsize_fin[i,"color"] <- "black"
+  }
+  if ((effectsize_fin[i, "CI_low"]>0) & (effectsize_fin[i,"CI_high"]>0)){
+    effectsize_fin[i,"color"] <- "forestgreen"
+  }
+  if((effectsize_fin[i, "CI_low"]<0) & (effectsize_fin[i,"CI_high"]<0))
+    effectsize_fin[i,"color"] <- "red"
+}
+
 effectsize_fin <- effectsize_fin %>%
   mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))
 
@@ -122,11 +124,11 @@ ggplot(data = effectsize_fin,
   geom_hline(aes(yintercept = 0), colour = "black") + 
   geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
                 colour = "black", size = 0.5, width = 0) +
-  geom_point(size = 2) +
+  geom_point(size = 2, col=effectsize_fin$color) +
   coord_flip() + 
   theme_sleek(base_size = 24) + 
   facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
-  scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
+  #scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
   ylab("Standardized effect size") +
   theme(legend.position = "none", 
         axis.title.y = element_blank(), 

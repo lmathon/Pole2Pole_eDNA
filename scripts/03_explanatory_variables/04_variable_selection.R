@@ -141,7 +141,7 @@ ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 socio_var2 <- socio_var %>%
-  dplyr::select(station, NoViolence_mean, Corruption_mean, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, conflicts)
+  dplyr::select(station, NoViolence_mean, Corruption_mean, HDI2019, neartt, Gravity, NGO, MarineEcosystemDependency, conflicts, Voice_mean)
 
 
 hist(socio_var2$HDI2019, col="grey")

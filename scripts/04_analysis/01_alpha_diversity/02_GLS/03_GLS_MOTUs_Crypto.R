@@ -64,7 +64,9 @@ AIC(mexp, mgau, mlin, msph, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_DHW_5year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+
+save(gls.crypto, file="Rdata/gls_crypto.rdata")
 
 summary(gls.crypto)
 anova(gls.crypto, type = "marginal")
@@ -97,7 +99,7 @@ fit.vol.crypto <- visreg(gls.crypto,"volume",scale="response")
 save(fit.vol.crypto, file="Rdata/fit.vol.crypto.rdata")
 fit.samp.crypto <- visreg(gls.crypto,"depth_sampling",scale="response")
 save(fit.samp.crypto, file="Rdata/fit.samp.crypto.rdata")
-fit.DHW.crypto <- visreg(gls.crypto,"mean_DHW_5year",scale="response")
+fit.DHW.crypto <- visreg(gls.crypto,"mean_DHW_1year",scale="response")
 save(fit.DHW.crypto, file="Rdata/fit.DHW.crypto.rdata")
 
 fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="lg10(Gravity +1)")
@@ -105,9 +107,9 @@ save(fit.grav_med.crypto, file="Rdata/fit.grav_med.crypto.rdata")
 
 
 #### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year", "mean_DHW_5year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
+env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019", "conflicts", "Corruption_mean", "Gravity", "MarineEcosystemDependency")]
+socio_var <- data[,c("HDI2019", "conflicts", "Voice_mean", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.crypto$fitted, env_var, geo_var, socio_var, samp_var)
@@ -116,10 +118,10 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.164+0.214+0.125+0.140+0.072+0.025+0.099, 
-                        geography=0.130+0.214+0.125+0.025+0.004, 
-                        socioeconomy=0.071+0.018+0.214+0.140+0.125+0.072, 
-                        sampling=0.009+0.018+0.004+0.125+0.072+0.025+0.099)
+partition <- data.frame(environment=0.142+0.233+0.148+0.118+0.155+0.047, 
+                        geography=0.159+0.233+0.155+0.012, 
+                        socioeconomy=0.090+0.024+0.233+0.155+0.148+0.118, 
+                        sampling=0.006+0.024+0.012+0.155+0.118+0.047)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -136,7 +138,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 crypto_effectsize <- effectsize(gls.crypto)
 crypto_effectsize <- crypto_effectsize[-1,]
 crypto_effectsize$taxa <- "Richness - Cryptobenthics"
-crypto_effectsize$vargroup <- c("environment","environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+crypto_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(crypto_effectsize, file = "Rdata/crypto_effectsize.rdata")
 

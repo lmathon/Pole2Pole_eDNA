@@ -7,7 +7,7 @@ ggplot(data = effectsize_fin,
   geom_hline(aes(yintercept = 0), colour = "black") + 
   geom_errorbar(aes(ymin = CI_low, ymax = CI_high), 
                 colour = "black", size = 0.5, width = 0) +
-  geom_point(size = 2) +
+  geom_point(size = 2, col=effectsize_fin$color) +
   coord_flip() + 
   theme_sleek(base_size = 24) + 
   facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
@@ -20,4 +20,4 @@ ggplot(data = effectsize_fin,
         strip.text.y = element_text(size=10,face="bold"),
         strip.placement = "outside")
 
-ggsave("outputs/GLS/effect_size_sensitivity.png", width = 6, height = 6.5)
+ggsave("outputs/GLS/effect_size_sensitivity.png", width = 10, height = 6.5)

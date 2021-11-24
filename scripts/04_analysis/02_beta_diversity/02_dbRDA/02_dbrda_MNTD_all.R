@@ -24,7 +24,7 @@ load("Rdata/db_mem.rdata")
 
 data <- exp_var
 df <- data %>%
-  select(-c("station", "province")) # remove station
+  dplyr::select(-c("station")) # remove station
 df_mem <- cbind(df, dbmem)
 
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -46,7 +46,7 @@ mctest::imcdiag(dbrda_full, method="VIF")
 
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(mntd ~ mean_DHW_1year+mean_DHW_5year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Corruption_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(mntd ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+province +Condition(volume+MEM1), df_mem) 
 
 
 
@@ -58,9 +58,9 @@ anova(dbrda_part, by = "margin", permutations = 99)
 
 # variation partitioning
 #
-env_var <- df_mem[,c("mean_DHW_1year", "mean_DHW_5year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
+env_var <- df_mem[,c("mean_DHW_1year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
-socio_var <- df_mem[,c("Corruption_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
+socio_var <- df_mem[,c("Voice_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
 mntd <- as.dist(mntd)
 
 
@@ -70,9 +70,9 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.159+0.046+0.022+0.180, 
-                        geography=0.080+0.046+0.022+0.003, 
-                        socioeconomy=0.080+0.180+0.022+0.003)
+partition <- data.frame(environment=0.116+0.017+0.054+0.202, 
+                        geography=0.017+0.054+0.091, 
+                        socioeconomy=0.124+0.054+0.202)
                         
 
 partition <- as.data.frame(t(partition))
@@ -107,16 +107,12 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
 
-grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_MNTD_MED <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  #geom_encircle(aes(group = province, fill= province), s_shape = 1, expand = 0,
-  #              alpha = 0.4, show.legend = TRUE) + # hull area 
-  geom_point(aes(col = MarineEcosystemDependency), cex = 2, show.legend = T) +
+  geom_point(cex = 2, show.legend = F, aes(col=MarineEcosystemDependency)) +
   scale_color_gradient(low="blue", high="red")+
-  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill") +
-  geom_segment(data= var_scores, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "grey",
-               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # all variables
+  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
   geom_label_repel(data= var_scores_diff75, 
@@ -125,17 +121,20 @@ grda_station <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
                    label = rownames(var_scores_diff75),
                    label.size = NA, 
                    size = 4,
-                   fill = alpha(c("white"),0),
+                   fill = NA,
                    show.legend = F) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
-       title = "MNTD ") +
+       title = "") +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
         legend.box.margin=margin(c(2,2,2,2)),  # add margin as to not overlap with axis box
+        legend.title = element_text(),
         legend.text = element_text(size=9),
+        legend.key.height = unit(0.5, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-grda_station
+dbrda_MNTD_MED
 
 ggsave("outputs/dbRDA/MNTD_all/dbrda_MED.png")
+save(dbrda_MNTD_MED, file="Rdata/dbrda_MNTD_MED.rdata")
