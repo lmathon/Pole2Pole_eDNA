@@ -5,6 +5,7 @@ library(sf)
 library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggthemes)
+library(ggpubr)
 
 # load richness data
 load("Rdata/richness_station.rdata")
@@ -41,10 +42,9 @@ meta <- meta %>%
   distinct(station, .keep_all=T)
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
-identical(as.character(rownames(meta)), rownames(rich_station))
-coor <- meta[, c("longitude_start", "latitude_start")]
-data <- cbind(exp_var, coor)
+data <- exp_var
 
+coor <- meta[, c("longitude_start", "latitude_start")]
 identical(as.character(rownames(coor)), as.character(rownames(exp_var_num)))
 data2 <- cbind(exp_var_num, coor)
 
@@ -110,17 +110,15 @@ ggplot() +
 ggsave("outputs/maps & plot sup/log(crypto_richness).png")
 
 
-# MPD
-load("Rdata/MPD_station.rdata")
-data <- left_join(data, mpd_stations)
-data <- data[order(data$MPD),]
+# large fish richness
+data2 <- data2[order(data2$largefish_MOTUs),]
 
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80", col="grey80") + 
-  geom_sf(aes(fill = data$MPD), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
+  geom_sf(aes(fill = data2$largefish_MOTUs), size=2, data= data2$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) + 
   scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
-  labs(fill="Mean Pairwise genetic distance")+
+  labs(fill="log(large fish richness) ")+
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.title = element_text(size=10),
@@ -130,41 +128,64 @@ ggplot() +
         panel.grid.major = element_line(colour = "grey50"),
         plot.title = element_text(lineheight=.8, face="bold"))
 
-ggsave("outputs/maps & plot sup/MPD.png")
+ggsave("outputs/maps & plot sup/log(large_richness).png")
 
 
-# Less than 20 MOTUs
-data_20 <- data %>%
-  filter(MOTUs < 21)
+# ses.MNTD
+load("Rdata/MNTD_station.rdata")
+data <- left_join(data, mntd_stations)
+data <- data[order(data$MNTD),]
 
 ggplot() + 
-  geom_sf(aes(), data = world, fill = "grey80") + 
-  geom_sf(fill="blue", size=2, data= data_20$metadata_map_sf, shape=21) + 
-  coord_sf(crs = "+proj=robin") + 
-  ggtitle("Stations with less than 20 MOTUs")+
+  geom_sf(aes(), data = world, fill = "grey80", col="grey80") + 
+  geom_sf(aes(fill = data$MNTD), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
+  coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) + 
+  scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
+  labs(fill="ses.MNTD")+
   theme_minimal() +
-  theme(panel.grid.minor = element_line(linetype = "blank"),
-        plot.background = element_rect(colour = NA), 
-        panel.background = element_blank(),
-        panel.border = element_blank(),
-        text = element_text(size=25),
-        legend.position = "bottom",
+  theme(legend.position = "bottom",
         legend.title = element_text(size=10),
         legend.text = element_text(size=10),
-        legend.key.height = unit(4, "mm"),
-        panel.grid.major = element_line(colour = "gray70"),
-        plot.title = element_text(size=12, face="bold", hjust = 0.5))
+        legend.key.height = unit(3, "mm"),
+        axis.text.x = element_blank(),
+        panel.grid.major = element_line(colour = "grey50"),
+        plot.title = element_text(lineheight=.8, face="bold"))
 
-#### map for explanatory variables (change variable and title) ####
-data2 <- data2[order(data2$MarineEcosystemDependency),]
+ggsave("outputs/maps & plot sup/ses.MNTD.png")
 
-nc_MED <- ggplot() + 
-  geom_sf(aes(), data = world2, fill = "grey80", col="grey80") +
-  geom_sf(aes(fill = data2$MarineEcosystemDependency), size=3, data= data2$metadata_map_sf, shape=21, show.legend = T) + 
-  coord_sf(xlim = c(162, 167), ylim = c(-19, -23)) +
-  scale_fill_gradient2(low="yellow", high="red", mid="orange", midpoint = 0.2, aesthetics = "fill")+
+
+#### map for explanatory variables (change variable and title) by region ####
+data <- data[order(data$MarineEcosystemDependency),]
+
+ggplot() + 
+  geom_sf(aes(), data = world, fill = "grey80", col="grey80") +
+  geom_sf(aes(fill = data$MarineEcosystemDependency), size=3, data= data$metadata_map_sf, shape=21, show.legend = T) + 
+  coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) +
+  scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
   labs(fill="Marine Ecosystem Dependency ")+
-  ggtitle("Tropical Southwestern Pacific")+
+  #ggtitle("Tropical Southwestern Pacific")+
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size=10),
+        legend.text = element_text(size=10),
+        legend.key.height = unit(3, "mm"),
+        axis.text.x = element_blank(),
+        panel.grid.major = element_line(colour = "grey95"),
+        plot.title = element_text(lineheight=.8, face="bold"))
+
+ggsave("outputs/maps & plot sup/MED.png")
+
+
+#### map for explanatory variables (change variable and title) by region ####
+data2 <- data2[order(data2$Gravity),]
+
+arctic_grav <- ggplot() + 
+  geom_sf(aes(), data = world2, fill = "grey80", col="grey80") +
+  geom_sf(aes(fill = data2$Gravity), size=4, data= data2$metadata_map_sf, shape=21, show.legend = T) + 
+  coord_sf(xlim = c(3, 34), ylim = c(75, 82)) +
+  scale_fill_gradient2(low="yellow", high="red", mid="orange", midpoint = 0.2, aesthetics = "fill")+
+  labs(fill="log(Gravity+1) ")+
+  ggtitle("Arctic")+
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.title = element_text(size=10),
@@ -174,9 +195,12 @@ nc_MED <- ggplot() +
         panel.grid.major = element_line(colour = "grey95"),
         plot.title = element_text(lineheight=.8, face="bold"))
 
-ggsave("outputs/maps & plot sup/MED.png")
-
 
 ggarrange(arctic_MED, Atl_Med_MED, china_MED, leng_MED, nc_MED, eparse_MED, cari_MED, ant_MED,
           ncol=2, nrow=4, common.legend = T, legend = c("bottom"))
 ggsave("outputs/maps & plot sup/map_MED_region.png", height = 16, width = 10)
+
+
+ggarrange(arctic_grav, Atl_Med_grav, china_grav, leng_grav, nc_grav, eparse_grav, cari_grav, ant_grav,
+          ncol=2, nrow=4, common.legend = T, legend = c("bottom"))
+ggsave("outputs/maps & plot sup/map_grav_region.png", height = 16, width = 10)
