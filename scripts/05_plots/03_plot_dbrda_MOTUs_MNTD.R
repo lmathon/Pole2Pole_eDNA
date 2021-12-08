@@ -4,9 +4,9 @@ library(ggpubr)
 load("Rdata/dbrda_MOTUs_province.rdata")
 load("Rdata/dbrda_MOTUs_MED.rdata")
 load("Rdata/dbrda_MOTUs_SST.rdata")
-load("Rdata/dbrda_MNTD_province.rdata")
-load("Rdata/dbrda_MNTD_MED.rdata")
-load("Rdata/dbrda_MNTD_SST.rdata")
+load("Rdata/dbrda_FD_province.rdata")
+load("Rdata/dbrda_FD_MED.rdata")
+load("Rdata/dbrda_FD_SST.rdata")
 
 
 dbrda_MOTUs_province <- dbrda_MOTUs_province +
@@ -14,15 +14,20 @@ dbrda_MOTUs_province <- dbrda_MOTUs_province +
   theme(plot.title.position = "panel",
         plot.title = element_text(size = 12, color = "black", face = "bold"))
 
-dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_MNTD_province, 
-                            common.legend = T, legend = c("bottom"), 
-                            labels = c("", "D. MNTD"), font.label = list(size = 12, color = "black"),
-                            label.x = 0)
+dbrda_FD_province <- dbrda_FD_prov +
+  ggtitle("B. Functional B-diversity")+
+  theme(plot.title.position = "panel",
+        plot.title = element_text(size = 12, color = "black", face = "bold"))
 
-dbrda_variable <- ggarrange(dbrda_MOTUs_SST, dbrda_MNTD_SST, dbrda_MOTUs_MED, dbrda_MNTD_MED, nrow=2, ncol=2, 
-          labels = c("B", "E", "C", "F"), 
+dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, 
+                            common.legend = T, legend = c("bottom")) 
+                            
+ggsave("outputs/dbRDA/dbrda_jaccard_FD.png", width = 10.7, height = 6.2)
+
+
+dbrda_variable <- ggarrange(dbrda_MOTUs_SST, dbrda_FD_SST, dbrda_MOTUs_MED, dbrda_FD_MED, nrow=2, ncol=2, 
+          labels = c("A", "B", "C", "D"), 
           font.label = list(size = 12, color = "black"),
           label.x = 0)
-ggarrange(dbrda_province, dbrda_variable, nrow=2, ncol=1, heights = c(1,2))
 
-ggsave("outputs/dbRDA/dbrda_jaccard_MNTD.png", width = 10, height = 12)
+ggsave("outputs/dbRDA/dbrda_jaccard_FD_sup.png", width = 10, height = 8)

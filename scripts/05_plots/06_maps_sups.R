@@ -131,17 +131,17 @@ ggplot() +
 ggsave("outputs/maps & plot sup/log(large_richness).png")
 
 
-# ses.MNTD
-load("Rdata/MNTD_station.rdata")
-data <- left_join(data, mntd_stations)
-data <- data[order(data$MNTD),]
+# alpha FD
+load("Rdata/FD_Hill_alpha.rdata")
+data <- left_join(data, FD_Hill)
+data <- data[order(data$FD_q2),]
 
 ggplot() + 
   geom_sf(aes(), data = world, fill = "grey80", col="grey80") + 
-  geom_sf(aes(fill = data$MNTD), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
+  geom_sf(aes(fill = data$FD_q2), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) + 
   scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
-  labs(fill="ses.MNTD")+
+  labs(fill=expression(paste("Functional ", alpha, "-diversity")))+
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.title = element_text(size=10),
@@ -151,7 +151,7 @@ ggplot() +
         panel.grid.major = element_line(colour = "grey50"),
         plot.title = element_text(lineheight=.8, face="bold"))
 
-ggsave("outputs/maps & plot sup/ses.MNTD.png")
+ggsave("outputs/maps & plot sup/FDq2.png")
 
 
 #### map for explanatory variables (change variable and title) by region ####

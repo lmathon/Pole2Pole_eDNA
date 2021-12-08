@@ -46,7 +46,7 @@ mctest::imcdiag(dbrda_full, method="VIF")
 
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+province +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 
 
@@ -59,8 +59,7 @@ anova(dbrda_part, by = "margin", permutations = 99)
 #
 env_var <- df_mem[,c("mean_DHW_1year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
-socio_var <- df_mem[,c("Voice_mean", "HDI2019", "Gravity", "MarineEcosystemDependency", "conflicts")]
-jaccard_motu <- as.dist(jaccard_motu)
+socio_var <- df_mem[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
 
 
 varpart_part <- varpart(jaccard_motu, env_var, geo_var, socio_var)
@@ -69,14 +68,14 @@ plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-eco
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.044+0.006+0.045, 
-                        geography=0.037+0.006, 
-                        socioeconomy=0.045+0.055)
+partition <- data.frame(environment=0.127+0.010+0.107, 
+                        geography=0.010+0.075, 
+                        socioeconomy=0.107+0.054)
 
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("socioeconomy", "environment", "geography"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -105,23 +104,24 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 # add metadata
 identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
+var_scores_diff75 <- var_scores_diff75[-c(6,9,10,11),]
 
-dbrda_MOTUs_province <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_MOTUs_MED <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_point(cex = 2, show.legend = T, aes(col=province)) +
-  #scale_color_gradient(low="blue", high="red")+
-  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
-  #geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
-  #             arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
-  #geom_label_repel(data= var_scores_diff75, 
-  #                 aes(x= CAP1, y=CAP2, 
-  #                    fontface=3),
-  #                 label = rownames(var_scores_diff75),
-  #                 label.size = NA, 
-  #                 size = 4,
-  #                 fill = NA,
-  #                 show.legend = F) +
+  geom_point(cex = 2, show.legend = F, aes(col=MarineEcosystemDependency)) +
+  scale_color_gradient(low="blue", high="red")+
+  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
+  geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
+               arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
+  geom_label_repel(data= var_scores_diff75, 
+                   aes(x= CAP1, y=CAP2, 
+                      fontface=3),
+                   label = rownames(var_scores_diff75),
+                   label.size = NA, 
+                   size = 4,
+                   fill = NA,
+                   show.legend = F) +
   labs(x = paste0("CAP1 (", CAP1, "%)"), y = paste0("CAP2 (", CAP2, "%)"),
        title = "") +
   theme_bw() +
@@ -133,7 +133,7 @@ dbrda_MOTUs_province <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-dbrda_MOTUs_province
+dbrda_MOTUs_MED
 
-ggsave("outputs/dbRDA/Jaccard_all/dbrda_province.png")
-save(dbrda_MOTUs_province, file="Rdata/dbrda_MOTUs_province.rdata")
+ggsave("outputs/dbRDA/Jaccard_all/dbrda_MED.png")
+save(dbrda_MOTUs_MED, file="Rdata/dbrda_MOTUs_MED.rdata")

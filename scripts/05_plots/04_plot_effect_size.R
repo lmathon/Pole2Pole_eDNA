@@ -3,12 +3,12 @@ library(tidyverse)
 library(funk)
 
 load("Rdata/motu_effectsize.rdata")
-load("Rdata/mntd_effectsize.rdata")
+load("Rdata/FDq2_effectsize.rdata")
 load("Rdata/crypto_effectsize.rdata")
 load("Rdata/large_effectsize.rdata")
 
 
-effectsize <- rbind(MNTD_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
+effectsize <- rbind(FDq2_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
 effectsize$taxa <- gsub("Richness - Cryptobenthics", "Richness - Crypto", effectsize$taxa)
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
@@ -26,7 +26,7 @@ for (i in 1:nrow(effectsize)) {
     effectsize[i,"color"] <- "black"
   }
   if ((effectsize[i, "CI_low"]>0) & (effectsize[i,"CI_high"]>0)){
-    effectsize[i,"color"] <- "forestgreen"
+    effectsize[i,"color"] <- "green4"
   }
   if((effectsize[i, "CI_low"]<0) & (effectsize[i,"CI_high"]<0))
     effectsize[i,"color"] <- "red"
@@ -54,4 +54,4 @@ ggplot(data = effectsize,
         strip.text.y = element_text(size=10,face="bold"),
         strip.placement = "outside")
 
-ggsave("outputs/GLS/effect_size.png", width = 10, height = 6.5)
+ggsave("outputs/GLS/FDq2_effect_size.png", width = 10, height = 6.5)

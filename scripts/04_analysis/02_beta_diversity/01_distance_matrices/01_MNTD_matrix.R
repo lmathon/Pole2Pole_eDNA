@@ -2,6 +2,7 @@ library(tidyverse)
 library(ape)
 library(picante)
 library(seriation)
+library(mFD)
 
 load("Rdata/03-filter-data.Rdata")
 
@@ -58,16 +59,14 @@ mntd <- as.matrix(mntd)
 
 save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
 
+#### calculate beta-FD between pairs of stations
+com[com>0] <- 1
+com <- as.matrix(com)
+beta_FD <- beta.fd.hill(com, dist_gen, q=2, tau = "mean", beta_type = "Jaccard") 
+beta_FD <- beta_FD$beta_fd_q$q2
+beta_FD <- as.matrix(beta_FD)
 
-#### MPD between pairs of stations ####
-mpd <- comdist(com, dist_gen, abundance.weighted = FALSE)
-mpd <- as.matrix(mpd)
-
-
-# save Rdata
-
-save(mpd, file="Rdata/MPD_pairwise_station.rdata")
-
+save(beta_FD, file = "Rdata/beta_FD.rdata")
 
 ##### plot distance matrix ####
 
@@ -79,66 +78,3 @@ dissplot(mntd, method=NA,
          col=bluered(100))
 
 
-#### MNTD for chondri MOTUs ####
-chondri_family <- c("Dasyatidae", "Potamotrygonidae", "Urotrygonidae", "Myliobatidae", "Gymnuridae", "Hexatrygonidae", 
-                    "Plesiobatidae", "Urolophidae", "Anacanthobatidae", "Arhynchobatidae", "Rajidae", "Glaucostegidae",
-                    "Pristidae", "Rhinidae", "Rhinobatidae", "Rhynchobatidae", "Zanobatidae", "Hypnidae", "Narcinidae",
-                    "Narkidae", "Torpedinidae", "Platyrhinidae", "Carcharhinidae", "Hemigaleidae", "Leptochariidae",
-                    "Proscylliidae", "Pseudotriakidae", "Scyliorhinidae", "Sphyrnidae", "Triakidae", "Alopiidae",
-                    "Megachasmidae", "Mitsukurinidae", "Odontaspididae", "Pseudocarchariidae", "Brachaeluridae",
-                    "Ginglymostomatidae", "Hemiscylliidae", "Orectolobidae", "Parascylliidae", "Rhincodontidae",
-                    "Stegostomatidae", "Heterodontidae", "Echinorhinidae", "Chlamydoselachidae", "Hexanchidae", 
-                    "Pristiophoridae", "Centrophoridae", "Dalatiidae", "Etmopteridae", "Oxynotidae", "Somniosidae", 
-                    "Squalidae", "Squatinidae", "Callorhinchidae", "Chimaeridae", "Rhinochimaeridae")
-
-chondri_order <- c("Myliobatiformes", "Rajiformes", "Rhinopristiformes", "Torpediniformes", "Chimaeriformes",
-                   "Carcharhiniformes", "Lamniformes", "Orectolobiformes", "Heterodontiformes", "Echinorhiniformes",
-                   "Hexanchiformes", "Pristiophoriformes", "Squaliformes", "Squatiniformes")
-
-df_chondri <- filter(df_filtered, order_name %in% chondri_order | family_name_corrected %in% chondri_family)
-chondri_motu <- unique(df_chondri$definition)
-
-com_chondri <- com[chondri_motu]
-com_chondri <- com_chondri[rowSums(com_chondri[])>0,]
-
-# compute MNTD
-mntd_chondri <- comdistnt(com_chondri, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-mntd_chondri <- as.matrix(mntd_chondri)
-
-
-# save Rdata
-save(mntd_chondri, file="Rdata/MNTD_chondri_pairwise_station.rdata")
-
-#### MNTD on crypto MOTUs ####
-cryptic_family <- c("Tripterygiidae", "Grammatidae", "Aploactinidae", "Creediidae", "Gobiidae", "Chaenopsidae", "Gobiesocidae", "Labrisomidae", "Pseudochromidae", "Bythitidae", "Plesiopidae", "Dactyloscopidae", "Blenniidae", "Apogonidae", "Callionymidae", "Opistognathidae", "Syngnathidae", "Kurtidae")
-cryptic_order <- c("Kurtiformes", "Gobiiformes", "Blenniiformes", "Syngnathiformes")
-df_crypto <- filter(df_filtered, order_name %in% cryptic_order | family_name_corrected %in% cryptic_family)
-
-crypto_motu <- unique(df_crypto$definition)
-
-com_crypto <- com[crypto_motu]
-com_crypto <- com_crypto[rowSums(com_crypto[])>0,]
-
-# compute MNTD
-mntd_crypto <- comdistnt(com_crypto, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-mntd_crypto <- as.matrix(mntd_crypto)
-
-# save Rdata
-save(mntd_crypto, file="Rdata/MNTD_crypto_pairwise_station.rdata")
-
-#### MNTD Large fish ####
-load("Rdata/large_families.rdata")
-load("Rdata/large_orders.rdata")
-df_large <- filter(df_filtered, order_name %in% large_orders | family_name_corrected %in% large_families)
-
-large_motu <- unique(df_large$definition)
-
-com_large <- com[large_motu]
-com_large <- com_large[rowSums(com_large[])>0,]
-
-# compute MNTD
-mntd_large <- comdistnt(com_large, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-mntd_large <- as.matrix(mntd_large)
-
-# save Rdata
-save(mntd_large, file="Rdata/MNTD_largefish_pairwise_station.rdata")

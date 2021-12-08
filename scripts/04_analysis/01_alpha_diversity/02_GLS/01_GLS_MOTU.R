@@ -64,7 +64,7 @@ AIC(mexp, mgau, msph, mlin, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+Voice_mean+HDI2019+Gravity+MarineEcosystemDependency+conflicts+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 save(gls.motus, file="Rdata/gls_motus.rdata")
 
@@ -107,7 +107,7 @@ save(fit.grav_med.motus, file="Rdata/fit.grav_med.motus.rdata")
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019", "conflicts", "Voice_mean", "Gravity", "MarineEcosystemDependency")]
+socio_var <- data[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
 samp_var <- data[, c("volume")]
 
 varpart <- varpart(gls.motus$fitted, env_var, geo_var, socio_var, samp_var)
@@ -116,14 +116,14 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.142+0.247+0.052+0.152+0.157+0.041+0.016, 
-                        geography=0.087+0.247+0.013+0.152+0.019+0.064, 
-                        socioeconomy=0.035+0.013+0.042+0.247+0.052+0.157+0.152, 
-                        sampling=0.017+0.042+0.064+0.157+0.152+0.016+0.041)
+partition <- data.frame(environment=0.188+0.009+0.008+0.201+0.200+0.271, 
+                        geography=0.089+0.009+0.011+0.2+0.081, 
+                        socioeconomy=0.028+0.04+0.011+0.201+0.008, 
+                        sampling=0.019+0.04+0.081+0.2+0.271)
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography", "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "sampling", "geography", "socioeconomy"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -137,6 +137,6 @@ ggplot(partition, aes(x=variables2,y = V1))+
 motus_effectsize <- effectsize(gls.motus)
 motus_effectsize <- motus_effectsize[-1,]
 motus_effectsize$taxa <- "Richness - all MOTUs"
-motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","socio","socio","geography","geography","geography","geography","sampling")
+motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
 
 save(motus_effectsize, file = "Rdata/motu_effectsize.rdata")
