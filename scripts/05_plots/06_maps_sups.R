@@ -141,7 +141,7 @@ ggplot() +
   geom_sf(aes(fill = data$FD_q2), size=2, data= data$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) + 
   scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
-  labs(fill=expression(paste("Functional ", alpha, "-diversity")))+
+  labs(fill=expression(paste("Sequence ", alpha, "-diversity")))+
   theme_minimal() +
   theme(legend.position = "bottom",
         legend.title = element_text(size=10),

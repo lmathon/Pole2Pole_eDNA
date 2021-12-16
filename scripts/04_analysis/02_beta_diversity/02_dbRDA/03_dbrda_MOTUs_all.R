@@ -14,6 +14,7 @@ library(spdep)
 library(mctest)
 library(ggpubr)
 library(ade4)
+library(relaimpo)
 
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
@@ -49,28 +50,28 @@ mctest::imcdiag(dbrda_full, method="VIF")
 dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
 
 
-
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
 anova(dbrda_part, by = "term", permutations = 99)
 anova(dbrda_part, by = "margin", permutations = 99)
 
+
 # variation partitioning
-#
+
 env_var <- df_mem[,c("mean_DHW_1year","mean_SST_1year", "mean_sss_1year", "mean_npp_1year")]
 geo_var <- df_mem[, c("bathy", "dist_to_CT", "depth_sampling", "distCoast")]
 socio_var <- df_mem[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
 
 
-varpart_part <- varpart(jaccard_motu, env_var, geo_var, socio_var)
+varpart_part <- varpart(dbrda_part$Ybar, env_var, geo_var, socio_var)
 
 plot(varpart_part, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'), bg = c('navy', 'tomato', 'yellow'))
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.127+0.010+0.107, 
-                        geography=0.010+0.075, 
-                        socioeconomy=0.107+0.054)
+partition <- data.frame(environment=(varpart_part$part$fract$Adj.R.square[1]*RsquareAdj(dbrda_part)$adj.r.squared)/varpart_part$part$fract$Adj.R.square[7], 
+                        geography=(varpart_part$part$fract$Adj.R.square[2]*RsquareAdj(dbrda_part)$adj.r.squared)/varpart_part$part$fract$Adj.R.square[7], 
+                        socioeconomy=(varpart_part$part$fract$Adj.R.square[3]*RsquareAdj(dbrda_part)$adj.r.squared)/varpart_part$part$fract$Adj.R.square[7])
 
 
 partition <- as.data.frame(t(partition))
@@ -80,7 +81,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "s
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("cumulated variance explained")+
+  ylab("Partial R²")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 # get scores

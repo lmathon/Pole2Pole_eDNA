@@ -20,6 +20,8 @@ library(ggpubr)
 library(ggplot2)
 library(effectsize)
 library(greekLetters)
+library(performance)
+library(relaimpo)
 
 load("Rdata/FD_Hill_alpha.rdata")
 load("Rdata/all_explanatory_variables.rdata")
@@ -70,9 +72,7 @@ summary(gls.FDq2)
 anova(gls.FDq2, type = "marginal")
 
 # R² for GLS
-FDq2_pred <- predict(gls.FDq2)
-fit <- lm(FDq2_pred ~ data$FD_q2)
-RsquareAdj(fit)
+r2(gls.FDq2)
 
 hist(gls.FDq2$residuals)
 
@@ -100,6 +100,13 @@ save(fit.DHW.FDq2, file="Rdata/fit.DHW.FDq2.rdata")
 fit.grav_med.FDq2 <- visreg2d(gls.FDq2, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(FDq2 richness +1)", xlab="log10(Gravity +1)")
 save(fit.grav_med.FDq2, file="Rdata/fit.grav_med.FDq2.rdata")
 
+
+#### part R² ####
+relimpo <- calc.relimp(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume,  
+                       data, type = c("lmg", "last", "first", "betasq", "pratt", "genizi", "car"))
+
+r2_FDq2 <- as.data.frame(relimpo$car)
+
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
 geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
@@ -112,19 +119,19 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.297+0.031+0.208+0.123+0.008+0.081+0.226, 
-                        geography=0.095+0.031+0.208+0.008+0.081+0.007, 
-                        socioeconomy=0.021+0.02+0.208+0.008+0.123, 
-                        sampling=0.008+0.02+0.007+0.008+0.081+0.226)
+partition <- data.frame(environment=sum(r2_FDq2[1:4,]), 
+                        geography=sum(r2_FDq2[8:11,]), 
+                        socioeconomy=sum(r2_FDq2[5:7,]), 
+                        sampling=r2_FDq2[12,])
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c( "environment", "geography", "socioeconomy",  "sampling"))
+partition$variables2 <- factor(partition$variables, levels = c( "environment", "geography",  "sampling", "socioeconomy"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("cumulated variance explained")+
+  ylab("partial R²")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 

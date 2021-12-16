@@ -11,6 +11,7 @@ load("Rdata/large_effectsize.rdata")
 effectsize <- rbind(FDq2_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
 effectsize$taxa <- gsub("Richness - Cryptobenthics", "Richness - Crypto", effectsize$taxa)
+effectsize$taxa <- gsub("Functional a-diversity", "Sequence a-diversity", effectsize$taxa)
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
 effectsize$vargroup <- gsub("environment", "Environment", effectsize$vargroup)
 effectsize$vargroup <- gsub("geography", "Geography", effectsize$vargroup)

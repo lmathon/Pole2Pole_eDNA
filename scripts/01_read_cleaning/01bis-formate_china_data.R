@@ -4,6 +4,7 @@ library(tidyr)
 library(data.table)
 library(reshape)
 library(dplyr)
+library(rfishbase)
 
 # Source functions
 source("scripts/01_read_cleaning/00_functions.R")
@@ -12,7 +13,7 @@ load("Rdata/archive_class_ncbi.Rdata")
 
 # load and formate df china
 
-df_china <- read.csv("data/swarm/chine/otutable_formated.csv", sep=";")
+df_china <- read.csv("data/chine/otutable_formated.csv", sep=";")
 vars <- colnames(df_china[,1:30])
 
 df_melt <- melt(df_china, id.vars=vars, variable_name = "sample_name")
@@ -50,12 +51,15 @@ df_clean <- df_short %>%
 
 df_taxo <- clean_taxonomy(df_clean)
 
-df_taxo$class_name <- NA
+x <- load_taxa()
+taxo <- collect(x)
 
-##fonctionne pas chez moi !!
-  #df_output <- add_class_name_archive(df_taxo, archive_class_ncbi)
-  #file_taxo_all <- list_output[[1]]
-  #archive_class_ncbi <- list_output[[2]]
+df_taxo$id <- 1:nrow(df_taxo)
+df_taxo <- left_join(df_taxo, taxo[,c("Family", "Class")], by=c("family_name_corrected"="Family"))
+df_taxo <- df_taxo %>% distinct(id, .keep_all=T)
+df_taxo <- df_taxo %>% select(-id)
+names(df_taxo)[names(df_taxo) == 'Class'] <- 'class_name'
+
 
 df_taxo <- left_join(df_taxo, df_china[,c("definition", "length")], by="definition")
 colnames(df_taxo)[21] <- "length_sequence"

@@ -27,7 +27,7 @@ gravity <- ggplot() +
   geom_line(data=fit.grav.large$fit, aes(Gravity, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.grav.large$fit, aes(x=Gravity, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Gravity+1)")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "alpha FD")) +
+  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -55,11 +55,11 @@ sst <- ggplot() +
   geom_line(data=fit.SST.large$fit, aes(mean_SST_1year, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.SST.large$fit, aes(x=mean_SST_1year, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   annotate(geom="text", x=0, y=2, label="all MOTUs", hjust=0, size=3, color="darkred", fontface = "bold")+
-  annotate(geom="text", x=0, y=2.1, label="alpha FD", hjust=0, size=3, color="orange", fontface = "bold")+
+  annotate(geom="text", x=0, y=2.1, label="sequence", hjust=0, size=3, color="orange", fontface = "bold")+
   annotate(geom="text", x=0, y=1.9, label="Crypto", hjust=0, size=3, color="navy", fontface = "bold")+
   annotate(geom="text", x=0, y=1.8, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
   labs(x="mean SST")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "alpha FD")) +
+  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -88,7 +88,7 @@ med <- ggplot() +
   geom_line(data=fit.MED.large$fit, aes(MarineEcosystemDependency, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.MED.large$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="Marine Ecosystem Dependency")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "alpha FD")) +
+  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -116,7 +116,7 @@ distCT <- ggplot() +
   geom_line(data=fit.CT.large$fit, aes(dist_to_CT, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.CT.large$fit, aes(x=dist_to_CT, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Distance to Coral Triangle (km) +1)")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "alpha FD")) +
+  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner

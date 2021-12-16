@@ -86,7 +86,7 @@ data <- data %>%
   
   FDq2_effectsize <- effectsize(gls.FDq2)
   FDq2_effectsize <- FDq2_effectsize[-1,]
-  FDq2_effectsize$taxa <- "Functional a-diversity"
+  FDq2_effectsize$taxa <- "sequence a-diversity"
   FDq2_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
   
   

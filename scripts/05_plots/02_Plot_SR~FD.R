@@ -17,7 +17,7 @@ FD_rich_station <- FD_rich_station %>%
 SR_FDq2 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q2)) +
   geom_point(size=2, aes(col=province), show.legend = T)+
   scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col")+
-  labs(x="MOTUs richness", y= expression(paste("Functional ", alpha,"-diversity")))+
+  labs(x="MOTUs richness", y= expression(paste("Sequence ", alpha,"-diversity")))+
   theme_bw()
 
 ggsave("outputs/SR~FDq2.png", width = 8, height = 5)

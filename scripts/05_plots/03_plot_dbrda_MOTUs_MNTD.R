@@ -15,7 +15,7 @@ dbrda_MOTUs_province <- dbrda_MOTUs_province +
         plot.title = element_text(size = 12, color = "black", face = "bold"))
 
 dbrda_FD_province <- dbrda_FD_prov +
-  ggtitle("B. Functional B-diversity")+
+  ggtitle("B. Sequence B-diversity")+
   theme(plot.title.position = "panel",
         plot.title = element_text(size = 12, color = "black", face = "bold"))
 

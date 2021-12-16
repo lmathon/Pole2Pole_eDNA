@@ -11,9 +11,7 @@ df_filtered <- df_all_filters %>%
   filter(sample_method !="control") %>%
   filter(depth_sampling < 40) %>%
   filter(site_name != "Kirkenes")
-  #filter(family_name_corrected %ni% "Salmonidae") %>%
-  #filter(site_name!="kirkenes") %>%
-  #filter(site_name %ni% c("mallorca", "menorca"))
+  
   
 list_read_step4 <- lapply(list_read_step4, function(x){
     x %>%
@@ -23,9 +21,7 @@ list_read_step4 <- lapply(list_read_step4, function(x){
       filter(sample_method !="control") %>%
       filter(depth_sampling < 40) %>%
       filter(site_name != "Kirkenes") #%>%
-      #filter(family_name_corrected %ni% "Salmonidae") %>%
-      #filter(site_name!="kirkenes") %>%
-      #filter(site_name %ni% c("mallorca", "menorca"))
+      
 })
 
 save(list_read_step3, list_read_step3_0PCR, list_read_step4, df_filtered, file = "Rdata/03-filter-data.Rdata")

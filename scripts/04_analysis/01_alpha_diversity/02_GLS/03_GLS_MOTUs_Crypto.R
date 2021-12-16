@@ -18,6 +18,8 @@ library(rcompanion)
 library(ggpubr)
 library(ggplot2)
 library(effectsize)
+library(performance)
+library(relaimpo)
 
 
 load("Rdata/richness_station.rdata")
@@ -74,9 +76,7 @@ AIC(gls.crypto)
 
 
 # R² for GLS
-MOTU_pred <- predict(gls.crypto)
-fit <- lm(MOTU_pred ~ data$crypto_MOTUs)
-RsquareAdj(fit)
+r2(gls.crypto)
 
 shapiro.test(gls.crypto$residuals)
 hist(gls.crypto$residuals)
@@ -105,6 +105,11 @@ save(fit.DHW.crypto, file="Rdata/fit.DHW.crypto.rdata")
 fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="lg10(Gravity +1)")
 save(fit.grav_med.crypto, file="Rdata/fit.grav_med.crypto.rdata")
 
+#### part R² ####
+relimpo <- calc.relimp(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, 
+                       data, type = c("lmg", "last", "first", "betasq", "pratt", "genizi", "car"))
+
+r2_crypto <- as.data.frame(relimpo$car)
 
 #### Variation partitioning ####
 env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
@@ -118,10 +123,10 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 
 # boxplot partition per variable type
 
-partition <- data.frame(environment=0.232+0.203+0.059+0.038+0.114+0.247, 
-                        geography=0.168+0.203+0.038+0.114+0.02, 
-                        socioeconomy=0.083+0.027+0.203+0.038+0.059, 
-                        sampling=0.004+0.027+0.02+0.038+0.114+0.247)
+partition <- data.frame(environment=sum(r2_crypto[1:4,]), 
+                        geography=sum(r2_crypto[8:11,]), 
+                        socioeconomy=sum(r2_crypto[5:7,]), 
+                        sampling=r2_crypto[12,])
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -130,7 +135,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "g
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("cumulated variance explained")+
+  ylab("partial R²")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 #### effect size ####
