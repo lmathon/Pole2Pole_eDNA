@@ -51,6 +51,28 @@ com[is.na(com)] <- 0
 com[com>0] <- 1
 
 
+
+#### calculate alpha FD Hill ####
+com <- as.matrix(com)
+test <- alpha.fd.hill(com, dist_gen, q=c(0,1,2), tau = "mean")
+FD_Hill <- as.data.frame(test$asb_FD_Hill)
+FD_Hill$station <- rownames(FD_Hill)
+
+save(FD_Hill, file = "Rdata/FD_Hill_alpha.rdata")
+
+
+
+
+
+
+
+
+######################################################################################
+# UNUSED
+######################################################################################
+
+
+
 #### calculate MNTD for each stations ####
 
 mntd_stations <- ses.mntd(com, dist_gen, abundance.weighted = FALSE, null.model = "independentswap", runs = 999, iterations = 100)
@@ -62,10 +84,3 @@ mntd_stations <- mntd(com, dist_gen, abundance.weighted = FALSE)
 mntd_stations_nc <- data.frame(station=stations, MNTD=mntd_stations)
 save(mntd_stations_nc, file="Rdata/MNTD_station_NC.rdata")
 
-#### calculate alpha FD Hill ####
-com <- as.matrix(com)
-test <- alpha.fd.hill(com, dist_gen, q=c(0,1,2), tau = "mean")
-FD_Hill <- as.data.frame(test$asb_FD_Hill)
-FD_Hill$station <- rownames(FD_Hill)
-
-save(FD_Hill, file = "Rdata/FD_Hill_alpha.rdata")
