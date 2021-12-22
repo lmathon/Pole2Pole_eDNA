@@ -11,6 +11,7 @@ library(cowplot)
 library(mFD)
 library(ecodist)
 library(coRanking)
+library(funk)
 
 
 #import species lists
@@ -128,7 +129,7 @@ AUC <- coRanking::AUC_ln_K(NX)
 
 # biplot
 
-plot(dist_gen ~ dist_phylo)
+plot(dist_phylo ~ dist_gen, xlab="Genetic distance", ylab="Phylogenetic distance", col="black")
 
 
 # prepare community matrix
@@ -180,10 +181,15 @@ colnames(Hill) <- c("station", "genet", "phylo")
 cor.test(Hill$phylo, Hill$genet, method = "spearman")
 
 
-ggplot(Hill, aes(genet, phylo))+
+plot_alpha_phylo_gen <- ggplot(Hill, aes(genet, phylo))+
   geom_point()+
-  labs(x="alpha genetic", y="alpha phylogenetic")+
-  annotate(geom="text", x=2, y=14, label="Spearman rho=0.92 \n p<0.001", hjust=0, size=3.5, fontface = "bold")
+  labs(y= expression(paste("Phylogenetic ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
+  annotate(geom="text", x=1, y=14, label="Spearman rho=0.92 \n p<0.001", hjust=0, size=4.5, fontface = "bold")+
+  theme_sleek(base_size = 24)+
+  theme(axis.title = element_text(size=14))
+
+save(plot_alpha_phylo_gen, file="Rdata/plot_alpha_phylo_gen.rdata")
+
 
 # calculate beta HILL for genet and phylo between samples
 
@@ -201,4 +207,4 @@ co_rank <- coranking(beta_hill_gen, beta_hill_phylo, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
-plot(beta_hill_phylo ~ beta_hill_gen)
+plot(beta_hill_phylo ~ beta_hill_gen, xlab=expression(paste("Sequence ", beta,"-diversity")), ylab=expression(paste("Phylogenetic ", beta,"-diversity")))

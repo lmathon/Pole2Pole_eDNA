@@ -11,6 +11,7 @@ library(cowplot)
 library(mFD)
 library(ecodist)
 library(coRanking)
+library(funk)
 
 
 #import species lists
@@ -129,7 +130,7 @@ AUC <- coRanking::AUC_ln_K(NX)
 
 # biplot
 
-plot(dist_gen ~ dist_trait)
+plot(dist_trait ~ dist_gen, xlab="Genetic distance", ylab="Functional distance", col="black")
 
 
 
@@ -182,11 +183,14 @@ colnames(Hill) <- c("station", "genet", "trait")
 cor.test(Hill$trait, Hill$genet, method = "spearman")
 
 
-ggplot(Hill, aes(genet, trait))+
+plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
   geom_point()+
-  labs(x="alpha genetic", y="alpha functional")+
-  annotate(geom="text", x=2, y=14, label="Spearman rho=0.81 \n p<0.001", hjust=0, size=3.5, fontface = "bold")
+  labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
+  annotate(geom="text", x=1, y=14, label="Spearman rho=0.81 \n p<0.001", hjust=0, size=4.5, fontface = "bold")+
+  theme_sleek(base_size = 24)+
+  theme(axis.title = element_text(size = 14))
 
+save(plot_alpha_trait_gen, file="Rdata/plot_alpha_trait_gen.rdata")
 
 # calculate beta HILL for genet and functio between samples
 
@@ -204,4 +208,5 @@ co_rank <- coranking(beta_hill_gen, beta_hill_trait, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
-plot(beta_hill_trait ~ beta_hill_gen)
+plot(beta_hill_trait ~ beta_hill_gen, xlab=expression(paste("Sequence ", beta,"-diversity")), ylab=expression(paste("Functional ", beta,"-diversity")))
+
