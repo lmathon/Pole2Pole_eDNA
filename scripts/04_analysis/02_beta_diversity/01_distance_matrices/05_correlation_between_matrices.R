@@ -15,10 +15,10 @@ load("Rdata/selected_socioeconomic_variables.rdata")
 
 # select same stations in big geographic distance matrix
 dist_km <- dist_km[rownames(mntd), colnames(mntd)]
-dist_jac_mo <- dist_jac_mo[rownames(mntd), colnames(mntd)]
-save(dist_jac_mo, file="Rdata/Jaccard_MOTU_dissimilarity.rdata")
+jaccard_motu <- jaccard_motu[rownames(mntd), colnames(mntd)]
+save(jaccard_motu, file="Rdata/Jaccard_MOTU_dissimilarity.rdata")
 
-dist_jac_mo <- as.dist(dist_jac_mo)
+jaccard_motu <- as.dist(jaccard_motu)
 dist_jac_sp <- as.dist(dist_jac_sp)
 dist_km <- as.dist(dist_km)
 mntd <- as.dist(mntd)
@@ -49,8 +49,8 @@ dissplot(dist_socio, method=NA,
 
 
 # calculate correlations
-mantel.rtest(dist_jac_mo, mntd) # Motu composition dissimilarity & mntd correlated
-mantel.rtest(dist_jac_mo, dist_km) # geographic distance & Motu composition dissimilarity correlated
+mantel.rtest(jaccard_motu, mntd) # Motu composition dissimilarity & mntd correlated
+mantel.rtest(jaccard_motu, dist_km) # geographic distance & Motu composition dissimilarity correlated
 mantel.rtest(dist_km, mntd) # geographic distance & mntd correlated
 mantel.rtest(dist_env, mntd)
 mantel.rtest(dist_socio, mntd)
