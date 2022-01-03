@@ -27,7 +27,7 @@ ggsave("outputs/SR~FDq2.png", width = 8, height = 5)
 load("Rdata/map_global.rdata")
 
 
-ggarrange(map_global, SR_FDq2, nrow=2, ncol=1, labels = c("A", "B"))
-ggsave("outputs/fig1.png", width = 7, height = 7)
+ggarrange(map_global, SR_FDq2, nrow=2, ncol=1, labels = c("(a)", "(b)"))
+ggsave("outputs/fig1.png", width = 7.2, height = 7.2, dpi = 600)
 
 cor.test(FD_rich_station$FD_q2, FD_rich_station$MOTUs, method = "spearman")

@@ -119,6 +119,8 @@ plot_seq <- dissplot(dist_gen, method=NA,
                        col=bluered(100))
 
 # correlation between matrix
+dist_gen <- as.matrix(dist_gen)
+dist_phylo <- as.matrix(dist_phylo)
 
 ecodist::mantel(dist_phylo ~ dist_gen)
 
@@ -184,9 +186,10 @@ cor.test(Hill$phylo, Hill$genet, method = "spearman")
 plot_alpha_phylo_gen <- ggplot(Hill, aes(genet, phylo))+
   geom_point()+
   labs(y= expression(paste("Phylogenetic ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=14, label="Spearman rho=0.92 \n p<0.001", hjust=0, size=4.5, fontface = "bold")+
+  annotate(geom="text", x=1, y=14, label="Spearman rho=0.92 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
-  theme(axis.title = element_text(size=14))
+  theme(axis.title = element_text(size=18),
+        axis.text = element_text(size=14))
 
 save(plot_alpha_phylo_gen, file="Rdata/plot_alpha_phylo_gen.rdata")
 
@@ -207,4 +210,8 @@ co_rank <- coranking(beta_hill_gen, beta_hill_phylo, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
-plot(beta_hill_phylo ~ beta_hill_gen, xlab=expression(paste("Sequence ", beta,"-diversity")), ylab=expression(paste("Phylogenetic ", beta,"-diversity")))
+
+plot(beta_hill_phylo ~ beta_hill_gen, 
+     xlab=expression(paste("Sequence ", beta,"-diversity")), 
+     ylab=expression(paste("Phylogenetic  ", beta,"-diversity")),
+     cex.lab = 1.2, cex.axis = 1.2)

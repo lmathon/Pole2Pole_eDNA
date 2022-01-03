@@ -10,14 +10,14 @@ load("Rdata/dbrda_FD_SST.rdata")
 
 
 dbrda_MOTUs_province <- dbrda_MOTUs_province +
-  ggtitle("A. Jaccard MOTUs composition")+
+  ggtitle("(a) Jaccard MOTUs composition")+
   theme(plot.title.position = "panel",
-        plot.title = element_text(size = 12, color = "black", face = "bold"))
+        plot.title = element_text(size = 13, color = "black", face = "bold"))
 
 dbrda_FD_province <- dbrda_FD_prov +
-  ggtitle("B. Sequence B-diversity")+
+  ggtitle("(b) Sequence ??-diversity")+  
   theme(plot.title.position = "panel",
-        plot.title = element_text(size = 12, color = "black", face = "bold"))
+        plot.title = element_text(size = 13, color = "black", face = "bold"))
 
 dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, 
                             common.legend = T, legend = c("bottom")) 

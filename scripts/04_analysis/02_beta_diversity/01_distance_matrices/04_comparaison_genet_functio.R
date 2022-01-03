@@ -121,6 +121,9 @@ plot_seq <- dissplot(dist_gen, method=NA,
 
 # Correlaton between matrix
 
+dist_gen <- as.matrix(dist_gen)
+dist_trait <- as.matrix(dist_trait)
+
 ecodist::mantel(dist_gen ~ dist_trait)
 
 
@@ -170,7 +173,7 @@ com <- com[rowSums(com)>0, ]
 
 # Calculate alpha HILL for genet and functio per sample
 
-dist_gen <- as.matrix(dist_gen)
+
 com <- as.matrix(com)
 Hill_gen <- alpha.fd.hill(com, dist_gen, q=2, tau = "mean")
 
@@ -186,9 +189,10 @@ cor.test(Hill$trait, Hill$genet, method = "spearman")
 plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=14, label="Spearman rho=0.81 \n p<0.001", hjust=0, size=4.5, fontface = "bold")+
+  annotate(geom="text", x=1, y=15, label="Spearman rho=0.81 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
-  theme(axis.title = element_text(size = 14))
+  theme(axis.title = element_text(size=18),
+        axis.text = element_text(size=14))
 
 save(plot_alpha_trait_gen, file="Rdata/plot_alpha_trait_gen.rdata")
 
@@ -208,5 +212,8 @@ co_rank <- coranking(beta_hill_gen, beta_hill_trait, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
-plot(beta_hill_trait ~ beta_hill_gen, xlab=expression(paste("Sequence ", beta,"-diversity")), ylab=expression(paste("Functional ", beta,"-diversity")))
+plot(beta_hill_trait ~ beta_hill_gen, 
+     xlab=expression(paste("Sequence ", beta,"-diversity")), 
+     ylab=expression(paste("Functional ", beta,"-diversity")),
+     cex.lab = 1.2, cex.axis = 1.2)
 
