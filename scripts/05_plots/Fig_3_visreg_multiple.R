@@ -131,8 +131,9 @@ ggsave("outputs/GLS/visreg_distCT.png", height = 5, width = 5)
 
 #### plot all together ####
 
-ggarrange(sst, distCT, gravity, med, nrow=2, ncol=2, labels = c("(a)", "(b)", "(c)", "(d)"))
+ggarrange(sst, distCT, gravity, med, nrow=2, ncol=2, labels = c("a", "b", "c", "d"))
 ggsave("outputs/GLS/visreg_multiple_FDq2.png", width = 8, height = 7)
+ggsave("outputs/Figures_papier/Fig3.png", width = 8, height = 7)
 
 
 #### Plot visreg gravity + MED ####

@@ -51,8 +51,11 @@ ggplot(data = effectsize,
   theme(legend.position = "none", 
         axis.title.y = element_blank(), 
         axis.title.x = element_text(size = 12),
-        strip.text.x = element_text(size=10,face="bold"),
-        strip.text.y = element_text(size=10,face="bold"),
+        strip.text.y = element_text(size=12,face="bold"),
+        strip.text.x = element_text(size=12,face="bold"),
+        axis.text.x = element_text(size=10),
+        axis.text.y = element_text(size=10),
         strip.placement = "outside")
 
 ggsave("outputs/GLS/FDq2_effect_size.png", width = 10, height = 6.5)
+ggsave("outputs/Figures_papier/Fig2.png", width = 10, height = 6.5)
