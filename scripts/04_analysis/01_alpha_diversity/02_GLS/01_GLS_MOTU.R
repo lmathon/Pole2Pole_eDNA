@@ -27,7 +27,7 @@ load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data <- left_join(exp_var_num, rich_station[,c("MOTUs", "station")], by="station")
+data <- left_join(exp_var, rich_station[,c("MOTUs", "station")], by="station")
 data <- data %>%
   dplyr::select(-c(station))
 
@@ -45,7 +45,7 @@ meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- meta[, c("longitude_start", "latitude_start", "province")]
 data <- cbind(data, coor)
-
+data$sample_method2 <- as.factor(data$sample_method2)
 
 #### GLS to account for spatial autocorrelation ####
 
@@ -66,7 +66,7 @@ AIC(mexp, mgau, msph, mlin, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 save(gls.motus, file="Rdata/gls_motus.rdata")
 
@@ -99,25 +99,18 @@ fit.samp.motus <- visreg(gls.motus,"depth_sampling",scale="response")
 save(fit.samp.motus, file="Rdata/fit.samp.motus.rdata")
 fit.DHW.motus <- visreg(gls.motus,"mean_DHW_1year",scale="response")
 save(fit.DHW.motus, file="Rdata/fit.DHW.motus.rdata")
+fit.method.motus <- visreg(gls.motus,"sample_method2",scale="response")
+save(fit.method.motus, file="Rdata/fit.method.motus.rdata")
 
 
 fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(MOTUs richness +1)", xlab="log10(Gravity +1)", plot.type="gg")
 save(fit.grav_med.motus, file="Rdata/fit.grav_med.motus.rdata")
 
 #### part R² ####
-relimpo <- calc.relimp(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, 
-                       data, type = c("lmg", "last", "first", "betasq", "pratt", "genizi", "car"))
+relimpo <- calc.relimp(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, 
+                       data, type = c("lmg", "last", "first"))
 
-r2_motus <- as.data.frame(relimpo$car)
-
-#### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
-geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
-samp_var <- data[, c("volume")]
-
-varpart <- varpart(gls.motus, env_var, geo_var, socio_var, samp_var)
-plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
+r2_motus <- as.data.frame(relimpo$lmg)
 
 
 # boxplot partition per variable type
@@ -125,7 +118,7 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 partition <- data.frame(environment=sum(r2_motus[1:4,]), 
                         geography=sum(r2_motus[8:11,]), 
                         socioeconomy=sum(r2_motus[5:7,]), 
-                        sampling=r2_motus[12,])
+                        sampling=r2_motus[c(12,13),])
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
@@ -143,6 +136,6 @@ ggplot(partition, aes(x=variables2,y = V1))+
 motus_effectsize <- effectsize(gls.motus)
 motus_effectsize <- motus_effectsize[-1,]
 motus_effectsize$taxa <- "Richness - all MOTUs"
-motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
 
 save(motus_effectsize, file = "Rdata/motu_effectsize.rdata")

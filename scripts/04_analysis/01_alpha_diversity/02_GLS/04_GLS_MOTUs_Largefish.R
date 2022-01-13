@@ -27,7 +27,7 @@ load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data <- left_join(exp_var_num, rich_station[,c("largefish_MOTUs", "station")], by="station")
+data <- left_join(exp_var, rich_station[,c("largefish_MOTUs", "station")], by="station")
 data <- data %>%
   dplyr::select(-c(station))
 
@@ -45,7 +45,7 @@ meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
-
+data$sample_method2 <- as.factor(data$sample_method2)
 
 #### GLS to account for spatial autocorrelation ####
 
@@ -66,7 +66,7 @@ AIC(mexp, mgau, mlin, msph, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 save(gls.largefish, file="Rdata/gls_large.rdata")
 
@@ -102,25 +102,19 @@ fit.samp.large <- visreg(gls.largefish,"depth_sampling",scale="response")
 save(fit.samp.large, file="Rdata/fit.samp.large.rdata")
 fit.DHW.large <- visreg(gls.largefish,"mean_DHW_1year",scale="response")
 save(fit.DHW.large, file="Rdata/fit.DHW.large.rdata")
+fit.method.large <- visreg(gls.largefish,"sample_method2",scale="response")
+save(fit.method.large, file="Rdata/fit.method.large.rdata")
+
 
 fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Large fish richness +1)", xlab="lg10(Gravity +1)")
 save(fit.grav_med.large, file="Rdata/fit.grav_med.large.rdata")
 
 #### part R² ####
-relimpo <- calc.relimp(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume,  
-                       data, type = c("lmg", "last", "first", "betasq", "pratt", "genizi", "car"))
+relimpo <- calc.relimp(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2,  
+                       data, type = c("lmg", "last", "first"))
 
-r2_large <- as.data.frame(relimpo$car)
+r2_large <- as.data.frame(relimpo$lmg)
 
-
-#### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
-geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
-samp_var <- data[, c("volume")]
-
-varpart <- varpart(gls.largefish$fitted, env_var, geo_var, socio_var, samp_var)
-plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # boxplot partition per variable type
@@ -128,11 +122,11 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 partition <- data.frame(environment=sum(r2_large[1:4,]), 
                         geography=sum(r2_large[8:11,]), 
                         socioeconomy=sum(r2_large[5:7,]), 
-                        sampling=r2_large[12,])
+                        sampling=r2_large[c(12,13),])
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "geography", "sampling", "socioeconomy"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "geography", "socioeconomy", "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -145,7 +139,7 @@ ggplot(partition, aes(x=variables2,y = V1))+
 large_effectsize <- effectsize(gls.largefish)
 large_effectsize <- large_effectsize[-1,]
 large_effectsize$taxa <- "Richness - Large fish"
-large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
 
 save(large_effectsize, file = "Rdata/large_effectsize.rdata")
 

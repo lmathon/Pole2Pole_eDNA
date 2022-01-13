@@ -15,11 +15,21 @@ effectsize$taxa <- gsub("Functional a-diversity", "Sequence a-diversity", effect
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
 effectsize$vargroup <- gsub("environment", "Environment", effectsize$vargroup)
 effectsize$vargroup <- gsub("geography", "Geography", effectsize$vargroup)
-effectsize$vargroup <- gsub("sampling", "Samp.", effectsize$vargroup)
+effectsize$vargroup <- gsub("sampling", "Sampling", effectsize$vargroup)
 effectsize$Parameter <- gsub("bathy", "bathymetry", effectsize$Parameter)
 effectsize$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize$Parameter)
 effectsize$Parameter <- gsub("distCoast", "distance to shore", effectsize$Parameter)
 effectsize$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize$Parameter)
+effectsize$Parameter <- gsub("sample_method2transect", "method_transect", effectsize$Parameter)
+
+for (i in 1:nrow(effectsize)) {
+  if(effectsize[i, "vargroup"]=="Sampling"){
+    effectsize[i,"Std_Coefficient"] <- effectsize[i,"Std_Coefficient"]/max(effectsize$CI_high)
+    effectsize[i,"CI_low"] <- effectsize[i,"CI_low"]/max(effectsize$CI_high)
+    effectsize[i,"CI_high"] <- effectsize[i,"CI_high"]/max(effectsize$CI_high)
+  }
+}
+
 
 effectsize$color <- NA
 for (i in 1:nrow(effectsize)) {
@@ -35,7 +45,7 @@ for (i in 1:nrow(effectsize)) {
 
 
 effectsize <- effectsize %>%
-  mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))
+  mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Sampling")))
 
 ggplot(data = effectsize, 
        aes(x = Parameter, y = Std_Coefficient)) +

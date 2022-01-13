@@ -28,7 +28,7 @@ load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(FD_Hill) <- FD_Hill$station
 
-data <- left_join(exp_var_num, FD_Hill[,c("FD_q2", "station")], by="station")
+data <- left_join(exp_var, FD_Hill[,c("FD_q2", "station")], by="station")
 data <- data %>%
   dplyr::select(-c(station))
 
@@ -42,7 +42,7 @@ meta <- meta[rownames(FD_Hill),]
 identical(as.character(rownames(meta)), rownames(FD_Hill))
 coor <- meta[, c("longitude_start", "latitude_start", "province")]
 data <- cbind(data, coor)
-
+data$sample_method2 <- as.factor(data$sample_method2)
 
 #### GLS to account for spatial autocorrelation ####
 
@@ -63,7 +63,7 @@ AIC(mexp, mgau, msph, mlin, mrat)
 gls.full <- mgau
 
 # remove colinear variables from VIF
-gls.FDq2 <- gls(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+gls.FDq2 <- gls(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
 
 save(gls.FDq2, file="Rdata/gls_FDq2.rdata")
 
@@ -95,26 +95,19 @@ fit.samp.FDq2 <- visreg(gls.FDq2,"depth_sampling",scale="response")
 save(fit.samp.FDq2, file="Rdata/fit.samp.FDq2.rdata")
 fit.DHW.FDq2 <- visreg(gls.FDq2,"mean_DHW_1year",scale="response")
 save(fit.DHW.FDq2, file="Rdata/fit.DHW.FDq2.rdata")
-
+fit.method.FDq2 <- visreg(gls.FDq2,"sample_method2",scale="response")
+save(fit.method.FDq2, file="Rdata/fit.method.FDq2.rdata")
 
 fit.grav_med.FDq2 <- visreg2d(gls.FDq2, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(FDq2 richness +1)", xlab="log10(Gravity +1)")
 save(fit.grav_med.FDq2, file="Rdata/fit.grav_med.FDq2.rdata")
 
 
 #### part R² ####
-relimpo <- calc.relimp(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume,  
-                       data, type = c("lmg", "last", "first", "betasq", "pratt", "genizi", "car"))
+relimpo <- calc.relimp(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2,  
+                       data, type = c("lmg", "last", "first"))
 
-r2_FDq2 <- as.data.frame(relimpo$car)
+r2_FDq2 <- as.data.frame(relimpo$lmg)
 
-#### Variation partitioning ####
-env_var <- data[,c("mean_DHW_1year", "mean_sss_1year", "mean_SST_1year", "mean_npp_1year")]
-geo_var <- data[, c("bathy", "dist_to_CT", "distCoast","depth_sampling")]
-socio_var <- data[,c("HDI2019", "Gravity", "MarineEcosystemDependency")]
-samp_var <- data[, c("volume")]
-
-varpart <- varpart(gls.FDq2$fitted, env_var, geo_var, socio_var, samp_var)
-plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy', 'sampling'), bg = c('navy', 'tomato', 'yellow', 'lightgreen'))
 
 
 # boxplot partition per variable type
@@ -122,11 +115,11 @@ plot(varpart, digits = 2, Xnames = c('environment', 'geography', 'socio-economy'
 partition <- data.frame(environment=sum(r2_FDq2[1:4,]), 
                         geography=sum(r2_FDq2[8:11,]), 
                         socioeconomy=sum(r2_FDq2[5:7,]), 
-                        sampling=r2_FDq2[12,])
+                        sampling=r2_FDq2[c(12,13),])
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c( "environment", "geography",  "sampling", "socioeconomy"))
+partition$variables2 <- factor(partition$variables, levels = c( "environment", "geography", "socioeconomy",  "sampling"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -140,6 +133,6 @@ ggplot(partition, aes(x=variables2,y = V1))+
 FDq2_effectsize <- effectsize(gls.FDq2)
 FDq2_effectsize <- FDq2_effectsize[-1,]
 FDq2_effectsize$taxa <- "Functional a-diversity"
-FDq2_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+FDq2_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
 
 save(FDq2_effectsize, file = "Rdata/FDq2_effectsize.rdata")

@@ -125,6 +125,31 @@ hist(log1p(samp_var2$volume), col="grey")
 
 samp_var2$volume <- log10(samp_var2$volume +1)
 
+
+for(i in 1:nrow(samp_var2)){
+  if (samp_var2[i, "sample_method"]=="transect_aller"){
+    samp_var2[i, "sample_method2"] <- "transect"
+  }
+  if (samp_var2[i, "sample_method"]=="transect_rond"){
+    samp_var2[i, "sample_method2"] <- "transect"
+  }
+  if (samp_var2[i, "sample_method"]=="transect_aller_retour"){
+    samp_var2[i, "sample_method2"] <- "transect"
+  }
+  if (samp_var2[i, "sample_method"]=="transect_rectangle"){
+    samp_var2[i, "sample_method2"] <- "transect"
+  }
+  if (samp_var2[i, "sample_method"]=="transect_benthique"){
+    samp_var2[i, "sample_method2"] <- "transect"
+  }
+  if (samp_var2[i, "sample_method"]=="bag_underwater"){
+    samp_var2[i, "sample_method2"] <- "point"
+  }
+  if (samp_var2[i, "sample_method"]=="bottle"){
+    samp_var2[i, "sample_method2"] <- "point"
+  }
+}
+
 # socioeco
 
 cor_socio_var <- mixed_assoc(socio_var[,-1])
@@ -188,10 +213,10 @@ ggplot(cor_var_sign, aes(x,y,fill=assoc))+
 
 # separate numeric and categorical
 exp_var_num <- exp_var %>%
-  dplyr::select( -c(sample_method, sequencer, province))
+  dplyr::select( -c(sample_method, sample_method2, sequencer, province))
 
 exp_var_cat <- exp_var %>%
-  dplyr::select(sample_method, sequencer, province)
+  dplyr::select(sample_method, sample_method2, sequencer, province)
 
 # save all variables
 save(exp_var, file="Rdata/all_explanatory_variables.rdata")
