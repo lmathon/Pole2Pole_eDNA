@@ -47,7 +47,7 @@ mctest::imcdiag(dbrda_full, method="VIF")
 
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1+sample_method2), df_mem) 
 
 
 RsquareAdj(dbrda_part)

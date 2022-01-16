@@ -69,7 +69,7 @@ traits_species <- traits_species[,-c(1,2)]
 
 # compute functional distance
 
-dist_trait = compute_dist_matrix(traits_species,metric = "euclidean", center = T, scale = T)
+dist_trait = compute_dist_matrix(traits_species, metric = "euclidean", center = T, scale = T)
 
 maxs <- apply(dist_trait, 2, max)
 mins <- apply(dist_trait, 2, min)
@@ -99,27 +99,9 @@ colnames(dist_gen) <- seq$species_name_corrected
 
 identical(rownames(dist_gen), rownames(dist_trait))
 
-# plot 
-
-dist_gen <- as.dist(dist_gen)
-dist_trait <- as.dist(dist_trait)
-
-plot_funct <- dissplot(dist_trait, method=NA, 
-                       upper_tri = TRUE, 
-                       lower_tri = FALSE, 
-                       reverse_columns=TRUE,
-                       main="Distance functional",
-                       col=bluered(100))
-
-plot_seq <- dissplot(dist_gen, method=NA, 
-                     upper_tri = TRUE, 
-                     lower_tri = FALSE, 
-                     reverse_columns=TRUE,
-                     main="Distance sequence",
-                     col=bluered(100))
 
 
-# Correlaton between matrix
+# Correlation between matrix
 
 dist_gen <- as.matrix(dist_gen)
 dist_trait <- as.matrix(dist_trait)
@@ -175,10 +157,10 @@ com <- com[rowSums(com)>0, ]
 
 
 com <- as.matrix(com)
-Hill_gen <- alpha.fd.hill(com, dist_gen, q=2, tau = "mean")
+Hill_gen <- alpha.fd.hill(com, dist_gen, q=1, tau = "mean")
 
 dist_trait <- as.matrix(dist_trait)
-Hill_trait <- alpha.fd.hill(com, dist_trait, q=2, tau = "mean")
+Hill_trait <- alpha.fd.hill(com, dist_trait, q=1, tau = "mean")
 
 Hill <- data.frame(station=rownames(com), genet=Hill_gen$asb_FD_Hill, trait=Hill_trait$asb_FD_Hill)
 colnames(Hill) <- c("station", "genet", "trait")
@@ -189,7 +171,7 @@ cor.test(Hill$trait, Hill$genet, method = "pearson")
 plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=15, label="Pearson cor=0.8 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=1, y=17, label="Pearson cor=0.85 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
@@ -198,26 +180,28 @@ save(plot_alpha_trait_gen, file="Rdata/plot_alpha_trait_gen.rdata")
 
 # calculate beta HILL for genet and functio between samples
 
-beta_hill_gen <- beta.fd.hill(com, dist_gen, q=2, tau = "mean", beta_type="Jaccard")
-beta_hill_gen <- beta_hill_gen$beta_fd_q$q2
+beta_hill_gen <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type="Jaccard")
+beta_hill_gen <- beta_hill_gen$beta_fd_q$q1
 
-beta_hill_trait <- beta.fd.hill(com, dist_trait, q=2, tau = "mean", beta_type="Jaccard")
-beta_hill_trait <- beta_hill_trait$beta_fd_q$q2
+beta_hill_trait <- beta.fd.hill(com, dist_trait, q=1, tau = "mean", beta_type="Jaccard")
+beta_hill_trait <- beta_hill_trait$beta_fd_q$q1
 
 
-ecodist::mantel(beta_hill_gen ~ beta_hill_trait)
 
 
 co_rank <- coranking(beta_hill_gen, beta_hill_trait, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
+
+mantel(as.dist(beta_hill_gen) ~ as.dist(beta_hill_trait))
+
 beta_hill <- data.frame(gen=as.vector(beta_hill_gen), trait=as.vector(beta_hill_trait))
 
 plot_beta_trait_gen <- ggplot(beta_hill, aes(gen, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", beta,"-diversity")), x=expression(paste("Sequence ", beta,"-diversity")))+
-  annotate(geom="text", x=0, y=1, label="Mantel=0.88", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=0, y=1, label="Mantel=0.84", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))

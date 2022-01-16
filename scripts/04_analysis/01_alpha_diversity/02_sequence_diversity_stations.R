@@ -64,23 +64,3 @@ save(FD_Hill, file = "Rdata/FD_Hill_alpha.rdata")
 
 
 
-
-
-
-######################################################################################
-# UNUSED
-######################################################################################
-
-
-
-#### calculate MNTD for each stations ####
-
-mntd_stations <- ses.mntd(com, dist_gen, abundance.weighted = FALSE, null.model = "independentswap", runs = 999, iterations = 100)
-
-mntd_stations <- data.frame(station=stations, MNTD=mntd_stations$mntd.obs.z)
-save(mntd_stations, file="Rdata/MNTD_station.rdata")
-
-mntd_stations <- mntd(com, dist_gen, abundance.weighted = FALSE)
-mntd_stations_nc <- data.frame(station=stations, MNTD=mntd_stations)
-save(mntd_stations_nc, file="Rdata/MNTD_station_NC.rdata")
-

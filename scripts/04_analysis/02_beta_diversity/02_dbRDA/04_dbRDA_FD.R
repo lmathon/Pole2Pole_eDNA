@@ -47,7 +47,7 @@ mctest::imcdiag(dbrda_full, method="VIF")
 
 
 #### partial dbrda correcting for sampling and MEM ####
-dbrda_part <- capscale(beta_FD ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1), df_mem) 
+dbrda_part <- capscale(beta_FD ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1+sample_method2), df_mem) 
 
 
 
@@ -108,12 +108,12 @@ identical(as.character(rownames(data)), rownames(station_scores)) # verify that 
 station_scores_met <- cbind(station_scores, data)
 
 
-dbrda_FD_MED <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_point(cex = 2, show.legend = F, aes(col=MarineEcosystemDependency)) +
-  scale_color_gradient(low="blue", high="red")+
-  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
+  geom_point(cex = 2, show.legend = T, aes(col=province)) +
+  #scale_color_gradient(low="blue", high="red")+
+  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
   geom_label_repel(data= var_scores_diff75, 
@@ -135,7 +135,7 @@ dbrda_FD_MED <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         legend.key.height = unit(0.5, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-dbrda_FD_MED
+dbrda_FD_prov
 
-ggsave("outputs/dbRDA/FD/dbrda_MED.png")
-save(dbrda_FD_MED, file="Rdata/dbrda_FD_MED.rdata")
+ggsave("outputs/dbRDA/FD/dbrda_province.png")
+save(dbrda_FD_prov, file="Rdata/dbrda_FD_province.rdata")

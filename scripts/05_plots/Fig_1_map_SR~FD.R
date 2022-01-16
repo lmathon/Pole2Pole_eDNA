@@ -14,20 +14,20 @@ FD_rich_station <- FD_rich_station %>%
   distinct(station, .keep_all=T)
 
 
-SR_FDq2 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q2)) +
+SR_FDq1 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q1)) +
   geom_point(size=2, aes(col=province), show.legend = T)+
   scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col")+
   labs(x="MOTUs richness", y= expression(paste("Sequence ", alpha,"-diversity")))+
   theme_bw()
 
-ggsave("outputs/SR~FDq2.png", width = 8, height = 5)
+ggsave("outputs/SR~FDq1.png", width = 8, height = 5)
 
 
 ### assemble with map
 load("Rdata/map_global.rdata")
 
 
-ggarrange(map_global, SR_FDq2, nrow=2, ncol=1, labels = c("a", "b"))
+ggarrange(map_global, SR_FDq1, nrow=2, ncol=1, labels = c("a", "b"))
 ggsave("outputs/Figures_papier/Fig1.png", width = 7.2, height = 7.2, dpi = 600)
 
-cor.test(FD_rich_station$FD_q2, FD_rich_station$MOTUs, method = "spearman")
+cor.test(FD_rich_station$FD_q1, FD_rich_station$MOTUs, method = "spearman")

@@ -3,12 +3,12 @@ library(tidyverse)
 library(funk)
 
 load("Rdata/motu_effectsize.rdata")
-load("Rdata/FDq2_effectsize.rdata")
+load("Rdata/FDq1_effectsize.rdata")
 load("Rdata/crypto_effectsize.rdata")
 load("Rdata/large_effectsize.rdata")
 
 
-effectsize <- rbind(FDq2_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
+effectsize <- rbind(FDq1_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
 effectsize$taxa <- gsub("Richness - Cryptobenthics", "Richness - Crypto", effectsize$taxa)
 effectsize$taxa <- gsub("Functional a-diversity", "Sequence a-diversity", effectsize$taxa)
@@ -67,5 +67,5 @@ ggplot(data = effectsize,
         axis.text.y = element_text(size=10),
         strip.placement = "outside")
 
-ggsave("outputs/GLS/FDq2_effect_size.png", width = 10, height = 6.5)
+ggsave("outputs/GLS/FDq1_effect_size.png", width = 10, height = 6.5)
 ggsave("outputs/Figures_papier/Fig2.png", width = 10, height = 6.5)

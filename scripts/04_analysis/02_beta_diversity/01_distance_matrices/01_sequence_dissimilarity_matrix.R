@@ -53,44 +53,12 @@ com[is.na(com)] <- 0
 #### calculate beta-FD between pairs of stations
 com[com>0] <- 1
 com <- as.matrix(com)
-beta_FD <- beta.fd.hill(com, dist_gen, q=2, tau = "mean", beta_type = "Jaccard") 
-beta_FD <- beta_FD$beta_fd_q$q2
+beta_FD <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type = "Jaccard") 
+beta_FD <- beta_FD$beta_fd_q$q1
 beta_FD <- as.matrix(beta_FD)
 
 save(beta_FD, file = "Rdata/beta_FD.rdata")
 
 
-
-
-
-
-
-
-
-
-#######################################################################
-# UNUSED
-#######################################################################
-
-#### calculate MNTD between pairs of stations ####
-
-mntd <- comdistnt(com, dist_gen, abundance.weighted = FALSE, exclude.conspecifics = FALSE)
-mntd <- as.matrix(mntd)
-
-
-# save Rdata
-
-save(mntd, file="Rdata/MNTD_pairwise_station.rdata")
-
-
-
-##### plot distance matrix ####
-
-dissplot(mntd, method=NA, 
-         upper_tri = TRUE, 
-         lower_tri = FALSE, 
-         reverse_columns=TRUE,
-         main="Mean Nearest Taxon Distance between stations",
-         col=bluered(100))
 
 

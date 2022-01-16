@@ -25,8 +25,8 @@ load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data_init <- left_join(exp_var_num, rich_station, by="station")
-data_init <- left_join(data_init, FD_Hill[,c("FD_q2", "station")], by="station")
+data_init <- left_join(exp_var, rich_station, by="station")
+data_init <- left_join(data_init, FD_Hill[,c("FD_q1", "station")], by="station")
 
 data_init <- data_init %>%
   dplyr::select(-c(station))
@@ -44,6 +44,7 @@ meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- meta[, c("longitude_start", "latitude_start")]
 data_init <- cbind(data_init, coor)
+data_init$sample_method2 <- as.factor(data_init$sample_method2)
 
 effectsize_fin <- vector("list", 10)
 
@@ -55,43 +56,43 @@ for (i in 1:10) {
   
   # GLS MOTUs
   
-  gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
   
   motus_effectsize <- effectsize(gls.motus)
   motus_effectsize <- motus_effectsize[-1,]
   motus_effectsize$taxa <- "Richness - all MOTUs"
-  motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+  motus_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
   # GLS crypto
   
-  gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
   
   crypto_effectsize <- effectsize(gls.crypto)
   crypto_effectsize <- crypto_effectsize[-1,]
   crypto_effectsize$taxa <- "Richness - Crypto"
-  crypto_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+  crypto_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
   # GLS large fish
   
-  gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
   large_effectsize <- effectsize(gls.largefish)
   large_effectsize <- large_effectsize[-1,]
   large_effectsize$taxa <- "Richness - Large fish"
-  large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+  large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
   # GLS FD 
-  gls.FDq2 <- gls(FD_q2 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.FDq1 <- gls(FD_q1 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  FDq2_effectsize <- effectsize(gls.FDq2)
-  FDq2_effectsize <- FDq2_effectsize[-1,]
-  FDq2_effectsize$taxa <- "Sequence a-diversity"
-  FDq2_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling")
+  FDq1_effectsize <- effectsize(gls.FDq1)
+  FDq1_effectsize <- FDq1_effectsize[-1,]
+  FDq1_effectsize$taxa <- "Sequence a-diversity"
+  FDq1_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
    
-  effectsize_fin[[i]] <- as.data.frame(rbind(FDq2_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
+  effectsize_fin[[i]] <- as.data.frame(rbind(FDq1_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
   
 }
 
@@ -104,11 +105,20 @@ effectsize_fin <- bind_rows(effectsize_fin)
 effectsize_fin$vargroup <- gsub("socio", "Socio-economy", effectsize_fin$vargroup)
 effectsize_fin$vargroup <- gsub("environment", "Environment", effectsize_fin$vargroup)
 effectsize_fin$vargroup <- gsub("geography", "Geography", effectsize_fin$vargroup)
-effectsize_fin$vargroup <- gsub("sampling", "Samp.", effectsize_fin$vargroup)
+effectsize_fin$vargroup <- gsub("sampling", "Sampling", effectsize_fin$vargroup)
 effectsize_fin$Parameter <- gsub("bathy", "bathymetry", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("distCoast", "distance to shore", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize_fin$Parameter)
+effectsize_fin$Parameter <- gsub("sample_method2transect", "method_transect", effectsize_fin$Parameter)
+
+for (i in 1:nrow(effectsize_fin)) {
+  if(effectsize_fin[i, "vargroup"]=="Sampling"){
+    effectsize_fin[i,"Std_Coefficient"] <- effectsize_fin[i,"Std_Coefficient"]/max(effectsize_fin$CI_high)
+    effectsize_fin[i,"CI_low"] <- effectsize_fin[i,"CI_low"]/max(effectsize_fin$CI_high)
+    effectsize_fin[i,"CI_high"] <- effectsize_fin[i,"CI_high"]/max(effectsize_fin$CI_high)
+  }
+}
 
 effectsize_fin$color <- NA
 for (i in 1:nrow(effectsize_fin)) {
@@ -125,7 +135,7 @@ for (i in 1:nrow(effectsize_fin)) {
 
 
 effectsize_fin <- effectsize_fin %>%
-  mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Samp.")))
+  mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Sampling")))
 
 save(effectsize_fin, file = "Rdata/effect_size_sensitivity.rdata")
 
