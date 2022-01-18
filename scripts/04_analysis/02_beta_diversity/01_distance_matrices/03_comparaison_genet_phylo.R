@@ -12,6 +12,8 @@ library(mFD)
 library(ecodist)
 library(coRanking)
 library(funk)
+library(entropart)
+library(phytools)
 
 
 #import species lists
@@ -100,23 +102,6 @@ colnames(dist_gen) <- seq$species_name_corrected
 
 identical(rownames(dist_gen), rownames(dist_phylo))
 
-# plot 
-dist_gen <- as.dist(dist_gen)
-dist_phylo <- as.dist(dist_phylo)
-
-plot_phylo <- dissplot(dist_phylo, method=NA, 
-         upper_tri = TRUE, 
-         lower_tri = FALSE, 
-         reverse_columns=TRUE,
-         main="Distance phylogenetic",
-         col=bluered(100))
-
-plot_seq <- dissplot(dist_gen, method=NA, 
-                       upper_tri = TRUE, 
-                       lower_tri = FALSE, 
-                       reverse_columns=TRUE,
-                       main="Distance sequence",
-                       col=bluered(100))
 
 # correlation between matrix
 dist_gen <- as.matrix(dist_gen)
@@ -172,12 +157,20 @@ com <- com[rowSums(com)>0, ]
 
 dist_gen <- as.matrix(dist_gen)
 com <- as.matrix(com)
-Hill_gen <- alpha.fd.hill(com, dist_gen, q=1, tau = "mean")
+Hill_gen <- alpha.fd.hill(com, dist_gen, q=0, tau = "mean")
 
-dist_phylo <- as.matrix(dist_phylo)
-Hill_phylo <- alpha.fd.hill(com, dist_phylo, q=1, tau = "mean")
 
-Hill <- data.frame(station=rownames(com), genet=Hill_gen$asb_FD_Hill, trait=Hill_phylo$asb_FD_Hill)
+pd <- data.frame()
+colnames(com) <- gsub(" ", "_", colnames(com))
+for (i in 1:nrow(com)) {
+  pd[i,1] <- ChaoPD(Ps=com[i,]/sum(com[i,]), 
+                    q=0, PhyloTree=phy, 
+                    Normalize=TRUE, 
+                    CheckArguments=FALSE)
+}
+
+
+Hill <- data.frame(station=rownames(com), genet=Hill_gen$asb_FD_Hill, phylo=pd$V1)
 colnames(Hill) <- c("station", "genet", "phylo")
 
 cor.test(Hill$phylo, Hill$genet, method = "pearson")
@@ -186,7 +179,7 @@ cor.test(Hill$phylo, Hill$genet, method = "pearson")
 plot_alpha_phylo_gen <- ggplot(Hill, aes(genet, phylo))+
   geom_point()+
   labs(y= expression(paste("Phylogenetic ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=14, label="pearson cor=0.96 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=1, y=34, label="pearson cor=0.94 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
@@ -198,6 +191,19 @@ save(plot_alpha_phylo_gen, file="Rdata/plot_alpha_phylo_gen.rdata")
 
 beta_hill_gen <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type="Jaccard")
 beta_hill_gen <- beta_hill_gen$beta_fd_q$q1
+
+
+
+com2 <- as.data.frame(t(com))
+com2$species <- rownames(com2)
+com2 <- com2 %>%
+  select(species, everything())
+
+com2 <- MetaCommunity(com2)
+dist_phylo <- as.matrix(dist_phylo)
+beta_phylo <- BetaEntropy(com2, q=0, Tree = NULL, Normalize=TRUE, 
+                            CheckArguments=FALSE, Z=dist_phylo)
+
 
 beta_hill_phylo <- beta.fd.hill(com, dist_phylo, q=1, tau = "mean", beta_type="Jaccard")
 beta_hill_phylo <- beta_hill_phylo$beta_fd_q$q1
@@ -211,6 +217,8 @@ NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
 beta_hill <- data.frame(gen=as.vector(beta_hill_gen), phylo=as.vector(beta_hill_phylo))
+cor.test(beta_hill$phylo, beta_hill$gen, method = "pearson")
+
 
 plot_beta_phylo_gen <- ggplot(beta_hill, aes(gen, phylo))+
   geom_point()+

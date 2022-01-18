@@ -26,7 +26,7 @@ load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
 data_init <- left_join(exp_var, rich_station, by="station")
-data_init <- left_join(data_init, FD_Hill[,c("FD_q1", "station")], by="station")
+data_init <- left_join(data_init, FD_Hill[,c("FD_q0", "station")], by="station")
 
 data_init <- data_init %>%
   dplyr::select(-c(station))
@@ -84,15 +84,15 @@ for (i in 1:10) {
   large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
   # GLS FD 
-  gls.FDq1 <- gls(FD_q1 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
+  gls.FDq0 <- gls(FD_q0 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  FDq1_effectsize <- effectsize(gls.FDq1)
-  FDq1_effectsize <- FDq1_effectsize[-1,]
-  FDq1_effectsize$taxa <- "Sequence a-diversity"
-  FDq1_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
+  FDq0_effectsize <- effectsize(gls.FDq0)
+  FDq0_effectsize <- FDq0_effectsize[-1,]
+  FDq0_effectsize$taxa <- "Sequence a-diversity"
+  FDq0_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
    
-  effectsize_fin[[i]] <- as.data.frame(rbind(FDq1_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
+  effectsize_fin[[i]] <- as.data.frame(rbind(FDq0_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
   
 }
 

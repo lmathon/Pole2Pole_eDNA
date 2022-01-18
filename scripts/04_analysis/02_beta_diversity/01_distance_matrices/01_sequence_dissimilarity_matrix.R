@@ -53,8 +53,8 @@ com[is.na(com)] <- 0
 #### calculate beta-FD between pairs of stations
 com[com>0] <- 1
 com <- as.matrix(com)
-beta_FD <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type = "Jaccard") 
-beta_FD <- beta_FD$beta_fd_q$q1
+beta_FD <- beta.fd.hill(com, dist_gen, q=0, tau = "mean", beta_type = "Jaccard") 
+beta_FD <- beta_FD$beta_fd_q$q0
 beta_FD <- as.matrix(beta_FD)
 
 save(beta_FD, file = "Rdata/beta_FD.rdata")

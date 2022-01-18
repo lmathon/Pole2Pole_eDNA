@@ -157,10 +157,10 @@ com <- com[rowSums(com)>0, ]
 
 
 com <- as.matrix(com)
-Hill_gen <- alpha.fd.hill(com, dist_gen, q=1, tau = "mean")
+Hill_gen <- alpha.fd.hill(com, dist_gen, q=0, tau = "mean")
 
 dist_trait <- as.matrix(dist_trait)
-Hill_trait <- alpha.fd.hill(com, dist_trait, q=1, tau = "mean")
+Hill_trait <- alpha.fd.hill(com, dist_trait, q=0, tau = "mean")
 
 Hill <- data.frame(station=rownames(com), genet=Hill_gen$asb_FD_Hill, trait=Hill_trait$asb_FD_Hill)
 colnames(Hill) <- c("station", "genet", "trait")
@@ -171,7 +171,7 @@ cor.test(Hill$trait, Hill$genet, method = "pearson")
 plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=17, label="Pearson cor=0.85 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=1, y=28, label="Pearson cor=0.88 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
@@ -187,16 +187,15 @@ beta_hill_trait <- beta.fd.hill(com, dist_trait, q=1, tau = "mean", beta_type="J
 beta_hill_trait <- beta_hill_trait$beta_fd_q$q1
 
 
-
-
 co_rank <- coranking(beta_hill_gen, beta_hill_trait, input_Xi = "dist")
 NX <- coRanking::R_NX(co_rank)
 AUC <- coRanking::AUC_ln_K(NX)
 
 
-mantel(as.dist(beta_hill_gen) ~ as.dist(beta_hill_trait))
+ecodist::mantel(as.dist(beta_hill_gen) ~ as.dist(beta_hill_trait))
 
 beta_hill <- data.frame(gen=as.vector(beta_hill_gen), trait=as.vector(beta_hill_trait))
+cor.test(beta_hill$trait, beta_hill$gen, method = "pearson")
 
 plot_beta_trait_gen <- ggplot(beta_hill, aes(gen, trait))+
   geom_point()+

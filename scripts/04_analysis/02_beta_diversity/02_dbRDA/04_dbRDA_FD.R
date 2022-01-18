@@ -77,7 +77,7 @@ partition <- data.frame(environment=(varpart_part$part$fract$Adj.R.square[1]*Rsq
 
 partition <- as.data.frame(t(partition))
 partition$variables <- rownames(partition)
-partition$variables2 <- factor(partition$variables, levels = c("environment", "geography", "socioeconomy"))
+partition$variables2 <- factor(partition$variables, levels = c("environment", "socioeconomy", "geography"))
 
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
@@ -108,12 +108,12 @@ identical(as.character(rownames(data)), rownames(station_scores)) # verify that 
 station_scores_met <- cbind(station_scores, data)
 
 
-dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_FD_MED <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_point(cex = 2, show.legend = T, aes(col=province)) +
-  #scale_color_gradient(low="blue", high="red")+
-  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
+  geom_point(cex = 2, show.legend = T, aes(col=MarineEcosystemDependency)) +
+  scale_color_gradient(low="blue", high="red")+
+  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
   geom_label_repel(data= var_scores_diff75, 
@@ -135,7 +135,7 @@ dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         legend.key.height = unit(0.5, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-dbrda_FD_prov
+dbrda_FD_MED
 
-ggsave("outputs/dbRDA/FD/dbrda_province.png")
-save(dbrda_FD_prov, file="Rdata/dbrda_FD_province.rdata")
+ggsave("outputs/dbRDA/FD/dbrda_MED.png")
+save(dbrda_FD_MED, file="Rdata/dbrda_FD_MED.rdata")
