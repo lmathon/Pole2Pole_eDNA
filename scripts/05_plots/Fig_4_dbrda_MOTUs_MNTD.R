@@ -9,7 +9,7 @@ load("Rdata/dbrda_FD_MED.rdata")
 load("Rdata/dbrda_FD_SST.rdata")
 
 
-dbrda_MOTUs_province <- dbrda_MOTUs_province +
+dbrda_MOTUs_province <- dbrda_MOTUs_prov +
   ggtitle("Jaccard MOTUs composition")+
   theme(plot.title.position = "panel",
         plot.title = element_text(size = 13, color = "black", face = "bold"))

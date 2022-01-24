@@ -1,9 +1,6 @@
 # R script
 # Calculating the number of MOTUs at each step of the cleaning for each project / all the projects 
 
-# ATTENTION! A RECODER
-# POUR PRENDRE EN COMPTE LES FILTRES A L ECHELLE DES PROJETS ET NON PAS DES REGIONS
-# POUR REFLETER CE QUI A ETE FAIT DANS LE MS PLUS FIDELEMENT (SAUF SI ON CHANGE LA FACON DE CALCULER POUR LE MS, C'EST AUSSI POSSIBLE; notamment pour les PCR)
 
 # Lib
 library(tidyverse)
@@ -12,13 +9,16 @@ library(purrr)
 
 # Set preference
 conflict_prefer("filter", "dplyr")
+conflict_prefer("select", "dplyr")
+conflict_prefer("map", "purrr")
 
 # Load data
-#load('Rdata/01_liste_all_read_edna.Rdata')
-#load("Rdata/02_clean_all.Rdata")
 
 load("Rdata/01_read_data.Rdata")
 load("Rdata/02-clean-data.Rdata")
+
+
+list_read_step4[[15]] <- NULL
 
 ## Join metadata
 columns_delete_field_metadata <- c("turbidity", "gps_start", "gps_b", "lat_gps_b", "long_gps_b", "gps_c", "long_gps_c", "lat_gps_d", "gps_half_turn", "longitude_turn", "latitude_end", "longitude_end", 
@@ -231,7 +231,6 @@ stat_by_project <- stat_by_project %>%
 
 # Write
 write.csv(stat_by_project, "outputs/count_by_project.csv", row.names = FALSE)
-write.csv(stat_by_project, "outputs/00_Figures_for_paper/Extended_Data/ED_Table3.csv", row.names = FALSE)
 
 
 
@@ -321,16 +320,16 @@ PCR_all <- liste_read_edna_cleaned %>%
 
 # ---- # PCRfilter: on a pair of filters (1/24 PCR). This is the alternative of the previous filter, not to use at this scale (otherwise: deletion of too many true observations)
 
-PCR_sample <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = TRUE,
-                     min_size_seq = 30, max_size_seq = 90, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 0,
-                     min_PCR_sample = 1, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
-  # filter stations
-  lapply(., fct_filter_station) %>%
-  # Stat
-  bind_rows(.) %>%
-  infos_statistiques() %>%
-  mutate(step = "PCR_sample") %>% 
-  select(step, colnames(.))
+#PCR_sample <- lapply(liste_read_edna, clean_data, remove_blanks = TRUE, min_reads=10, remove_chimera=TRUE, remove_not_fish_manual=FALSE, remove_not_fish_taxize = TRUE,
+#                     min_size_seq = 30, max_size_seq = 90, tag_jump=TRUE, tag_jump_value = 0.001, min_PCR = 0,
+#                     min_PCR_sample = 1, habitat_select = c("marine"), min_percentage_id = 0, delete_gps_col=TRUE) %>%
+#  # filter stations
+#  lapply(., fct_filter_station) %>%
+#  # Stat
+#  bind_rows(.) %>%
+#  infos_statistiques() %>%
+#  mutate(step = "PCR_sample") %>% 
+#  select(step, colnames(.))
 
 # ---- # LULU  
 

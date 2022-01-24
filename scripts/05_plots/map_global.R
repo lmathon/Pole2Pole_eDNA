@@ -6,6 +6,7 @@ library(rnaturalearth)
 library(rnaturalearthdata)
 library(ggthemes)
 library(ggrepel)
+library(RColorBrewer)
 
 load("Rdata/03-filter-data.Rdata")
 
@@ -25,6 +26,9 @@ for (i in 1:length(Sites)) {
 }
 
 world <- ne_countries(type="map_units",returnclass = 'sf')
+world2 <- st_read("c://Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L1.shp")
+antarctica <- st_read("c://Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L6.shp")
+
 data$metadata_map_sf = st_as_sf(data[,c("longitude", "latitude")], coords = c("longitude", "latitude"), 
                                 crs = 4326)
 map_global <- ggplot() + 
@@ -32,7 +36,7 @@ map_global <- ggplot() +
   geom_text_repel(data = data, aes(x=longitude, y=latitude, label = n_stations),size=3, min.segment.length = 0.2, force = 2, max.overlaps=20) +
   geom_sf(aes(fill = data$province), size=2, data= data$metadata_map_sf, shape=21, show.legend = F) + 
   coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) +
-  scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "fill")+
+  scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "fill")+
   labs(x="", y="")+
   theme_minimal() +
   theme(legend.position = "bottom",

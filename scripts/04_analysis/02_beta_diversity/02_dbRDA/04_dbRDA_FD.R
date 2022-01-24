@@ -108,12 +108,12 @@ identical(as.character(rownames(data)), rownames(station_scores)) # verify that 
 station_scores_met <- cbind(station_scores, data)
 
 
-dbrda_FD_SST <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_point(cex = 2, show.legend = F, aes(col=mean_SST_1year)) +
-  scale_color_gradient(low="blue", high="red")+
-  #scale_fill_brewer(palette="Paired", direction = 1, aesthetics = "col") +
+  geom_point(cex = 2, show.legend = T, aes(col=province)) +
+  #scale_color_gradient(low="blue", high="red")+
+  scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "col")+
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
   geom_label_repel(data= var_scores_diff75, 
@@ -135,7 +135,7 @@ dbrda_FD_SST <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         legend.key.height = unit(0.5, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-dbrda_FD_SST
+dbrda_FD_prov
 
-ggsave("outputs/dbRDA/FD/dbrda_SST.png")
-save(dbrda_FD_SST, file="Rdata/dbrda_FD_SST.rdata")
+ggsave("outputs/dbRDA/FD/dbrda_province.png")
+save(dbrda_FD_prov, file="Rdata/dbrda_FD_province.rdata")

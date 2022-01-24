@@ -193,18 +193,6 @@ beta_hill_gen <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type="Jacca
 beta_hill_gen <- beta_hill_gen$beta_fd_q$q1
 
 
-
-com2 <- as.data.frame(t(com))
-com2$species <- rownames(com2)
-com2 <- com2 %>%
-  select(species, everything())
-
-com2 <- MetaCommunity(com2)
-dist_phylo <- as.matrix(dist_phylo)
-beta_phylo <- BetaEntropy(com2, q=0, Tree = NULL, Normalize=TRUE, 
-                            CheckArguments=FALSE, Z=dist_phylo)
-
-
 beta_hill_phylo <- beta.fd.hill(com, dist_phylo, q=1, tau = "mean", beta_type="Jaccard")
 beta_hill_phylo <- beta_hill_phylo$beta_fd_q$q1
 
