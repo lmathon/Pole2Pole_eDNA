@@ -30,4 +30,4 @@ load("Rdata/map_global.rdata")
 ggarrange(map_global, SR_FDq1, nrow=2, ncol=1, labels = c("a", "b"))
 ggsave("outputs/Figures_papier/Fig1.png", width = 7.2, height = 7.2, dpi = 600)
 
-cor.test(FD_rich_station$FD_q1, FD_rich_station$MOTUs, method = "spearman")
+cor.test(FD_rich_station$FD_q1, FD_rich_station$MOTUs, method = "pearson")
