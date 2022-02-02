@@ -10,20 +10,20 @@ load("Rdata/dbrda_FD_SST.rdata")
 
 
 dbrda_MOTUs_province <- dbrda_MOTUs_prov +
-  ggtitle("Jaccard MOTUs composition")+
+  ggtitle(expression(paste("Taxonomic ", beta,"-diversity")))+
   theme(plot.title.position = "panel",
-        plot.title = element_text(size = 13, color = "black", face = "bold"))
+        plot.title = element_text(size = 14, color = "black", face = "bold"))
 
 dbrda_FD_province <- dbrda_FD_prov +
-  ggtitle("Sequence beta-diversity")+  
+  ggtitle(expression(paste("Sequence ", beta,"-diversity")))+  
   theme(plot.title.position = "panel",
-        plot.title = element_text(size = 13, color = "black", face = "bold"))
+        plot.title = element_text(size = 14, color = "black", face = "bold"))
 
 dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, labels = c("a", "b"), 
                             common.legend = T, legend = c("bottom")) 
                             
 ggsave("outputs/dbRDA/dbrda_jaccard_FD.png", width = 10.7, height = 6.2)
-ggsave("outputs/Figures_papier/Fig4.png", width = 10.7, height = 6.2)
+ggsave("outputs/Figures_papier/Fig5.png", width = 10.7, height = 6.2)
 
 
 

@@ -105,7 +105,7 @@ save(fit.DHW.crypto, file="Rdata/fit.DHW.crypto.rdata")
 fit.method.crypto <- visreg(gls.crypto,"sample_method2",scale="response")
 save(fit.method.crypto, file="Rdata/fit.method.crypto.rdata")
 
-fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="lg10(Gravity +1)")
+fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab="Cryptobenthic\n a-diversity", plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.crypto, file="Rdata/fit.grav_med.crypto.rdata")
 
 #### part R² ####

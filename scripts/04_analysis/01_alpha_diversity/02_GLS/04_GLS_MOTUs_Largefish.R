@@ -106,7 +106,7 @@ fit.method.large <- visreg(gls.largefish,"sample_method2",scale="response")
 save(fit.method.large, file="Rdata/fit.method.large.rdata")
 
 
-fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Large fish richness +1)", xlab="lg10(Gravity +1)")
+fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab="Large fish\na-diversity", plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.large, file="Rdata/fit.grav_med.large.rdata")
 
 #### part R² ####

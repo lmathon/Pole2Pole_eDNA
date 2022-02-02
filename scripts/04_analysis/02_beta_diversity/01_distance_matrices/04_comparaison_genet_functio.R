@@ -106,6 +106,9 @@ identical(rownames(dist_gen), rownames(dist_trait))
 dist_gen <- as.matrix(dist_gen)
 dist_trait <- as.matrix(dist_trait)
 
+pairwise <- data.frame(gen=as.vector(dist_gen), trait=as.vector(dist_trait))
+cor.test(pairwise$trait, pairwise$gen, method = "pearson")
+
 ecodist::mantel(dist_gen ~ dist_trait)
 
 

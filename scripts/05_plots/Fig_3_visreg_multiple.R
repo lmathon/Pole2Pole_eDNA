@@ -27,7 +27,7 @@ gravity <- ggplot() +
   geom_line(data=fit.grav.large$fit, aes(Gravity, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.grav.large$fit, aes(x=Gravity, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Gravity+1)")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
+  scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -59,7 +59,7 @@ sst <- ggplot() +
   annotate(geom="text", x=0, y=1.9, label="Crypto", hjust=0, size=3, color="navy", fontface = "bold")+
   annotate(geom="text", x=0, y=1.8, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
   labs(x="mean SST")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
+  scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -88,7 +88,7 @@ med <- ggplot() +
   geom_line(data=fit.MED.large$fit, aes(MarineEcosystemDependency, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.MED.large$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="Marine Ecosystem Dependency")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
+  scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -116,7 +116,7 @@ distCT <- ggplot() +
   geom_line(data=fit.CT.large$fit, aes(dist_to_CT, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.CT.large$fit, aes(x=dist_to_CT, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Distance to Coral Triangle (km) +1)")+
-  scale_y_continuous("log10(MOTUs richness+1)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence diversity")) +
+  scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -135,28 +135,4 @@ ggarrange(sst, distCT, gravity, med, nrow=2, ncol=2, labels = c("a", "b", "c", "
 ggsave("outputs/GLS/visreg_multiple_FDq0.png", width = 8, height = 7)
 ggsave("outputs/Figures_papier/Fig3.png", width = 8, height = 7)
 
-
-#### Plot visreg gravity + MED ####
-
-load("Rdata/gls_motus.rdata")
-load("Rdata/gls_FDq0.rdata")
-load("Rdata/gls_crypto.rdata")
-load("Rdata/gls_large.rdata")
-
-load("Rdata/richness_station.rdata")
-load("Rdata/FD_Hill_alpha.rdata")
-
-load("Rdata/all_explanatory_variables_numeric.rdata")
-rownames(rich_station) <- rich_station$station
-
-data <- left_join(exp_var_num, rich_station, by="station")
-data <- left_join(data, FD_Hill)
-data <- data %>%
-  dplyr::select(-c(station))
-
-
-visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(MOTUs richness +1)", xlab="log10(Gravity +1)", plot.type="gg")
-visreg2d(gls.FDq0, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="Functional ??-diversity", xlab="log10(Gravity +1)", plot.type="gg")
-visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Crypto richness +1)", xlab="log10(Gravity +1)", plot.type="gg")
-visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(Large fish richness +1)", xlab="log10(Gravity +1)", plot.type="gg")
 

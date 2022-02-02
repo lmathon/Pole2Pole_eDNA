@@ -17,7 +17,7 @@ FD_rich_station <- FD_rich_station %>%
 SR_FDq1 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q1)) +
   geom_point(size=2, aes(col=province), show.legend = T)+
   scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "col")+
-  labs(x="MOTUs richness", y= expression(paste("Sequence ", alpha,"-diversity")))+
+  labs(x=expression(paste("Taxonomic ", alpha,"-diversity")), y= expression(paste("Sequence ", alpha,"-diversity")))+
   theme_bw()
 
 ggsave("outputs/SR~FDq1.png", width = 8, height = 5)

@@ -98,7 +98,7 @@ save(fit.DHW.FDq0, file="Rdata/fit.DHW.FDq0.rdata")
 fit.method.FDq0 <- visreg(gls.FDq0,"sample_method2",scale="response")
 save(fit.method.FDq0, file="Rdata/fit.method.FDq0.rdata")
 
-fit.grav_med.FDq0 <- visreg2d(gls.FDq0, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(FDq0 richness +1)", xlab="log10(Gravity +1)")
+fit.grav_med.FDq0 <- visreg2d(gls.FDq0, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab="Sequence\na-diversity", plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.FDq0, file="Rdata/fit.grav_med.FDq0.rdata")
 
 

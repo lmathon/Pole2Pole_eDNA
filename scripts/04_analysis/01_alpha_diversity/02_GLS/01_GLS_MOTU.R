@@ -103,7 +103,7 @@ fit.method.motus <- visreg(gls.motus,"sample_method2",scale="response")
 save(fit.method.motus, file="Rdata/fit.method.motus.rdata")
 
 
-fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", main="log10(MOTUs richness +1)", xlab="log10(Gravity +1)", plot.type="gg")
+fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab="All fish\na-diversity", plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.motus, file="Rdata/fit.grav_med.motus.rdata")
 
 #### part R² ####
