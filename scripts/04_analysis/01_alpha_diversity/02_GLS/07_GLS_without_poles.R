@@ -19,21 +19,23 @@ library(ggpubr)
 library(ggplot2)
 library(effectsize)
 
-load("Rdata/FD_Hill_alpha.rdata")
+'%ni%' <- Negate("%in%")
+
 load("Rdata/richness_station.rdata")
+load("Rdata/FD_Hill_alpha.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
 
-data_init <- left_join(exp_var, rich_station, by="station")
-data_init <- left_join(data_init, FD_Hill[,c("FD_q0", "station")], by="station")
+data <- left_join(exp_var, rich_station, by="station")
+data <- left_join(data, FD_Hill[,c("FD_q0", "station")], by="station")
 
-data_init <- data_init %>%
+data <- data %>%
   dplyr::select(-c(station))
 
-data_init$MOTUs <- log10(data_init$MOTUs +1)
-data_init$crypto_MOTUs <- log10(data_init$crypto_MOTUs +1)
-data_init$largefish_MOTUs <- log10(data_init$largefish_MOTUs +1)
+data$MOTUs <- log10(data$MOTUs +1)
+data$crypto_MOTUs <- log10(data$crypto_MOTUs +1)
+data$largefish_MOTUs <- log10(data$largefish_MOTUs +1)
 
 # join longitude & latitude
 meta <- read.csv("metadata/Metadata_eDNA_Pole2Pole_v4.csv", sep=";")
@@ -43,21 +45,17 @@ rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
 coor <- meta[, c("longitude_start", "latitude_start")]
-data_init <- cbind(data_init, coor)
-data_init$sample_method2 <- as.factor(data_init$sample_method2)
+data <- cbind(data, coor)
+data$sample_method2 <- as.factor(data$sample_method2)
 
-effectsize_fin <- vector("list", 10)
-
-for (i in 1:10) {
-  # select 80%
+data <- data  %>%
+  filter(province %ni% c("Scotia_Sea", "Arctic"))%>%
+  dplyr::select(-province)
   
-  data <- data_init %>%
-    sample_frac(0.8)
   
   # GLS MOTUs
   
   gls.motus <- gls(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
-  
   
   motus_effectsize <- effectsize(gls.motus)
   motus_effectsize <- motus_effectsize[-1,]
@@ -68,7 +66,7 @@ for (i in 1:10) {
   
   gls.crypto <- gls(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
-  
+   
   crypto_effectsize <- effectsize(gls.crypto)
   crypto_effectsize <- crypto_effectsize[-1,]
   crypto_effectsize$taxa <- "Richness - Crypto"
@@ -78,29 +76,26 @@ for (i in 1:10) {
   
   gls.largefish <- gls(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
+  
   large_effectsize <- effectsize(gls.largefish)
   large_effectsize <- large_effectsize[-1,]
   large_effectsize$taxa <- "Richness - Large fish"
   large_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
-  # GLS FD 
+  
+  #### GLS FD ####
   gls.FDq0 <- gls(FD_q0 ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, correlation = corGaus(form = ~longitude_start + latitude_start, nugget = TRUE), data = data,method="ML")
   
   FDq0_effectsize <- effectsize(gls.FDq0)
   FDq0_effectsize <- FDq0_effectsize[-1,]
-  FDq0_effectsize$taxa <- "Sequence a-diversity"
+  FDq0_effectsize$taxa <- "sequence a-diversity"
   FDq0_effectsize$vargroup <- c("environment","environment","environment","environment","socio","socio","socio","geography","geography","geography","geography","sampling","sampling")
   
-   
-  effectsize_fin[[i]] <- as.data.frame(rbind(FDq0_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
   
-}
+  effectsize_fin <- as.data.frame(rbind(FDq0_effectsize, motus_effectsize, crypto_effectsize, large_effectsize))
+  
 
-
-#### effect size x10 ####
-
-
-effectsize_fin <- bind_rows(effectsize_fin)
+#### effect size ####
 
 effectsize_fin$taxa <- gsub("Richness - Cryptobenthics", "Cryptobenthic a-diversity", effectsize_fin$taxa)
 effectsize_fin$taxa <- gsub("Richness - Large fish", "Large fish a-diversity", effectsize_fin$taxa)
@@ -136,13 +131,8 @@ for (i in 1:nrow(effectsize_fin)) {
     effectsize_fin[i,"color"] <- "red"
 }
 
-
-
 effectsize_fin <- effectsize_fin %>%
   mutate(across(vargroup, factor, levels=c("Environment","Socio-economy","Geography", "Sampling")))
-
-save(effectsize_fin, file = "Rdata/effect_size_sensitivity.rdata")
-
 
 ggplot(data = effectsize_fin, 
        aes(x = Parameter, y = Std_Coefficient)) +
@@ -153,13 +143,13 @@ ggplot(data = effectsize_fin,
   coord_flip() + 
   theme_sleek(base_size = 24) + 
   facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
-  scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
+  #scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
   ylab("Standardized effect size") +
   theme(legend.position = "none", 
         axis.title.y = element_blank(), 
         axis.title.x = element_text(size = 12),
-        strip.text.x = element_text(size=12,face="bold"),
+        strip.text.x = element_text(size=10,face="bold"),
         strip.text.y = element_text(size=10,face="bold"),
         strip.placement = "outside")
 
-ggsave("outputs/GLS/effect_size_sensitivity.png", width = 10, height = 6.5)
+ggsave("outputs/GLS/effect_size_without_poles.png", width = 10, height = 6.5)

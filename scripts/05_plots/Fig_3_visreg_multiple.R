@@ -54,9 +54,9 @@ sst <- ggplot() +
   geom_ribbon(data=fit.SST.FDq0$fit, aes(x=mean_SST_1year, ymin=(visregLwr*b)+a, ymax=(visregUpr*b)+a), fill='orange', alpha=.2)+
   geom_line(data=fit.SST.large$fit, aes(mean_SST_1year, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.SST.large$fit, aes(x=mean_SST_1year, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  annotate(geom="text", x=0, y=2, label="all MOTUs", hjust=0, size=3, color="darkred", fontface = "bold")+
-  annotate(geom="text", x=0, y=2.1, label="sequence", hjust=0, size=3, color="orange", fontface = "bold")+
-  annotate(geom="text", x=0, y=1.9, label="Crypto", hjust=0, size=3, color="navy", fontface = "bold")+
+  annotate(geom="text", x=0, y=2, label="All fish", hjust=0, size=3, color="darkred", fontface = "bold")+
+  annotate(geom="text", x=0, y=2.1, label="Sequence", hjust=0, size=3, color="orange", fontface = "bold")+
+  annotate(geom="text", x=0, y=1.9, label="Cryptobenthic", hjust=0, size=3, color="navy", fontface = "bold")+
   annotate(geom="text", x=0, y=1.8, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
   labs(x="mean SST")+
   scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +

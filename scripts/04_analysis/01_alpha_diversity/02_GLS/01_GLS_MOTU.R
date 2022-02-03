@@ -99,7 +99,7 @@ fit.samp.motus <- visreg(gls.motus,"depth_sampling",scale="response")
 save(fit.samp.motus, file="Rdata/fit.samp.motus.rdata")
 fit.DHW.motus <- visreg(gls.motus,"mean_DHW_1year",scale="response")
 save(fit.DHW.motus, file="Rdata/fit.DHW.motus.rdata")
-fit.method.motus <- visreg(gls.motus,"sample_method2",scale="response")
+fit.method.motus <- visreg(gls.motus,"sample_method2",scale="response", xlab="sample method", ylab="All fish taxonomic diversity", gg=TRUE)
 save(fit.method.motus, file="Rdata/fit.method.motus.rdata")
 
 

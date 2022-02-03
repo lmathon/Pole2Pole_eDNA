@@ -26,8 +26,6 @@ for (i in 1:length(Sites)) {
 }
 
 world <- ne_countries(type="map_units",returnclass = 'sf')
-world2 <- st_read("c://Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L1.shp")
-antarctica <- st_read("c://Users/mathon/Desktop/PhD/Projets/Megafauna/Carto_megafauna/GSHHS_f_L6.shp")
 
 data$metadata_map_sf = st_as_sf(data[,c("longitude", "latitude")], coords = c("longitude", "latitude"), 
                                 crs = 4326)
@@ -44,8 +42,8 @@ map_global <- ggplot() +
         legend.text = element_text(size=10),
         legend.key.height = unit(3, "mm"),
         axis.text.x = element_blank(),
-        panel.grid.major = element_line(colour = "grey50"),
-        plot.title = element_text(lineheight=.8, face="bold"))
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1, fill=NA))
 
 ggsave("outputs/maps & plot sup/map_global_label.png")
 save(map_global, file="Rdata/map_global.rdata")

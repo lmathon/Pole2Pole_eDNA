@@ -14,20 +14,21 @@ FD_rich_station <- FD_rich_station %>%
   distinct(station, .keep_all=T)
 
 
-SR_FDq1 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q1)) +
+SR_FDq0 <- ggplot(FD_rich_station, aes(x=MOTUs, y=FD_q0)) +
   geom_point(size=2, aes(col=province), show.legend = T)+
+  labs(color = "Region")+
   scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "col")+
   labs(x=expression(paste("Taxonomic ", alpha,"-diversity")), y= expression(paste("Sequence ", alpha,"-diversity")))+
   theme_bw()
 
-ggsave("outputs/SR~FDq1.png", width = 8, height = 5)
+ggsave("outputs/SR~FDq0.png", width = 8, height = 5)
 
 
 ### assemble with map
 load("Rdata/map_global.rdata")
 
 
-ggarrange(map_global, SR_FDq1, nrow=2, ncol=1, labels = c("a", "b"))
+ggarrange(map_global, SR_FDq0, nrow=2, ncol=1, labels = c("a", "b"))
 ggsave("outputs/Figures_papier/Fig1.png", width = 7.2, height = 7.2, dpi = 600)
 
-cor.test(FD_rich_station$FD_q1, FD_rich_station$MOTUs, method = "pearson")
+cor.test(FD_rich_station$FD_q0, FD_rich_station$MOTUs, method = "pearson")

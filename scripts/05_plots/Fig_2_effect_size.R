@@ -10,9 +10,9 @@ load("Rdata/large_effectsize.rdata")
 
 effectsize <- rbind(FDq0_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
-effectsize$taxa <- gsub("Richness - Cryptobenthics", "Crypto taxonomic a-div.", effectsize$taxa)
-effectsize$taxa <- gsub("Richness - Large fish", "Large fish taxonomic a-div.", effectsize$taxa)
-effectsize$taxa <- gsub("Richness - all MOTUs", "All fish taxonomic a-div.", effectsize$taxa)
+effectsize$taxa <- gsub("Richness - Cryptobenthics", "Cryptobenthic a-diversity", effectsize$taxa)
+effectsize$taxa <- gsub("Richness - Large fish", "Large fish a-diversity", effectsize$taxa)
+effectsize$taxa <- gsub("Richness - all MOTUs", "All fish a-diversity", effectsize$taxa)
 effectsize$taxa <- gsub("Functional a-diversity", "Sequence a-diversity", effectsize$taxa)
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
 effectsize$vargroup <- gsub("environment", "Environment", effectsize$vargroup)
@@ -64,7 +64,7 @@ ggplot(data = effectsize,
         axis.title.y = element_blank(), 
         axis.title.x = element_text(size = 12),
         strip.text.y = element_text(size=12,face="bold"),
-        strip.text.x = element_text(size=11,face="bold"),
+        strip.text.x = element_text(size=12,face="bold"),
         axis.text.x = element_text(size=10),
         axis.text.y = element_text(size=10),
         strip.placement = "outside")

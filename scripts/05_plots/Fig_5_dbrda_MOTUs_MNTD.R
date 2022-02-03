@@ -11,8 +11,10 @@ load("Rdata/dbrda_FD_SST.rdata")
 
 dbrda_MOTUs_province <- dbrda_MOTUs_prov +
   ggtitle(expression(paste("Taxonomic ", beta,"-diversity")))+
+  labs(color="Region")+
   theme(plot.title.position = "panel",
-        plot.title = element_text(size = 14, color = "black", face = "bold"))
+        plot.title = element_text(size = 14, color = "black", face = "bold"),
+        legend.text=element_text(size=11))
 
 dbrda_FD_province <- dbrda_FD_prov +
   ggtitle(expression(paste("Sequence ", beta,"-diversity")))+  
