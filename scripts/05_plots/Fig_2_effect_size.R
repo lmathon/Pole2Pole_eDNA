@@ -70,4 +70,4 @@ ggplot(data = effectsize,
         strip.placement = "outside")
 
 ggsave("outputs/GLS/FDq0_effect_size.png", width = 10, height = 6.5)
-ggsave("outputs/Figures_papier/Fig2.png", width = 11, height = 6.5)
+ggsave("outputs/Figures_papier/Fig2.pdf", width = 11, height = 6.5)
