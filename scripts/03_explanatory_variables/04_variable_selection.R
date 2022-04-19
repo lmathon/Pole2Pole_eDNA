@@ -10,21 +10,21 @@ load("Rdata/environmental_variables.rdata")
 load("Rdata/sampling_variables.rdata")
 load("Rdata/geographic_variables.rdata")
 load("Rdata/socioeconomic_variables.rdata")
-load("Rdata/MNTD_pairwise_station.rdata")
+load("Rdata/FD_Hill_alpha.rdata")
 
 # Formate data
 rownames(env_var) <- env_var$station
-env_var <- env_var[rownames(mntd),]
+env_var <- env_var[rownames(FD_Hill),]
 env_var <- env_var[, colSums(env_var != 0) > 0]
 
 rownames(geo_var) <- geo_var$station
-geo_var <- geo_var[rownames(mntd),]
+geo_var <- geo_var[rownames(FD_Hill),]
 
 rownames(samp_var) <- samp_var$station
-samp_var <- samp_var[rownames(mntd),]
+samp_var <- samp_var[rownames(FD_Hill),]
 
 rownames(socio_var) <- socio_var$station
-socio_var <- socio_var[rownames(mntd),]
+socio_var <- socio_var[rownames(FD_Hill),]
 
 # calculate correlation between variables and select variables
 
@@ -152,13 +152,13 @@ for(i in 1:nrow(samp_var2)){
 
 # socioeco
 
-cor_socio_var <- mixed_assoc(socio_var[,-1])
+cor_socio_var <- mixed_assoc(socio_var[,-c(1,10:12)])
 
 
 cor_socio_sign <- cor_socio_var %>%
   filter(assoc >= 0.7 | assoc <= -0.7)
 
-ggplot(cor_socio_sign, aes(x,y,fill=assoc))+
+ggplot(cor_socio_var, aes(x,y,fill=assoc))+
   geom_tile()+
   xlab("")+
   ylab("")+
@@ -202,7 +202,7 @@ cor_exp_var <- mixed_assoc(exp_var[,-1])
 cor_var_sign <- cor_exp_var %>%
   filter(assoc >= 0.7 | assoc <= -0.7)
 
-ggplot(cor_var_sign, aes(x,y,fill=assoc))+
+ggplot(cor_exp_var, aes(x,y,fill=assoc))+
   geom_tile()+
   xlab("")+
   ylab("")+
@@ -210,6 +210,17 @@ ggplot(cor_var_sign, aes(x,y,fill=assoc))+
   scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 
+exp_var2 <- exp_var %>%
+  dplyr::select(mean_SST_1year, mean_sss_1year, mean_npp_1year, mean_DHW_1year, MarineEcosystemDependency, HDI2019, Gravity, distCoast, dist_to_CT, depth_sampling, bathy)
+
+cor_exp_var2 <- mixed_assoc(exp_var2)
+
+ggplot(cor_exp_var2, aes(x,y,fill=assoc))+
+  geom_tile()+
+  xlab("")+
+  ylab("")+
+  theme(axis.text.x = element_text(face="plain", size=10, angle=90, vjust = 0, hjust = 1))+
+  scale_fill_gradient2(low="blue", high="red", mid = "white", midpoint=0)
 
 # separate numeric and categorical
 exp_var_num <- exp_var %>%
