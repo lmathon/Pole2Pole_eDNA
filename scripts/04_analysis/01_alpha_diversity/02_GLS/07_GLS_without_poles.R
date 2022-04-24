@@ -109,6 +109,7 @@ effectsize_fin$Parameter <- gsub("bathy", "bathymetry", effectsize_fin$Parameter
 effectsize_fin$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("distCoast", "distance to shore", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize_fin$Parameter)
+effectsize_fin$Parameter <- gsub("MarineEcosystemDependency", "MarineEcosystemDependence", effectsize_fin$Parameter)
 effectsize_fin$Parameter <- gsub("sample_method2transect", "method_transect", effectsize_fin$Parameter)
 
 for (i in 1:nrow(effectsize_fin)) {

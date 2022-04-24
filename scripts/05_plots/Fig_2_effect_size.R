@@ -22,6 +22,7 @@ effectsize$Parameter <- gsub("bathy", "bathymetry", effectsize$Parameter)
 effectsize$Parameter <- gsub("dist_to_CT", "distance to CT", effectsize$Parameter)
 effectsize$Parameter <- gsub("distCoast", "distance to shore", effectsize$Parameter)
 effectsize$Parameter <- gsub("depth_sampling", "depth of sampling", effectsize$Parameter)
+effectsize$Parameter <- gsub("MarineEcosystemDependency", "MarineEcosystemDependence", effectsize$Parameter)
 effectsize$Parameter <- gsub("sample_method2transect", "method_transect", effectsize$Parameter)
 
 for (i in 1:nrow(effectsize)) {
@@ -71,3 +72,4 @@ ggplot(data = effectsize,
 
 ggsave("outputs/GLS/FDq0_effect_size.png", width = 10, height = 6.5)
 ggsave("outputs/Figures_papier/Fig2.pdf", width = 11, height = 6.5)
+ggsave("outputs/Figures_papier/Fig2.png", width = 11, height = 6.5)

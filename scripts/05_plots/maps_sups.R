@@ -162,7 +162,7 @@ ggplot() +
   geom_sf(aes(fill = data$MarineEcosystemDependency), size=3, data= data$metadata_map_sf, shape=21, show.legend = T) + 
   coord_sf(xlim = c(-180, 180), ylim = c(-80, 90)) +
   scale_fill_gradient(low="yellow", high="red", aesthetics = "fill")+
-  labs(fill="Marine Ecosystem Dependency ")+
+  labs(fill="Marine Ecosystem Dependence ")+
   #ggtitle("Tropical Southwestern Pacific")+
   theme_minimal() +
   theme(legend.position = "bottom",

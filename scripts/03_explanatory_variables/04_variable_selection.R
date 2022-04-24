@@ -184,6 +184,7 @@ socio_var2$neartt <- log10(socio_var2$neartt +1)
 socio_var2$Gravity <- log10(socio_var2$Gravity +1)
 socio_var2$NGO <- log10(socio_var2$NGO+1)
 
+names(socio_var2) <- c("station", "NoViolence_mean", "Corruption_mean", "HDI2019", "neartt", "Gravity", "NGO", "MarineEcosystemDependence", "conflicts", "Voice_mean")
 
 # save selected variables
 save(env_var2, file="Rdata/selected_environmental_variables.rdata")
@@ -211,7 +212,7 @@ ggplot(cor_exp_var, aes(x,y,fill=assoc))+
 
 
 exp_var2 <- exp_var %>%
-  dplyr::select(mean_SST_1year, mean_sss_1year, mean_npp_1year, mean_DHW_1year, MarineEcosystemDependency, HDI2019, Gravity, distCoast, dist_to_CT, depth_sampling, bathy)
+  dplyr::select(mean_SST_1year, mean_sss_1year, mean_npp_1year, mean_DHW_1year, MarineEcosystemDependence, HDI2019, Gravity, distCoast, dist_to_CT, depth_sampling, bathy)
 
 cor_exp_var2 <- mixed_assoc(exp_var2)
 

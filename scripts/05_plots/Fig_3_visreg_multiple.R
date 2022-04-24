@@ -2,6 +2,7 @@ library(ggplot2)
 library(grid)
 library(cowplot)
 library(tidyverse)
+library(ggpubr)
 
 #### Gravity ####
 
@@ -87,7 +88,7 @@ med <- ggplot() +
   geom_ribbon(data=fit.MED.FDq0$fit, aes(x=MarineEcosystemDependency, ymin=(visregLwr*b)+a, ymax=(visregUpr*b)+a), fill='orange', alpha=.2)+
   geom_line(data=fit.MED.large$fit, aes(MarineEcosystemDependency, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.MED.large$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
-  labs(x="Marine Ecosystem Dependency")+
+  labs(x="Marine Ecosystem Dependence")+
   scale_y_continuous("log(taxonomic a-diversity)", sec.axis = sec_axis(~ (. - a)/b, name = "sequence a-diversity")) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
@@ -134,5 +135,6 @@ ggsave("outputs/GLS/visreg_distCT.png", height = 5, width = 5)
 ggarrange(sst, distCT, gravity, med, nrow=2, ncol=2, labels = c("A", "B", "C", "D"))
 ggsave("outputs/GLS/visreg_multiple_FDq0.png", width = 8, height = 7)
 ggsave("outputs/Figures_papier/Fig3.pdf", width = 8, height = 7)
+ggsave("outputs/Figures_papier/Fig3.png", width = 8, height = 7)
 
 
