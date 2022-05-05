@@ -10,10 +10,10 @@ load("Rdata/large_effectsize.rdata")
 
 effectsize <- rbind(FDq0_effectsize, motus_effectsize, crypto_effectsize, large_effectsize)
 
-effectsize$taxa <- gsub("Richness - Cryptobenthics", "Cryptobenthic a-diversity", effectsize$taxa)
-effectsize$taxa <- gsub("Richness - Large fish", "Large fish a-diversity", effectsize$taxa)
-effectsize$taxa <- gsub("Richness - all MOTUs", "All fish a-diversity", effectsize$taxa)
-effectsize$taxa <- gsub("Functional a-diversity", "Sequence a-diversity", effectsize$taxa)
+effectsize$taxa <- gsub("Richness - Cryptobenthics", expression(paste("Cryptobenthic ", alpha,"-diversity")), effectsize$taxa)
+effectsize$taxa <- gsub("Richness - Large fish",  expression(paste("Large fish ", alpha,"-diversity")), effectsize$taxa)
+effectsize$taxa <- gsub("Richness - all MOTUs",  expression(paste("All fish ", alpha,"-diversity")), effectsize$taxa)
+effectsize$taxa <- gsub("Functional a-diversity",  expression(paste("Sequence ", alpha,"-diversity")), effectsize$taxa)
 effectsize$vargroup <- gsub("socio", "Socio-economy", effectsize$vargroup)
 effectsize$vargroup <- gsub("environment", "Environment", effectsize$vargroup)
 effectsize$vargroup <- gsub("geography", "Geography", effectsize$vargroup)
@@ -58,7 +58,7 @@ ggplot(data = effectsize,
   geom_point(size = 2, col=effectsize$color) +
   coord_flip() + 
   theme_sleek(base_size = 24) + 
-  facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y") + 
+  facet_grid(vargroup ~ taxa, scales = "free_y", space = "free_y", switch = "y", labeller = label_parsed) + 
   scale_y_continuous(breaks = c(-1,-0.5,0,0.5,1)) + 
   ylab("Standardized effect size") +
   theme(legend.position = "none", 
