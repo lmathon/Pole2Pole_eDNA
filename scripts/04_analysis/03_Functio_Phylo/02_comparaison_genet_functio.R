@@ -69,7 +69,7 @@ traits_species <- traits_species[,-c(1,2)]
 
 # compute functional distance
 
-dist_trait = compute_dist_matrix(traits_species, metric = "euclidean", center = T, scale = T)
+dist_trait = compute_dist_matrix(traits_species, metric = "gower")
 
 maxs <- apply(dist_trait, 2, max)
 mins <- apply(dist_trait, 2, min)
@@ -121,7 +121,7 @@ AUC <- coRanking::AUC_ln_K(NX)
 plot_functio_gen <- ggplot(pairwise, aes(gen, trait))+
   geom_point()+
   labs(y= "Functional distance", x="Genetic distance")+
-  annotate(geom="text", x=0, y=1, label="Mantel=0.05", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=0, y=1, label="Mantel=0.04", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
@@ -182,7 +182,7 @@ cor.test(Hill$trait, Hill$genet, method = "pearson")
 plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
-  annotate(geom="text", x=1, y=28, label="Pearson cor=0.88 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=1, y=28, label="Pearson cor=0.91 \n p<0.001", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
@@ -211,7 +211,7 @@ cor.test(beta_hill$trait, beta_hill$gen, method = "pearson")
 plot_beta_trait_gen <- ggplot(beta_hill, aes(gen, trait))+
   geom_point()+
   labs(y= expression(paste("Functional ", beta,"-diversity")), x=expression(paste("Sequence ", beta,"-diversity")))+
-  annotate(geom="text", x=0, y=1, label="Mantel=0.84", hjust=0, size=6, fontface = "bold")+
+  annotate(geom="text", x=0, y=1, label="Mantel=0.87", hjust=0, size=6, fontface = "bold")+
   theme_sleek(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
