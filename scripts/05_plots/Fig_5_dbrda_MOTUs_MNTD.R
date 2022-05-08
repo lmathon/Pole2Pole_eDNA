@@ -26,6 +26,7 @@ dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, labels = c(
                             
 ggsave("outputs/dbRDA/dbrda_jaccard_FD.png", width = 10.7, height = 6.2)
 ggsave("outputs/Figures_papier/Fig5.pdf", width = 10.7, height = 6.2)
+ggsave("outputs/Figures_papier/Fig5.png", width = 10.7, height = 6.2)
 
 
 

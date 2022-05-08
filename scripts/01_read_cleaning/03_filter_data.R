@@ -25,3 +25,15 @@ list_read_step4 <- lapply(list_read_step4, function(x){
 })
 
 save(list_read_step3, list_read_step3_0PCR, list_read_step4, df_filtered, file = "Rdata/03-filter-data.Rdata")
+
+
+
+list_stat <- split(df_filtered, df_filtered$station)
+
+nb_samp <- lapply(list_stat, function(x){
+     length(unique(x$sample_name_all_pcr))
+ })
+
+nb_samp <- as.data.frame(t(bind_rows(nb_samp)))
+mean(nb_samp$V1)
+sd(nb_samp$V1)

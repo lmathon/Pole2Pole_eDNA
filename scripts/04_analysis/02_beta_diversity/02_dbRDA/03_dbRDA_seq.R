@@ -107,6 +107,8 @@ CAP2 <- round(sumdbrda$cont$importance["Proportion Explained", "CAP2"]*100, 1)
 identical(as.character(rownames(data)), rownames(station_scores)) # verify that data in same order
 station_scores_met <- cbind(station_scores, data)
 
+var_scores_diff75$names <- c("mean SST", "mean SSS", "MarineEcosystemDependence", "Gravity", "Distance to CT")
+
 
 dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
@@ -119,7 +121,7 @@ dbrda_FD_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_label_repel(data= var_scores_diff75, 
                    aes(x= CAP1, y=CAP2, 
                        fontface=3),
-                   label = rownames(var_scores_diff75),
+                   label = var_scores_diff75$names,
                    label.size = NA, 
                    size = 4,
                    fill = NA,

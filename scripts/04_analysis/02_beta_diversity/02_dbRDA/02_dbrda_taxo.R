@@ -107,18 +107,23 @@ identical(as.character(rownames(data)), rownames(station_scores)) # verify that 
 station_scores_met <- cbind(station_scores, data)
 var_scores_diff75 <- var_scores_diff75[-c(6,9,10,11),]
 
-dbrda_MOTUs_SST <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
+
+var_scores_diff75$names <- c("mean SST", "HDI", "MarineEcosystemDependence", "mean SSS", "Distance to CT")
+
+
+
+dbrda_MOTUs_prov <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
   geom_hline(yintercept = 0, lty = 2, col = "grey", show.legend = F) +
   geom_vline(xintercept = 0, lty = 2, col = "grey", show.legend = F) +
-  geom_point(cex = 2, show.legend = F, aes(col=mean_SST_1year)) +
-  scale_color_gradient(low="blue", high="red")+
-  #scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "col")+
+  geom_point(cex = 2, show.legend = T, aes(col=province)) +
+  #scale_color_gradient(low="blue", high="red")+
+  scale_fill_manual(values=c("#A6CEE3","#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99", "#E31A1C", "#B15928", "#FF7F00", "#CAB2D6","#6A3D9A","#FFD92F"), aesthetics = "col")+
   geom_segment(data= var_scores_diff75, aes(x=0, xend=CAP1,y = 0, yend=CAP2), col = "black",
                arrow=arrow(length=unit(0.01,"npc")), show.legend = F) + # most differentiated variables
   geom_label_repel(data= var_scores_diff75, 
                    aes(x= CAP1, y=CAP2, 
                       fontface=3),
-                   label = rownames(var_scores_diff75),
+                   label = var_scores_diff75$names,
                    label.size = NA, 
                    size = 4,
                    fill = NA,
@@ -134,7 +139,7 @@ dbrda_MOTUs_SST <- ggplot(station_scores_met, aes(x= CAP1, y = CAP2)) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
         panel.background = element_rect(colour = "black", size=1)) 
-dbrda_MOTUs_SST
+dbrda_MOTUs_prov
 
-ggsave("outputs/dbRDA/Jaccard_all/dbrda_SST.png")
-save(dbrda_MOTUs_SST, file="Rdata/dbrda_MOTUs_SST.rdata")
+ggsave("outputs/dbRDA/Jaccard_all/dbrda_province.png")
+save(dbrda_MOTUs_prov, file="Rdata/dbrda_MOTUs_province.rdata")
