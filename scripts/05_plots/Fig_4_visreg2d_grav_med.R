@@ -30,5 +30,5 @@ fit.grav_med.FDq0 <- fit.grav_med.FDq0 +
 ggarrange(fit.grav_med.motus, fit.grav_med.crypto, fit.grav_med.large, fit.grav_med.FDq0, labels = c("A", "B", "C", "D"))
 
 
-ggsave("outputs/Figures_papier/Fig4.pdf", width = 8, height = 8)
-ggsave("outputs/Figures_papier/Fig4.png", width = 8, height = 8)
+ggsave("outputs/Figures_papier/Fig4.pdf", width = 7, height = 8)
+ggsave("outputs/Figures_papier/Fig4.png", width = 7, height = 8)
