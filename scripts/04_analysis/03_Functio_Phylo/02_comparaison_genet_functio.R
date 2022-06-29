@@ -191,11 +191,11 @@ save(plot_alpha_trait_gen, file="Rdata/plot_alpha_trait_gen.rdata")
 
 # calculate beta HILL for genet and functio between samples
 
-beta_hill_gen <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type="Jaccard")
-beta_hill_gen <- beta_hill_gen$beta_fd_q$q1
+beta_hill_gen <- beta.fd.hill(com, dist_gen, q=0, tau = "mean", beta_type="Jaccard")
+beta_hill_gen <- beta_hill_gen$beta_fd_q$q0
 
-beta_hill_trait <- beta.fd.hill(com, dist_trait, q=1, tau = "mean", beta_type="Jaccard")
-beta_hill_trait <- beta_hill_trait$beta_fd_q$q1
+beta_hill_trait <- beta.fd.hill(com, dist_trait, q=0, tau = "mean", beta_type="Jaccard")
+beta_hill_trait <- beta_hill_trait$beta_fd_q$q0
 
 
 co_rank <- coranking(beta_hill_gen, beta_hill_trait, input_Xi = "dist")

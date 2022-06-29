@@ -199,13 +199,14 @@ save(plot_alpha_phylo_gen, file="Rdata/plot_alpha_phylo_gen.rdata")
 
 
 # calculate beta HILL for genet and phylo between samples
+colnames(com) <- gsub("_", " ", colnames(com))
 
-beta_hill_gen <- beta.fd.hill(com, dist_gen, q=1, tau = "mean", beta_type="Jaccard")
-beta_hill_gen <- beta_hill_gen$beta_fd_q$q1
+beta_hill_gen <- beta.fd.hill(com, dist_gen, q=0, tau = "mean", beta_type="Jaccard")
+beta_hill_gen <- beta_hill_gen$beta_fd_q$q0
 
 
-beta_hill_phylo <- beta.fd.hill(com, dist_phylo, q=1, tau = "mean", beta_type="Jaccard")
-beta_hill_phylo <- beta_hill_phylo$beta_fd_q$q1
+beta_hill_phylo <- beta.fd.hill(com, dist_phylo, q=0, tau = "mean", beta_type="Jaccard")
+beta_hill_phylo <- beta_hill_phylo$beta_fd_q$q0
 
 
 ecodist::mantel(beta_hill_gen ~ beta_hill_phylo)
