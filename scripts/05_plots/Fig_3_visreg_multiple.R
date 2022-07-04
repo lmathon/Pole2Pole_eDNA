@@ -28,7 +28,7 @@ gravity <- ggplot() +
   geom_line(data=fit.grav.large$fit, aes(Gravity, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.grav.large$fit, aes(x=Gravity, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Gravity+1)")+
-  scale_y_continuous(expression(paste("log(taxonomic ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
+  scale_y_continuous(expression(paste("log(MOTU ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -60,7 +60,7 @@ sst <- ggplot() +
   annotate(geom="text", x=0, y=1.9, label="Cryptobenthic", hjust=0, size=3, color="navy", fontface = "bold")+
   annotate(geom="text", x=0, y=1.8, label="Large fish", hjust=0, size=3, color="darkgreen", fontface = "bold")+
   labs(x="mean SST")+
-  scale_y_continuous(expression(paste("log(taxonomic ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
+  scale_y_continuous(expression(paste("log(MOTU ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -89,7 +89,7 @@ med <- ggplot() +
   geom_line(data=fit.MED.large$fit, aes(MarineEcosystemDependency, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.MED.large$fit, aes(x=MarineEcosystemDependency, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="Marine Ecosystem Dependence")+
-  scale_y_continuous(expression(paste("log(taxonomic ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
+  scale_y_continuous(expression(paste("log(MOTU ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
@@ -117,7 +117,7 @@ distCT <- ggplot() +
   geom_line(data=fit.CT.large$fit, aes(dist_to_CT, visregFit), colour='darkgreen', size=1, show.legend = T)+
   geom_ribbon(data=fit.CT.large$fit, aes(x=dist_to_CT, ymin=visregLwr, ymax=visregUpr), fill='darkgreen', alpha=.2)+
   labs(x="log10(Distance to Coral Triangle (km) +1)")+
-  scale_y_continuous(expression(paste("log(taxonomic ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
+  scale_y_continuous(expression(paste("log(MOTU ", alpha,"-diversity")), sec.axis = sec_axis(~ (. - a)/b, name = expression(paste("Sequence ", alpha,"-diversity")))) +
   theme_bw() +
   theme(axis.line = element_line(colour = "black"),
         legend.position = "right",             # position in top left corner
