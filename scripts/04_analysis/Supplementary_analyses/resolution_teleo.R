@@ -32,6 +32,9 @@ BS_seq <- BS_seq %>%
   filter(!is.na(n_sp_total)) %>%
   filter(!is.na(resolution))
 
+BS_seq$resolution <- BS_seq$resolution*100
+BS_seq$sequenced <- BS_seq$sequenced*100
+
 BS_seq1 <- BS_seq[1:60,]
 BS_seq2 <- BS_seq[61:120,]
 BS_seq3 <- BS_seq[121:163,]
@@ -56,8 +59,8 @@ plot1 <- ggplot(BS_seq1)+
   geom_segment(aes(x=fct_rev(reorder(Family,Family)), y=0, xend=fct_rev(reorder(Family,Family)), yend=seg1$yend), color="grey50")+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=sequenced), col="#4587A1", size=2)+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=resolution), col="#FFA500", size=2)+
-  annotate(geom = "text", x=BS_seq1$Family, y=1.15, label=BS_seq1$n_sp_total, hjust=1, size=3)+
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1))+
+  annotate(geom = "text", x=BS_seq1$Family, y=115, label=BS_seq1$n_sp_total, hjust=1, size=3)+
+  scale_y_continuous(breaks = c(0, 25, 50, 75, 100))+
   xlab("")+
   ylab("% of species sequenced and resolution")+
   coord_flip()+
@@ -72,8 +75,8 @@ plot2 <- ggplot(BS_seq2)+
   geom_segment(aes(x=fct_rev(reorder(Family,Family)), y=0, xend=fct_rev(reorder(Family,Family)), yend=seg2$yend), color="grey50")+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=sequenced), col="#4587A1", size=2)+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=resolution), col="#FFA500", size=2)+
-  annotate(geom = "text", x=BS_seq2$Family, y=1.15, label=BS_seq2$n_sp_total, hjust=1, size=3)+
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1))+
+  annotate(geom = "text", x=BS_seq2$Family, y=115, label=BS_seq2$n_sp_total, hjust=1, size=3)+
+  scale_y_continuous(breaks = c(0, 25, 50, 75, 100))+
   xlab("")+
   ylab("% of species sequenced and resolution")+
   coord_flip()+
@@ -88,8 +91,8 @@ plot3 <- ggplot(BS_seq3)+
   geom_segment(aes(x=fct_rev(reorder(Family,Family)), y=0, xend=fct_rev(reorder(Family,Family)), yend=seg3$yend), color="grey50")+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=sequenced), col="#4587A1", size=2)+
   geom_point(aes(x=fct_rev(reorder(Family,Family)), y=resolution), col="#FFA500", size=2)+
-  annotate(geom = "text", x=BS_seq3$Family, y=1.15, label=BS_seq3$n_sp_total, hjust=1, size=3)+
-  scale_y_continuous(breaks = c(0, 0.25, 0.5, 0.75, 1))+
+  annotate(geom = "text", x=BS_seq3$Family, y=115, label=BS_seq3$n_sp_total, hjust=1, size=3)+
+  scale_y_continuous(breaks = c(0, 25, 50, 75, 100))+
   xlab("")+
   ylab("% of species sequenced and resolution")+
   coord_flip()+
@@ -102,7 +105,7 @@ plot3 <- ggplot(BS_seq3)+
 
 
 resolution1 <- ggarrange(plot1, plot2, ncol=2)
-ggsave(resolution1, file="outputs/maps & plot sup/resolution1.png")
+ggsave(resolution1, file="outputs/maps & plot sup/resolution1.png", width=7.5, height = 7.5)
 
 resolution2 <- plot3
-ggsave(resolution2, file="outputs/maps & plot sup/resolution2.png")
+ggsave(resolution2, file="outputs/maps & plot sup/resolution2.png", width=3.8, height = 6)

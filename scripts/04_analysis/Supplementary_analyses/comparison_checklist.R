@@ -20,14 +20,14 @@ colnames(eparses) <- c("Family", "nb_MOTUs")
 MOTU_checklist <- full_join(eparses, europa)
 MOTU_checklist[is.na(MOTU_checklist)] <- 0
 
-
+cor.test(MOTU_checklist$nb_MOTUs, MOTU_checklist$nb_species, method="pearson")
 lm <- lm(nb_MOTUs~nb_species, data=MOTU_checklist)
 summary(lm)
 
 plot_eparses <- ggplot(MOTU_checklist, aes(x=nb_species, y=nb_MOTUs))+
   geom_point()+
   geom_abline(slope = 0.6, intercept = 0.85, size=0.8)+
-  annotate(geom="text", x=45, y=3, label="y = 0.6x+0.85\nR² = 0.67\np < 0.001", hjust=1, size=3.2) +
+  annotate(geom="text", x=45, y=3, label="Pearson\nr = 0.82\np < 0.001", hjust=1, size=3.2) +
   ggtitle("Scattered Islands")+
   xlab("Number of species per family in the checklist")+
   ylab("Number of MOTUs per family")+
@@ -69,13 +69,14 @@ MOTU_checklist2 <- full_join(nc_MOTUs, nc)
 MOTU_checklist2[is.na(MOTU_checklist2)] <- 0
 
 
+cor.test(MOTU_checklist2$nb_MOTUs, MOTU_checklist2$nb_species, method="pearson")
 lm <- lm(nb_MOTUs~nb_species, data=MOTU_checklist2)
 summary(lm)
 
 plot_nc <- ggplot(MOTU_checklist2, aes(x=nb_species, y=nb_MOTUs))+
   geom_point()+
   geom_abline(slope = 0.45, intercept = -0.92, size=0.8)+
-  annotate(geom="text", x=200, y=10, label="y = 0.45x-0.92\nR² = 0.84\np < 0.001", hjust=1, size=3.2) +
+  annotate(geom="text", x=200, y=10, label="Pearson\nr = 0.91\np < 0.001", hjust=1, size=3.2) +
   ggtitle("New-Caledonia")+
   xlab("Number of species per family in the checklist")+
   ylab("Number of MOTUs per family")+
@@ -113,13 +114,14 @@ MOTU_checklist3 <- full_join(leng_MOTUs, lengguru)
 MOTU_checklist3[is.na(MOTU_checklist3)] <- 0
 
 
+cor.test(MOTU_checklist3$nb_MOTUs, MOTU_checklist3$nb_species, method="pearson")
 lm <- lm(nb_MOTUs~nb_species, data=MOTU_checklist3)
 summary(lm)
 
 plot_leng <- ggplot(MOTU_checklist3, aes(x=nb_species, y=nb_MOTUs))+
   geom_point()+
   geom_abline(slope = 0.3, intercept = 0.8, size=0.8)+
-  annotate(geom="text", x=350, y=10, label="y = 0.3x+0.8\nR² = 0.71\np < 0.001", hjust=1, size=3.2) +
+  annotate(geom="text", x=350, y=10, label="Pearson\nr = 0.84\np < 0.001", hjust=1, size=3.2) +
   ggtitle("Lengguru")+
   xlab("Number of species per family in the checklist")+
   ylab("Number of MOTUs per family")+
@@ -157,6 +159,7 @@ MOTU_checklist4 <- full_join(med_MOTUs, med)
 MOTU_checklist4[is.na(MOTU_checklist4)] <- 0
 
 
+cor.test(MOTU_checklist4$nb_MOTUs, MOTU_checklist4$nb_species, method="pearson")
 lm <- lm(nb_MOTUs~nb_species, data=MOTU_checklist4)
 summary(lm)
 
@@ -165,7 +168,7 @@ plot_med <- ggplot(MOTU_checklist4, aes(x=nb_species, y=nb_MOTUs))+
   ylim(0,30)+
   xlim(0,30)+
   geom_abline(slope = 1.3, intercept = 0.55, size=0.8)+
-  annotate(geom="text", x=30, y=3, label="y = 1.3x+0.55\nR² = 0.66\np < 0.001", hjust=1, size=3.2) +
+  annotate(geom="text", x=30, y=3, label="Pearson\nr = 0.81\np < 0.001", hjust=1, size=3.2) +
   ggtitle("Mediterrannean Sea")+
   xlab("Number of species per family in the checklist")+
   ylab("Number of MOTUs per family")+
