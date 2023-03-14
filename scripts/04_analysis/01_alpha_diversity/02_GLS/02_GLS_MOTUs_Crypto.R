@@ -26,6 +26,8 @@ load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
+rownames(rich_station) <- gsub("rÃ©cif", "recif", rownames(rich_station))
+
 
 data <- left_join(exp_var, rich_station[,c("crypto_MOTUs", "station")], by="station")
 data <- data %>%
@@ -76,7 +78,7 @@ anova(gls.crypto, type = "marginal")
 AIC(gls.crypto)
 
 
-# R² for GLS
+# R? for GLS
 r2(gls.crypto)
 
 shapiro.test(gls.crypto$residuals)
@@ -108,7 +110,7 @@ save(fit.method.crypto, file="Rdata/fit.method.crypto.rdata")
 fit.grav_med.crypto <- visreg2d(gls.crypto, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab=expression(paste("Cryptobenthic ",alpha,"-diversity")), plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.crypto, file="Rdata/fit.grav_med.crypto.rdata")
 
-#### part R² ####
+#### part R? ####
 relimpo <- calc.relimp(crypto_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, 
                        data, type = c("lmg", "last", "first"))
 
@@ -130,7 +132,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "g
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("partial R²")+
+  ylab("partial R?")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 #### effect size ####

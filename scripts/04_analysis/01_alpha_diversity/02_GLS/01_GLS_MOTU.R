@@ -26,6 +26,7 @@ load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
+rownames(rich_station) <- gsub("rÃ©cif", "recif", rownames(rich_station))
 
 data <- left_join(exp_var, rich_station[,c("MOTUs", "station")], by="station")
 data <- data %>%
@@ -43,9 +44,10 @@ meta <- meta %>%
 rownames(meta) <- meta$station
 meta <- meta[rownames(rich_station),]
 identical(as.character(rownames(meta)), rownames(rich_station))
-coor <- meta[, c("longitude_start", "latitude_start", "province")]
+coor <- meta[, c("longitude_start", "latitude_start")]
 data <- cbind(data, coor)
 data$sample_method2 <- as.factor(data$sample_method2)
+
 
 #### GLS to account for spatial autocorrelation ####
 
@@ -75,7 +77,7 @@ AIC(gls.motus)
 summary(gls.motus)
 anova(gls.motus, type = "marginal")
 
-# R² for GLS
+# R? for GLS
 r2(gls.motus)
 
 hist(gls.motus$residuals)
@@ -106,7 +108,7 @@ save(fit.method.motus, file="Rdata/fit.method.motus.rdata")
 fit.grav_med.motus <- visreg2d(gls.motus, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab=expression(paste("All fish ",alpha,"-diversity")), plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.motus, file="Rdata/fit.grav_med.motus.rdata")
 
-#### part R² ####
+#### part R? ####
 relimpo <- calc.relimp(MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2, 
                        data, type = c("lmg", "last", "first"))
 
@@ -127,7 +129,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "g
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("partial R²")+
+  ylab("partial R?")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 

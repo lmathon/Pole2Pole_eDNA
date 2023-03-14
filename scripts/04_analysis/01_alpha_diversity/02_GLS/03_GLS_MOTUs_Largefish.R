@@ -26,6 +26,8 @@ load("Rdata/richness_station.rdata")
 load("Rdata/all_explanatory_variables.rdata")
 load("Rdata/all_explanatory_variables_numeric.rdata")
 rownames(rich_station) <- rich_station$station
+rownames(rich_station) <- gsub("rÃ©cif", "recif", rownames(rich_station))
+
 
 data <- left_join(exp_var, rich_station[,c("largefish_MOTUs", "station")], by="station")
 data <- data %>%
@@ -75,7 +77,7 @@ anova(gls.largefish, type = "marginal")
 AIC(gls.largefish)
 
 
-# R² for GLS
+# R? for GLS
 r2(gls.largefish)
 
 
@@ -109,7 +111,7 @@ save(fit.method.large, file="Rdata/fit.method.large.rdata")
 fit.grav_med.large <- visreg2d(gls.largefish, "Gravity", "MarineEcosystemDependency", scale = "response", type = "conditional", xlab="log10(Gravity +1)", zlab=expression(paste("Large fish ",alpha,"-diversity")), plot.type="gg", color=c("red", "white", "blue"))
 save(fit.grav_med.large, file="Rdata/fit.grav_med.large.rdata")
 
-#### part R² ####
+#### part R? ####
 relimpo <- calc.relimp(largefish_MOTUs ~ mean_DHW_1year+mean_sss_1year+mean_SST_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast+volume+sample_method2,  
                        data, type = c("lmg", "last", "first"))
 
@@ -131,7 +133,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "g
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("partial R²")+
+  ylab("partial R?")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 #### effect size ####

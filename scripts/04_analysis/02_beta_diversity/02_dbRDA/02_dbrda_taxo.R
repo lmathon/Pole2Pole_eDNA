@@ -24,6 +24,8 @@ load("Rdata/db_mem.rdata")
 # transform data
 
 data <- exp_var
+rownames(data) <- gsub("rÃ©cif", "recif", rownames(data))
+
 df <- data %>%
   dplyr::select(-c("station")) # remove station
 df_mem <- cbind(df, dbmem)
@@ -43,12 +45,12 @@ data <- cbind(data, coor)
 dbrda_full <- capscale(jaccard_motu ~ .,df_mem)
 
 # check for colinearity and select variables
-mctest::imcdiag(dbrda_full, method="VIF")
+vif.cca(dbrda_full)
 
 
 #### partial dbrda correcting for sampling and MEM ####
 dbrda_part <- capscale(jaccard_motu ~ mean_DHW_1year+mean_SST_1year+mean_sss_1year+mean_npp_1year+HDI2019+Gravity+MarineEcosystemDependency+dist_to_CT+bathy+depth_sampling+distCoast +Condition(volume+MEM1+sample_method2), df_mem) 
-
+vif.cca(dbrda_part)
 
 RsquareAdj(dbrda_part)
 anova(dbrda_part)
@@ -81,7 +83,7 @@ partition$variables2 <- factor(partition$variables, levels = c("environment", "s
 ggplot(partition, aes(x=variables2,y = V1))+
   geom_col(width = 0.2)+
   xlab("Variable type")+
-  ylab("Partial R²")+
+  ylab("Partial R?")+
   theme(legend.position="none", panel.background = element_rect(fill="white", colour="grey", size=0.5, linetype="solid"), panel.grid.major = element_blank())
 
 # get scores
