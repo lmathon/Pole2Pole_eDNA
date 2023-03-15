@@ -63,8 +63,10 @@ traits_species <- traits %>%
 
 traits_species <- traits_species[order(traits_species$Species), ]
 rownames(traits_species) <- traits_species$Species
-traits_species <- select_if(traits_species, is.numeric)
-traits_species <- traits_species[,-c(1,2)]
+traits_species <- traits_species[,-c(1:6,15:19,21:23,25:27,29:50)]
+traits_species <- traits_species[,-c(12:14,31:36)]
+traits_species$DemersPelag <- as.factor(traits_species$DemersPelag)
+
 
 
 # compute functional distance
@@ -122,7 +124,7 @@ plot_functio_gen <- ggplot(pairwise, aes(gen, trait))+
   geom_point()+
   labs(y= "Functional distance", x="Genetic distance")+
   annotate(geom="text", x=0, y=1, label="Mantel=0.04", hjust=0, size=6, fontface = "bold")+
-  theme_sleek(base_size = 24)+
+  theme_bw(base_size = 24)+
   theme(axis.title = element_text(size=18),
         axis.text = element_text(size=14))
 
@@ -179,13 +181,15 @@ colnames(Hill) <- c("station", "genet", "trait")
 cor.test(Hill$trait, Hill$genet, method = "pearson")
 
 
-plot_alpha_trait_gen <- ggplot(Hill, aes(genet, trait))+
+plot_alpha_trait_gen <- ggplot(Hill, aes(trait, genet))+
   geom_point()+
-  labs(y= expression(paste("Functional ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
+  labs(x= expression(paste("Functional ", alpha,"-diversity")), y=expression(paste("Sequence ", alpha,"-diversity")))+
   annotate(geom="text", x=1, y=28, label="Pearson cor=0.91 \n p<0.001", hjust=0, size=6, fontface = "bold")+
-  theme_sleek(base_size = 24)+
+  theme_bw(base_size = 24)+
   theme(axis.title = element_text(size=18),
-        axis.text = element_text(size=14))
+        axis.text = element_text(size=14),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1, fill=NA))
 
 save(plot_alpha_trait_gen, file="Rdata/plot_alpha_trait_gen.rdata")
 
@@ -208,12 +212,14 @@ ecodist::mantel(as.dist(beta_hill_gen) ~ as.dist(beta_hill_trait))
 beta_hill <- data.frame(gen=as.vector(beta_hill_gen), trait=as.vector(beta_hill_trait))
 cor.test(beta_hill$trait, beta_hill$gen, method = "pearson")
 
-plot_beta_trait_gen <- ggplot(beta_hill, aes(gen, trait))+
+plot_beta_trait_gen <- ggplot(beta_hill, aes(trait, gen))+
   geom_point()+
-  labs(y= expression(paste("Functional ", beta,"-diversity")), x=expression(paste("Sequence ", beta,"-diversity")))+
+  labs(x= expression(paste("Functional ", beta,"-diversity")), y=expression(paste("Sequence ", beta,"-diversity")))+
   annotate(geom="text", x=0, y=1, label="Mantel=0.87", hjust=0, size=6, fontface = "bold")+
-  theme_sleek(base_size = 24)+
+  theme_bw(base_size = 24)+
   theme(axis.title = element_text(size=18),
-        axis.text = element_text(size=14))
+        axis.text = element_text(size=14),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1, fill=NA))
 
 save(plot_beta_trait_gen, file="Rdata/plot_beta_trait_gen.rdata")

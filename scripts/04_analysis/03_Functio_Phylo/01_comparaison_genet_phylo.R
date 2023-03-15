@@ -11,7 +11,6 @@ library(cowplot)
 library(mFD)
 library(ecodist)
 library(coRanking)
-library(funk)
 library(entropart)
 library(phytools)
 
@@ -187,13 +186,15 @@ colnames(Hill) <- c("station", "genet", "phylo")
 cor.test(Hill$phylo, Hill$genet, method = "pearson")
 
 
-plot_alpha_phylo_gen <- ggplot(Hill, aes(genet, phylo))+
+plot_alpha_phylo_gen <- ggplot(Hill, aes(phylogenet))+
   geom_point()+
-  labs(y= expression(paste("Phylogenetic ", alpha,"-diversity")), x=expression(paste("Sequence ", alpha,"-diversity")))+
+  labs(x= expression(paste("Phylogenetic ", alpha,"-diversity")), y=expression(paste("Sequence ", alpha,"-diversity")))+
   annotate(geom="text", x=1, y=34, label="pearson cor=0.94 \n p<0.001", hjust=0, size=6, fontface = "bold")+
-  theme_sleek(base_size = 24)+
+  theme_bw()+
   theme(axis.title = element_text(size=18),
-        axis.text = element_text(size=14))
+        axis.text = element_text(size=14),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1, fill=NA))
 
 save(plot_alpha_phylo_gen, file="Rdata/plot_alpha_phylo_gen.rdata")
 
@@ -220,14 +221,15 @@ beta_hill <- data.frame(gen=as.vector(beta_hill_gen), phylo=as.vector(beta_hill_
 cor.test(beta_hill$phylo, beta_hill$gen, method = "pearson")
 
 
-plot_beta_phylo_gen <- ggplot(beta_hill, aes(gen, phylo))+
+plot_beta_phylo_gen <- ggplot(beta_hill, aes(phylo, gen))+
   geom_point()+
-  labs(y= expression(paste("Phylogenetic ", beta,"-diversity")), x=expression(paste("Sequence ", beta,"-diversity")))+
+  labs(x= expression(paste("Phylogenetic ", beta,"-diversity")), y=expression(paste("Sequence ", beta,"-diversity")))+
   annotate(geom="text", x=0, y=1, label="Mantel=0.91", hjust=0, size=6, fontface = "bold")+
-  theme_sleek(base_size = 24)+
+  theme_bw()+
   theme(axis.title = element_text(size=18),
-        axis.text = element_text(size=14))
+        axis.text = element_text(size=14),
+        panel.grid.major = element_blank(),panel.grid.minor = element_blank(),
+        panel.border = element_rect(colour = "black", size=1, fill=NA))
 
 save(plot_beta_phylo_gen, file="Rdata/plot_beta_phylo_gen.rdata")
-
 
