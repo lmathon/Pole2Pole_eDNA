@@ -25,29 +25,37 @@ remove_geom <- function(ggplot2_object, geom_type) {
 plot_alpha_phylo_gen <- remove_geom(plot_alpha_phylo_gen, "GeomText")
 plot_alpha_phylo_gen <- plot_alpha_phylo_gen +
   coord_flip()+
-  annotate(geom="text", x=4, y=20, label="Pearson cor=0.94 \n p<0.001", hjust=0, size=6, fontface = "bold")
+  ggtitle("(a)")+
+  annotate(geom="text", x=4, y=20, label="Pearson cor=0.94 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  theme(plot.title = element_text(size=20, face="bold", hjust = 0, colour = "black"))
 
 
 plot_alpha_trait_gen <- remove_geom(plot_alpha_trait_gen, "GeomText")
 plot_alpha_trait_gen <- plot_alpha_trait_gen +
   ylim(0,22)+
   coord_flip()+
-  annotate(geom="text", x=4, y=12, label="Pearson cor=0.91 \n p<0.001", hjust=0, size=6, fontface = "bold")
+  ggtitle("(b)")+
+  annotate(geom="text", x=4, y=12, label="Pearson cor=0.91 \n p<0.001", hjust=0, size=6, fontface = "bold")+
+  theme(plot.title = element_text(size=20, face="bold", hjust = 0, colour = "black"))
 
 
 plot_beta_phylo_gen <- remove_geom(plot_beta_phylo_gen, "GeomText")
 plot_beta_phylo_gen <- plot_beta_phylo_gen +
   coord_flip()+
-  annotate(geom="text", x=0, y=0.6, label="Mantel=0.91", hjust=0, size=6, fontface = "bold")
+  ggtitle("(c)")+
+  annotate(geom="text", x=0, y=0.6, label="Mantel=0.91", hjust=0, size=6, fontface = "bold")+
+  theme(plot.title = element_text(size=20, face="bold", hjust = 0, colour = "black"))
 
 plot_beta_trait_gen <- remove_geom(plot_beta_trait_gen, "GeomText")
 plot_beta_trait_gen <- plot_beta_trait_gen +
   coord_flip()+
-  annotate(geom="text", x=0, y=0.6, label="Mantel=0.85", hjust=0, size=6, fontface = "bold")
+  ggtitle("(d)")+
+  annotate(geom="text", x=0, y=0.6, label="Mantel=0.85", hjust=0, size=6, fontface = "bold")+
+  theme(plot.title = element_text(size=20, face="bold", hjust = 0, colour = "black"))
 
 
 ggarrange(plot_alpha_phylo_gen, plot_alpha_trait_gen, plot_beta_phylo_gen, plot_beta_trait_gen,
-          nrow=2, ncol=2, labels = c("A", "B", "C", "D"), font.label = list(size = 24))
+          nrow=2, ncol=2)
 
-ggsave("outputs/Figures_papier/Fig5.pdf", width = 13, height = 14, dpi = 600)
-ggsave("outputs/Figures_papier/Fig5.png", width = 13, height = 14, dpi = 600)
+ggsave("outputs/Figures_papier/Fig5.pdf", width = 14, height = 14, dpi = 600)
+ggsave("outputs/Figures_papier/Fig5.png", width = 14, height = 14, dpi = 600)

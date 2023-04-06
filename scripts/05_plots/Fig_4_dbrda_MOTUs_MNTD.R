@@ -21,7 +21,7 @@ dbrda_FD_province <- dbrda_FD_prov +
   theme(plot.title.position = "panel",
         plot.title = element_text(size = 14, color = "black", face = "bold"))
 
-dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, labels = c("A", "B"), 
+dbrda_province <- ggarrange(dbrda_MOTUs_province, dbrda_FD_province, labels = c("(a)", "(b)"), 
                             common.legend = T, legend = c("bottom")) 
                             
 ggsave(dbrda_province, file="outputs/dbRDA/dbrda_jaccard_FD.png", width = 10.7, height = 6.2)
@@ -33,7 +33,7 @@ ggsave(dbrda_province, file="outputs/Figures_papier/Fig4.png", width = 10.7, hei
 
 
 dbrda_variable <- ggarrange(dbrda_MOTUs_SST, dbrda_FD_SST, dbrda_MOTUs_MED, dbrda_FD_MED, nrow=2, ncol=2, 
-          labels = c("A", "B", "C", "D"), 
+          labels = c("(a)", "(b)", "(c)", "(d)"), 
           font.label = list(size = 12, color = "black"),
           label.x = 0)
 
