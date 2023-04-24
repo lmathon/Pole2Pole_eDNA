@@ -41,7 +41,7 @@ I provide here my API key. You must add it as an environmental variable in your 
 
 ```
 library(rentrez)
-set_entrez_key("e1b887b07de1764a6e68883fce0f9f69d108") # My API key
+set_entrez_key("YOUR_API_KEY") # My API key
 Sys.getenv("ENTREZ_KEY") 
 ```
 
